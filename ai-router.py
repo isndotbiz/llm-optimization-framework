@@ -639,7 +639,7 @@ class AIRouter:
         """Display documentation guide menu"""
         docs_dir = Path("D:/models") if self.platform == "Windows" else Path.home() / "models"
 
-        # Define documentation files with priority
+        # Define documentation files with priority (ONLY FILES THAT EXIST)
         docs = [
             # Frequently needed (top priority)
             ("HOW-TO-RUN-AI-ROUTER.md", "🚀 How to Run the AI Router", "Getting started, usage, troubleshooting"),
@@ -648,38 +648,59 @@ class AIRouter:
 
             # Important reference
             ("COMPREHENSIVE-EVALUATION-FRAMEWORK-PROMPT.md", "📊 Evaluation Framework", "Testing and comparing models"),
-            ("MACBOOK-M4-OPTIMIZATION-GUIDE.md", "💻 MacBook M4 Optimization", "Optimizing for Apple M4 hardware"),
             ("2025-RESEARCH-SUMMARY.md", "🔬 2025 Research Summary", "Latest research findings and best practices"),
+            ("MACBOOK-M4-OPTIMIZATION-GUIDE.md", "💻 MacBook M4 Optimization", "Optimizing for Apple M4 hardware"),
 
-            # Less frequent but useful
+            # Additional resources
             ("GITHUB-SETUP-GUIDE.md", "🐙 GitHub Setup Guide", "Setting up Git and GitHub"),
-            ("README.md", "📖 Main README", "Project overview and information"),
+            ("README.md", "📖 Project README", "Complete project overview and setup"),
         ]
 
+        # Filter to only files that actually exist
+        existing_docs = []
+        for filename, title, desc in docs:
+            doc_path = docs_dir / filename
+            if doc_path.exists():
+                existing_docs.append((filename, title, desc))
+
+        docs = existing_docs
+
+        if not docs:
+            print(f"\n{Colors.BRIGHT_RED}No documentation files found!{Colors.RESET}\n")
+            input(f"{Colors.BRIGHT_YELLOW}Press Enter to return...{Colors.RESET}")
+            return
+
         print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  📚 DOCUMENTATION GUIDES{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  📚 DOCUMENTATION GUIDES ({len(docs)} available){Colors.RESET}")
         print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
 
-        print(f"{Colors.BRIGHT_WHITE}⭐ Most Frequently Needed:{Colors.RESET}\n")
-        for idx in range(3):
-            filename, title, desc = docs[idx]
-            print(f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} {Colors.BRIGHT_WHITE}{title}{Colors.RESET}")
-            print(f"    {Colors.CYAN}{desc}{Colors.RESET}")
-            print()
+        # Display docs organized by priority
+        # Top 3 are most frequently needed
+        if len(docs) >= 1:
+            print(f"{Colors.BRIGHT_WHITE}⭐ Most Frequently Needed:{Colors.RESET}\n")
+            for idx in range(min(3, len(docs))):
+                filename, title, desc = docs[idx]
+                print(f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} {Colors.BRIGHT_WHITE}{title}{Colors.RESET}")
+                print(f"    {Colors.CYAN}{desc}{Colors.RESET}")
+                print()
 
-        print(f"{Colors.BRIGHT_WHITE}📚 Important Reference:{Colors.RESET}\n")
-        for idx in range(3, 6):
-            filename, title, desc = docs[idx]
-            print(f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} {Colors.WHITE}{title}{Colors.RESET}")
-            print(f"    {Colors.CYAN}{desc}{Colors.RESET}")
-            print()
+        # Next 3 are important reference
+        if len(docs) > 3:
+            print(f"{Colors.BRIGHT_WHITE}📚 Important Reference:{Colors.RESET}\n")
+            for idx in range(3, min(6, len(docs))):
+                filename, title, desc = docs[idx]
+                print(f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} {Colors.WHITE}{title}{Colors.RESET}")
+                print(f"    {Colors.CYAN}{desc}{Colors.RESET}")
+                print()
 
-        print(f"{Colors.BRIGHT_WHITE}📖 Additional Resources:{Colors.RESET}\n")
-        for idx in range(6, len(docs)):
-            filename, title, desc = docs[idx]
-            print(f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} {Colors.WHITE}{title}{Colors.RESET}")
-            print(f"    {Colors.CYAN}{desc}{Colors.RESET}")
-            print()
+        # Remaining are additional resources
+        if len(docs) > 6:
+            print(f"{Colors.BRIGHT_WHITE}📖 Additional Resources:{Colors.RESET}\n")
+            for idx in range(6, len(docs)):
+                filename, title, desc = docs[idx]
+                print(f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} {Colors.WHITE}{title}{Colors.RESET}")
+                print(f"    {Colors.CYAN}{desc}{Colors.RESET}")
+                print()
 
         print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} {Colors.WHITE}Return to main menu{Colors.RESET}\n")
 
