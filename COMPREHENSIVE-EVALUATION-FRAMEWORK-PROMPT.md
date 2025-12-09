@@ -1,12 +1,12 @@
-# Comprehensive Evaluation Framework - Complete Parameter List
+# 📊 Comprehensive Evaluation Framework - Complete Parameter List
 
-## Overview
+## 📖 Overview
 
 This document provides a complete list of all available parameters for creating a comprehensive LLM evaluation framework. Use this as input to design your evaluation system.
 
-## Evaluation Dimensions
+## 🎯 Evaluation Dimensions
 
-### 1. Performance Metrics
+### 1. ⚡ Performance Metrics
 
 #### Speed Metrics
 - **Prompt Processing Speed** (tokens/sec)
@@ -45,7 +45,7 @@ This document provides a complete list of all available parameters for creating 
   - Monitor: GPU temperature
   - Alert: >80°C
 
-### 2. Quality Metrics
+### 2. ✨ Quality Metrics
 
 #### Accuracy Metrics
 - **Factual Accuracy** (0-100%)
@@ -86,7 +86,7 @@ This document provides a complete list of all available parameters for creating 
   - Vocabulary diversity
   - Higher = more varied language
 
-### 3. Task-Specific Metrics
+### 3. 🎯 Task-Specific Metrics
 
 #### Coding Tasks
 - **HumanEval Pass@1** (%)
@@ -139,7 +139,7 @@ This document provides a complete list of all available parameters for creating 
 - **Citation Accuracy** (%)
   - If model provides sources, are they real?
 
-### 4. Configuration Impact Testing
+### 4. ⚙️ Configuration Impact Testing
 
 Test how each parameter affects performance:
 
@@ -168,7 +168,7 @@ Test how each parameter affects performance:
 - Values: [f16, q8_0, q4_0]
 - Measure: Speed/memory vs. quality trade-off
 
-### 5. Model Comparison Framework
+### 5. 🔬 Model Comparison Framework
 
 #### Head-to-Head Comparison
 - Same prompt to multiple models
@@ -186,7 +186,7 @@ Test how each parameter affects performance:
 - Measure quality degradation
 - Q8_0 vs Q6_K vs Q5_K_M vs Q4_K_M vs IQ2_M
 
-### 6. Benchmark Datasets
+### 6. 📚 Benchmark Datasets
 
 #### Standard Benchmarks
 - **HumanEval**: Code generation (164 problems)
@@ -203,7 +203,7 @@ Test how each parameter affects performance:
 - **Real-World Prompts**: Actual user queries
 - **Edge Cases**: Difficult/ambiguous prompts
 
-### 7. Evaluation Automation
+### 7. 🤖 Evaluation Automation
 
 #### Test Suite Structure
 ```json
@@ -232,7 +232,7 @@ Test how each parameter affects performance:
 4. **Analyze**: Statistical analysis
 5. **Report**: Generate comparison reports
 
-### 8. Statistical Analysis
+### 8. 📈 Statistical Analysis
 
 #### Metrics to Calculate
 - **Mean**: Average performance
@@ -247,7 +247,7 @@ Test how each parameter affects performance:
 - **Wilcoxon**: Non-parametric comparison
 - **Effect Size**: Practical significance
 
-### 9. Reporting Format
+### 9. 📝 Reporting Format
 
 #### Per-Model Report
 ```
@@ -280,7 +280,7 @@ Quality (1-5)          4.2          4.1         4.5
 VRAM (GB)             19.2         20.1        11.8
 ```
 
-### 10. Continuous Monitoring
+### 10. 📊 Continuous Monitoring
 
 #### Real-Time Metrics
 - Dashboard showing live performance
@@ -292,7 +292,7 @@ VRAM (GB)             19.2         20.1        11.8
 - Measure which performs better
 - Statistical significance testing
 
-## Implementation Checklist
+## ✅ Implementation Checklist
 
 ### Phase 1: Infrastructure
 - [ ] Set up test harness
@@ -320,7 +320,7 @@ VRAM (GB)             19.2         20.1        11.8
 - [ ] Detect regressions
 - [ ] A/B testing framework
 
-## Example Evaluation Command
+## 💻 Example Evaluation Command
 
 ```python
 python evaluate.py \
@@ -333,7 +333,7 @@ python evaluate.py \
   --generate-report
 ```
 
-## Output Files
+## 📁 Output Files
 
 - `results.json`: Raw results data
 - `metrics.csv`: Metrics in tabular format
@@ -341,7 +341,7 @@ python evaluate.py \
 - `statistical-analysis.pdf`: Detailed analysis
 - `recommendations.md`: Which model/config for which task
 
-## Cost Estimation
+## 💰 Cost Estimation
 
 Running full evaluation suite:
 - **Time**: 4-8 hours for all models × all benchmarks

@@ -421,10 +421,11 @@ class AIRouter:
             print(f"{Colors.BRIGHT_GREEN}[3]{Colors.RESET} List all available models")
             print(f"{Colors.BRIGHT_GREEN}[4]{Colors.RESET} View system prompt examples")
             print(f"{Colors.BRIGHT_GREEN}[5]{Colors.RESET} View optimal parameters guide")
-            print(f"{Colors.BRIGHT_GREEN}[6]{Colors.RESET} Exit")
+            print(f"{Colors.BRIGHT_GREEN}[6]{Colors.RESET} 📚 View documentation guides")
+            print(f"{Colors.BRIGHT_GREEN}[7]{Colors.RESET} Exit")
             print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}═══════════════════════════════════════════════════════════════{Colors.RESET}")
 
-            choice = input(f"\n{Colors.BRIGHT_YELLOW}Enter choice [1-6]: {Colors.RESET}").strip()
+            choice = input(f"\n{Colors.BRIGHT_YELLOW}Enter choice [1-7]: {Colors.RESET}").strip()
 
             if choice == "1":
                 self.auto_select_mode()
@@ -437,6 +438,8 @@ class AIRouter:
             elif choice == "5":
                 self.view_parameters_guide()
             elif choice == "6":
+                self.view_documentation()
+            elif choice == "7":
                 print(f"\n{Colors.BRIGHT_GREEN}Goodbye!{Colors.RESET}\n")
                 sys.exit(0)
             else:
@@ -631,6 +634,98 @@ class AIRouter:
         print(f"{Colors.GREEN}✓{Colors.RESET} {Colors.WHITE}ALWAYS use --jinja flag with Phi-4{Colors.RESET}")
         print(f"{Colors.GREEN}✓{Colors.RESET} {Colors.WHITE}ALWAYS use --jinja flag with Qwen3{Colors.RESET}")
         print(f"{Colors.GREEN}✓{Colors.RESET} {Colors.WHITE}WSL provides near-native Linux performance (within 1%){Colors.RESET}\n")
+
+    def view_documentation(self):
+        """Display documentation guide menu"""
+        docs_dir = Path("D:/models") if self.platform == "Windows" else Path.home() / "models"
+
+        # Define documentation files with priority
+        docs = [
+            # Frequently needed (top priority)
+            ("HOW-TO-RUN-AI-ROUTER.md", "🚀 How to Run the AI Router", "Getting started, usage, troubleshooting"),
+            ("BOT-PROJECT-QUICK-START.md", "🤖 Bot & Project Management", "Create bots and projects with custom configs"),
+            ("SYSTEM-PROMPTS-QUICK-START.md", "📝 System Prompts Quick Start", "Using and customizing system prompts"),
+
+            # Important reference
+            ("COMPREHENSIVE-EVALUATION-FRAMEWORK-PROMPT.md", "📊 Evaluation Framework", "Testing and comparing models"),
+            ("MACBOOK-M4-OPTIMIZATION-GUIDE.md", "💻 MacBook M4 Optimization", "Optimizing for Apple M4 hardware"),
+            ("2025-RESEARCH-SUMMARY.md", "🔬 2025 Research Summary", "Latest research findings and best practices"),
+
+            # Less frequent but useful
+            ("GITHUB-SETUP-GUIDE.md", "🐙 GitHub Setup Guide", "Setting up Git and GitHub"),
+            ("README.md", "📖 Main README", "Project overview and information"),
+        ]
+
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  📚 DOCUMENTATION GUIDES{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+        print(f"{Colors.BRIGHT_WHITE}⭐ Most Frequently Needed:{Colors.RESET}\n")
+        for idx in range(3):
+            filename, title, desc = docs[idx]
+            print(f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} {Colors.BRIGHT_WHITE}{title}{Colors.RESET}")
+            print(f"    {Colors.CYAN}{desc}{Colors.RESET}")
+            print()
+
+        print(f"{Colors.BRIGHT_WHITE}📚 Important Reference:{Colors.RESET}\n")
+        for idx in range(3, 6):
+            filename, title, desc = docs[idx]
+            print(f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} {Colors.WHITE}{title}{Colors.RESET}")
+            print(f"    {Colors.CYAN}{desc}{Colors.RESET}")
+            print()
+
+        print(f"{Colors.BRIGHT_WHITE}📖 Additional Resources:{Colors.RESET}\n")
+        for idx in range(6, len(docs)):
+            filename, title, desc = docs[idx]
+            print(f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} {Colors.WHITE}{title}{Colors.RESET}")
+            print(f"    {Colors.CYAN}{desc}{Colors.RESET}")
+            print()
+
+        print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} {Colors.WHITE}Return to main menu{Colors.RESET}\n")
+
+        choice = input(f"{Colors.BRIGHT_YELLOW}Select documentation [0-{len(docs)}]: {Colors.RESET}").strip()
+
+        if choice == "0":
+            return
+
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(docs):
+                filename, title, desc = docs[idx]
+                doc_path = docs_dir / filename
+
+                if doc_path.exists():
+                    # Read and display the documentation
+                    with open(doc_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+
+                    print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+                    print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  {title}{Colors.RESET}")
+                    print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+                    # Display content with pagination (first 50 lines)
+                    lines = content.split('\n')
+                    page_size = 50
+
+                    for i in range(0, len(lines), page_size):
+                        page_lines = lines[i:i+page_size]
+                        print('\n'.join(page_lines))
+
+                        if i + page_size < len(lines):
+                            cont = input(f"\n{Colors.BRIGHT_YELLOW}Press Enter to continue, 'q' to quit: {Colors.RESET}").strip().lower()
+                            if cont == 'q':
+                                break
+                        else:
+                            print(f"\n{Colors.BRIGHT_GREEN}[End of document]{Colors.RESET}")
+
+                    input(f"\n{Colors.BRIGHT_YELLOW}Press Enter to return to menu...{Colors.RESET}")
+                else:
+                    print(f"{Colors.BRIGHT_RED}Documentation file not found: {filename}{Colors.RESET}")
+                    input(f"\n{Colors.BRIGHT_YELLOW}Press Enter to continue...{Colors.RESET}")
+            else:
+                print(f"{Colors.BRIGHT_RED}Invalid selection.{Colors.RESET}")
+        except ValueError:
+            print(f"{Colors.BRIGHT_RED}Invalid input.{Colors.RESET}")
 
 
 def main():

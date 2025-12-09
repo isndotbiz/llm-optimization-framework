@@ -1,10 +1,10 @@
-# How to Run the AI Router
+# 🤖 How to Run the AI Router
 
-## Quick Start
+## ⚡ Quick Start
 
 The AI Router is now set up to run in WSL for optimal performance!
 
-### Option 1: PowerShell Launcher (Recommended)
+### 💻 Option 1: PowerShell Launcher (Recommended)
 
 ```powershell
 # From D:\models directory
@@ -17,13 +17,13 @@ This launcher script:
 - ✓ Supports full ANSI colors and Unicode
 - ✓ Provides troubleshooting instructions if needed
 
-### Option 2: Direct WSL Command
+### ⚙️ Option 2: Direct WSL Command
 
 ```bash
 wsl bash -c "cd /mnt/d/models && ~/hf_venv/bin/python3 ai-router.py"
 ```
 
-### Option 3: Inside WSL
+### 🐧 Option 3: Inside WSL
 
 ```bash
 # Open WSL terminal
@@ -36,7 +36,7 @@ cd /mnt/d/models
 ~/hf_venv/bin/python3 ai-router.py
 ```
 
-## What the AI Router Does
+## 🎯 What the AI Router Does
 
 The AI Router is an intelligent model selection and execution framework that:
 
@@ -46,7 +46,7 @@ The AI Router is an intelligent model selection and execution framework that:
 4. **Executes with 2025-optimized parameters** (Flash Attention, KV cache quantization, etc.)
 5. **Displays beautiful terminal UI** with colors and formatting
 
-## Menu Options
+## 📋 Menu Options
 
 When you run the app, you'll see these options:
 
@@ -59,7 +59,7 @@ When you run the app, you'll see these options:
 [6] Exit
 ```
 
-### Option 1: Auto-Select (Recommended)
+###  Option 1: Auto-Select (Recommended)
 
 The smartest way to use the router:
 
@@ -113,7 +113,7 @@ View examples of model-specific system prompts that optimize each model's perfor
 
 View the complete guide to all 50+ available configuration parameters from config-templates.json.
 
-## Performance Notes
+## 🚀 Performance Notes
 
 Running in WSL provides:
 - **Within 1% of native Linux performance** (2025 research)
@@ -122,7 +122,7 @@ Running in WSL provides:
 - **CUDA Graphs** (+1.2x speedup)
 - **Optimal batch processing** (512 minimum)
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 ### Missing Dependencies
 
@@ -160,7 +160,7 @@ If not installed:
 wsl bash -c "sudo apt update && sudo apt install python3 python3-pip python3-venv"
 ```
 
-## Related Documentation
+## 📚 Related Documentation
 
 - **BOT-PROJECT-QUICK-START.md** - Create custom bots and projects
 - **config-templates.json** - Complete parameter reference (50+ params)
@@ -168,7 +168,7 @@ wsl bash -c "sudo apt update && sudo apt install python3 python3-pip python3-ven
 - **MACBOOK-M4-OPTIMIZATION-GUIDE.md** - M4 Mac optimization
 - **AI-ROUTER-QUICKSTART.md** - Original quick start guide
 
-## Advanced Usage
+## 🔬 Advanced Usage
 
 ### Running with Custom Config
 
@@ -197,7 +197,7 @@ wsl bash -c "~/llama.cpp/build/bin/llama-server \
 
 Then other agents can connect to `http://localhost:8080`
 
-## Next Steps
+## ✅ Next Steps
 
 1. **Try the auto-select feature** - Let the router choose the best model
 2. **Create custom projects** - See BOT-PROJECT-QUICK-START.md

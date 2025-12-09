@@ -1,10 +1,10 @@
-# Bot & Project Management System - Quick Start
+# 🤖 Bot & Project Management System - Quick Start
 
-## Overview
+## 📖 Overview
 
 This guide shows you how to create bots and projects with custom configurations for your RTX 3090 models.
 
-## Directory Structure
+## 📁 Directory Structure
 
 ```
 D:\models\
@@ -22,16 +22,16 @@ D:\models\
 └── config-templates.json # All available parameters
 ```
 
-## Creating a New Project
+## 🚀 Creating a New Project
 
-### Step 1: Create Project Directory
+### 📂 Step 1: Create Project Directory
 
 ```bash
 mkdir -p D:\models\projects\my-coding-project
 cd D:\models\projects\my-coding-project
 ```
 
-### Step 2: Create config.json
+### ⚙️ Step 2: Create config.json
 
 ```json
 {
@@ -74,7 +74,7 @@ cd D:\models\projects\my-coding-project
 }
 ```
 
-### Step 3: Create system-prompt.txt
+### 📝 Step 3: Create system-prompt.txt
 
 ```
 You are an expert software engineer specializing in Python, JavaScript, and Rust.
@@ -94,7 +94,7 @@ Code style preferences:
 Always explain your reasoning and suggest improvements.
 ```
 
-## Pre-Made Bot Templates
+## 🎨 Pre-Made Bot Templates
 
 ### Qwen3 Coder Bot
 
@@ -162,7 +162,7 @@ Always explain your reasoning and suggest improvements.
 }
 ```
 
-## Running a Project
+## ▶️ Running a Project
 
 ### Method 1: Manual Command
 
@@ -248,7 +248,7 @@ Invoke-Expression $cmd
 .\run-project.ps1 -ProjectName "my-coding-project" -Prompt "Write a Python function to sort a list"
 ```
 
-## Configuration Reference
+## 📚 Configuration Reference
 
 See `config-templates.json` for complete list of all 50+ available parameters including:
 
@@ -273,7 +273,7 @@ See `config-templates.json` for complete list of all 50+ available parameters in
 ### Advanced Parameters
 - `seed`, `grammar`, `json_schema`, `stop_sequences`, `logit_bias`
 
-## Quick Project Examples
+## 💡 Quick Project Examples
 
 ### 1. Python Coding Assistant
 
@@ -319,7 +319,7 @@ See `config-templates.json` for complete list of all 50+ available parameters in
 }
 ```
 
-## Opening Models to Other Agents
+## 🌐 Opening Models to Other Agents
 
 ### Method 1: llama.cpp Server Mode
 
@@ -371,7 +371,7 @@ response = client.chat.completions.create(
 )
 ```
 
-## Next Steps
+## ✅ Next Steps
 
 1. Create your first project using the templates above
 2. Experiment with different configurations
