@@ -1,0 +1,64 @@
+# Large Model Files (too large for GitHub)
+*.gguf
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+
+# Model directories
+organized/
+rtx4060ti-16gb/
+rtx3090-24gb/
+organized-old/
+
+# Virtual environments
+venv/
+mlx_venv/
+hf_venv/
+env/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS files
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Git files
+*.orig
+
+# HuggingFace cache (if you have local cache)
+.cache/
+huggingface/
+
+# Personal notes (if you want to keep them local)
+# personal-notes.md

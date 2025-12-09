@@ -1,0 +1,181 @@
+{
+  "model_parameters": {
+    "rtx3090_24gb": {
+      "Llama-3.3-70B-Abliterated": {
+        "file": "Llama-3.3-70B-Instruct-abliterated-IQ2_S.gguf",
+        "system_prompt_file": "Llama-3.3-70B-SYSTEM-PROMPT.txt",
+        "temperature": 0.7,
+        "context": 6000,
+        "top_p": 0.95,
+        "top_k": 40,
+        "repeat_penalty": 1.05,
+        "use_case": "Best uncensored 70B for unrestricted research"
+      },
+      "Qwen3-Coder-30B": {
+        "file": "Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+        "system_prompt_file": "Qwen3-Coder-30B-SYSTEM-PROMPT.txt",
+        "temperature": 0.7,
+        "context": 131072,
+        "top_p": 0.8,
+        "top_k": 20,
+        "repeat_penalty": 1.05,
+        "special_flags": "--jinja --enable-chunked-prefill --max-num-batched-tokens 131072",
+        "use_case": "Best 2025 coding - 94% HumanEval, 256K context"
+      },
+      "Dolphin-Mistral-24B-Venice": {
+        "file": "cognitivecomputations_Dolphin-Mistral-24B-Venice-Edition-Q4_K_M.gguf",
+        "system_prompt_file": "Dolphin-Mistral-24B-SYSTEM-PROMPT.txt",
+        "temperature": 0.15,
+        "context": 16384,
+        "top_p": 0.95,
+        "top_k": 40,
+        "repeat_penalty": 1.1,
+        "use_case": "Lowest refusal rate (2.2%)"
+      },
+      "Phi-4-Reasoning-Plus": {
+        "file": "microsoft_Phi-4-reasoning-plus-Q6_K.gguf",
+        "system_prompt_file": "Phi-4-Reasoning-Plus-SYSTEM-PROMPT.txt",
+        "temperature": 0.8,
+        "context": 16384,
+        "top_p": 0.9,
+        "top_k": 25,
+        "repeat_penalty": 1.05,
+        "special_flags": "--jinja",
+        "use_case": "Best reasoning - 78% AIME 2025"
+      },
+      "Gemma-3-27B-Abliterated": {
+        "file": "mlabonne_gemma-3-27b-it-abliterated-Q2_K.gguf",
+        "system_prompt_file": "Gemma-3-27B-SYSTEM-PROMPT.txt",
+        "temperature": 1.0,
+        "context": 100000,
+        "min_p": 0.08,
+        "top_k": 50,
+        "repeat_penalty": 1.2,
+        "frequency_penalty": 0.5,
+        "note": "NO system prompt support - use prompt framing in user message",
+        "use_case": "Creative writing - 128K context"
+      },
+      "Ministral-3-14B-Reasoning": {
+        "file": "Ministral-3-14B-Reasoning-2512-Q5_K_M.gguf",
+        "system_prompt_file": "Ministral-3-14B-SYSTEM-PROMPT.txt",
+        "temperature": 0.7,
+        "context": 200000,
+        "top_p": 0.95,
+        "top_k": 30,
+        "repeat_penalty": 1.05,
+        "max_tokens": 32768,
+        "use_case": "Best reasoning at 14B - 85% AIME, 256K context"
+      },
+      "DeepSeek-R1-Distill-Qwen-14B": {
+        "file": "DeepSeek-R1-Distill-Qwen-14B-Q5_K_M.gguf",
+        "system_prompt_file": "DeepSeek-R1-SYSTEM-PROMPT.txt",
+        "temperature": 0.6,
+        "context": 32768,
+        "top_p": 0.95,
+        "top_k": 30,
+        "max_tokens": 32768,
+        "note": "NO system prompt - all instructions in user prompt",
+        "use_case": "Chain-of-thought reasoning - 94.3% MATH-500"
+      },
+      "Wizard-Vicuna-13B-Uncensored": {
+        "file": "Wizard-Vicuna-13B-Uncensored-Q4_0.gguf",
+        "system_prompt_file": "Wizard-Vicuna-13B-SYSTEM-PROMPT.txt",
+        "temperature": 0.7,
+        "context": 16384,
+        "top_p": 0.95,
+        "top_k": 40,
+        "repeat_penalty": 1.1,
+        "use_case": "Classic uncensored general purpose"
+      },
+      "Dolphin-3.0-8B": {
+        "file": "Dolphin3.0-Llama3.1-8B-Q6_K.gguf",
+        "system_prompt_file": "Dolphin-3.0-8B-SYSTEM-PROMPT.txt",
+        "temperature": 0.7,
+        "context": 24576,
+        "top_p": 0.95,
+        "top_k": 40,
+        "repeat_penalty": 1.1,
+        "use_case": "Fast uncensored 8B - 60-90 tok/sec"
+      }
+    },
+    "rtx4060ti_16gb": {
+      "Qwen-2.5-14B-Instruct": {
+        "file": "qwen25-14b-instruct/Qwen2.5-14B-Instruct-Q4_K_M.gguf",
+        "system_prompt_file": "Qwen-14B-Instruct-SYSTEM-PROMPT.txt",
+        "temperature": 0.7,
+        "context": 32768,
+        "top_p": 0.8,
+        "top_k": 40,
+        "repeat_penalty": 1.05,
+        "special_flags": "--jinja",
+        "use_case": "Smart daily driver with safety filters"
+      },
+      "Qwen-2.5-14B-Uncensored": {
+        "file": "qwen25-14b-uncensored/Qwen2.5-14B_Uncensored_Instruct-Q4_K_M.gguf",
+        "system_prompt_file": "Qwen-14B-Uncensored-SYSTEM-PROMPT.txt",
+        "temperature": 0.7,
+        "context": 32768,
+        "top_p": 0.8,
+        "top_k": 40,
+        "repeat_penalty": 1.05,
+        "special_flags": "--jinja",
+        "use_case": "Uncensored daily driver for server"
+      },
+      "Llama-3.1-8B-Instruct": {
+        "file": "llama31-8b-instruct/Meta-Llama-3.1-8B-Instruct-Q6_K.gguf",
+        "system_prompt_file": "Llama-3.1-8B-SYSTEM-PROMPT.txt",
+        "temperature": 0.7,
+        "context": 32768,
+        "top_p": 0.9,
+        "top_k": 50,
+        "repeat_penalty": 1.05,
+        "use_case": "Official Meta model, production-ready"
+      },
+      "Qwen-2.5-Coder-7B": {
+        "file": "qwen25-coder-7b/qwen2.5-coder-7b-instruct-q5_k_m.gguf",
+        "system_prompt_file": "Qwen-Coder-7B-SYSTEM-PROMPT.txt",
+        "temperature": 0.7,
+        "context": 32768,
+        "top_p": 0.9,
+        "top_k": 20,
+        "repeat_penalty": 1.2,
+        "special_flags": "--jinja",
+        "use_case": "Fast coding specialist - 84.8% HumanEval"
+      },
+      "Dolphin-3.0-8B-Backup": {
+        "file": "Dolphin3.0-Llama3.1-8B-Q6_K.gguf",
+        "system_prompt_file": "Dolphin-3.0-8B-SYSTEM-PROMPT.txt",
+        "temperature": 0.7,
+        "context": 24576,
+        "top_p": 0.95,
+        "top_k": 40,
+        "repeat_penalty": 1.1,
+        "use_case": "Server backup - fast uncensored"
+      }
+    }
+  },
+  "parameter_guidelines": {
+    "temperature": {
+      "code_generation": "0.1-0.3",
+      "math_reasoning": "0.2-0.7",
+      "general_chat": "0.6-0.8",
+      "creative_writing": "0.8-1.2",
+      "structured_json": "0.0"
+    },
+    "context_optimization": {
+      "note": "Use exactly what you need, not maximum. Each token increases latency ~0.24ms"
+    },
+    "sampling_methods": {
+      "top_p": "General use (0.9-0.95)",
+      "min_p": "Creative tasks at high temp (outperforms top-p)",
+      "top_k": "Fixed candidate pool size"
+    },
+    "critical_notes": {
+      "qwen_models": "MUST use sampling (temp >= 0.6), NOT greedy decoding",
+      "reasoning_models": "Avoid explicit 'think step-by-step' prompts",
+      "deepseek_r1": "NO system prompt - user prompt only",
+      "gemma_3": "NO system prompt support - use in-context framing",
+      "phi_4": "Use --jinja flag for llama.cpp"
+    }
+  }
+}

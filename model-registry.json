@@ -1,0 +1,35 @@
+{
+  "updated": "2025-12-08 17:05:00",
+  "hardware": {
+    "primary": "RTX 3090 24GB VRAM",
+    "server": "RTX 4060 Ti 16GB VRAM"
+  },
+  "rtx3090_24gb": {
+    "total_vram": "24GB",
+    "total_size": "~99GB (9 models)",
+    "location": "D:\\models\\organized\\",
+    "models": [
+      {"index": 1, "name": "Llama 3.3 70B Abliterated", "file": "Llama-3.3-70B-Instruct-abliterated-IQ2_S.gguf", "size_gb": 21, "quantization": "IQ2_S", "category": "uncensored", "best_for": "Best 2025 uncensored, research"},
+      {"index": 2, "name": "Qwen 2.5 Coder 32B", "file": "Qwen2.5-Coder-32B-Instruct-Q4_K_M.gguf", "size_gb": 19, "quantization": "Q4_K_M", "category": "censored", "best_for": "Best 2025 coding model, 92.2% HumanEval"},
+      {"index": 3, "name": "Dolphin-Mistral-24B-Venice", "file": "cognitivecomputations_Dolphin-Mistral-24B-Venice-Edition-Q4_K_M.gguf", "size_gb": 14, "quantization": "Q4_K_M", "category": "uncensored", "best_for": "Lowest refusal rate (2.2%)"},
+      {"index": 4, "name": "Phi-4 14B", "file": "phi-4-Q6_K.gguf", "size_gb": 12, "quantization": "Q6_K", "category": "censored", "best_for": "Best reasoning 2025, beats GPT-4 on benchmarks"},
+      {"index": 5, "name": "MythoMax-L2-13B", "file": "mythomax-l2-13b.Q6_K.gguf", "size_gb": 10, "quantization": "Q6_K", "category": "uncensored", "best_for": "Creative writing, roleplay"},
+      {"index": 6, "name": "DeepSeek-R1-Distill-Qwen-14B", "file": "DeepSeek-R1-Distill-Qwen-14B-Q5_K_M.gguf", "size_gb": 9.8, "quantization": "Q5_K_M", "category": "censored", "best_for": "Chain-of-thought reasoning"},
+      {"index": 7, "name": "Unknown Model", "file": "Wizard-Vicuna-13B-Uncensored-Q4_0.gguf", "size_gb": 6.9, "quantization": "Q4_0", "category": "uncensored", "best_for": "Classic uncensored"},
+      {"index": 8, "name": "Dolphin3.0-Llama3.1-8B", "file": "Dolphin3.0-Llama3.1-8B-Q6_K.gguf", "size_gb": 6.2, "quantization": "Q6_K", "category": "uncensored", "best_for": "Fast uncensored 8B"}
+    ]
+  },
+  "rtx4060ti_16gb": {
+    "total_vram": "16GB",
+    "total_size": "~40GB (5 models)",
+    "location": "D:\\models\\rtx4060ti-16gb\\",
+    "models": [
+      {"index": 1, "name": "Qwen 2.5 14B Instruct", "file": "Qwen2.5-14B-Instruct-Q4_K_M.gguf", "size_gb": 8.4, "quantization": "Q4_K_M", "category": "censored", "best_for": "Smart daily driver, general purpose", "location": "qwen25-14b-instruct/"},
+      {"index": 2, "name": "Qwen 2.5 14B Uncensored", "file": "Qwen2.5-14B_Uncensored_Instruct-Q4_K_M.gguf", "size_gb": 8.4, "quantization": "Q4_K_M", "category": "uncensored", "best_for": "Uncensored daily driver", "location": "qwen25-14b-uncensored/"},
+      {"index": 3, "name": "Dolphin3.0-Llama3.1-8B", "file": "Dolphin3.0-Llama3.1-8B-Q6_K.gguf", "size_gb": 6.2, "quantization": "Q6_K", "category": "uncensored", "best_for": "Fast uncensored 8B"},
+      {"index": 4, "name": "Llama 3.1 8B Instruct", "file": "Meta-Llama-3.1-8B-Instruct-Q6_K.gguf", "size_gb": 6.2, "quantization": "Q6_K", "category": "censored", "best_for": "General purpose, reliable", "location": "llama31-8b-instruct/"},
+      {"index": 5, "name": "Qwen 2.5 Coder 7B", "file": "qwen2.5-coder-7b-instruct-q5_k_m.gguf", "size_gb": 5.1, "quantization": "Q5_K_M", "category": "censored", "best_for": "Coding, 84.8% HumanEval", "location": "qwen25-coder-7b/"}
+    ]
+  },
+  "notes": "See organize-models.ps1 for file locations. Use run-in-wsl.ps1 for optimized WSL execution."
+}
