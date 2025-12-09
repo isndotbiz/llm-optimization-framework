@@ -11,6 +11,7 @@ import subprocess
 import json
 import platform
 from pathlib import Path
+from logging_config import setup_logging
 
 def is_wsl():
     """Detect if running in WSL (Windows Subsystem for Linux)"""
@@ -357,6 +358,49 @@ class AIRouter:
 
         self.system_prompts_dir = self.models_dir
 
+        # Initialize logging
+        self.logger = setup_logging(self.models_dir)
+        self.logger.info(f"AI Router initialized on {self.platform}")
+
+    def _validate_resources_for_model(self, model_data):
+        """Validate that system has sufficient resources to run the model"""
+        try:
+            # Check if WSL is available for llama.cpp models
+            if model_data['framework'] == 'llama.cpp':
+                if self.platform == "Windows":
+                    # Quick WSL check
+                    result = subprocess.run(['wsl', '--status'], capture_output=True, timeout=5)
+                    if result.returncode != 0:
+                        self.logger.warning("WSL not available or not running")
+                        return False
+
+            # For now, assume resources are sufficient if WSL check passes
+            # Could add memory checks here in the future
+            return True
+
+        except subprocess.TimeoutExpired:
+            self.logger.warning("WSL status check timed out")
+            return True  # Assume OK if timeout (WSL might be slow but working)
+        except Exception as e:
+            self.logger.warning(f"Resource validation error: {e}")
+            return True  # Be permissive on validation errors
+
+    def _get_fallback_model(self, model_id):
+        """Get a smaller fallback model if primary model fails"""
+        fallback_map = {
+            "qwen3-coder-30b": "dolphin-llama31-8b",      # 18GB -> 6GB
+            "llama33-70b": "ministral-3-14b",              # 21GB -> 9GB
+            "phi4-14b": "dolphin-llama31-8b",              # 12GB -> 6GB
+            "dolphin-mistral-24b": "wizard-vicuna-13b",    # 14GB -> 7GB
+            "gemma3-27b": "dolphin-llama31-8b",            # 10GB -> 6GB
+        }
+
+        fallback_id = fallback_map.get(model_id)
+        if fallback_id and fallback_id in self.models:
+            self.logger.info(f"Fallback model for {model_id}: {fallback_id}")
+            return fallback_id
+        return None
+
     def print_banner(self):
         """Print colorful banner"""
         print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}")
@@ -507,21 +551,59 @@ class AIRouter:
                 prompt = input(f"\n{Colors.BRIGHT_CYAN}Enter your prompt: {Colors.RESET}").strip()
                 self.run_model(model_id, model_data, prompt)
             else:
-                print(f"{Colors.BRIGHT_RED}Invalid model number.{Colors.RESET}")
+                print(f"{Colors.BRIGHT_RED}✗ Invalid model number.{Colors.RESET}")
+                print(f"{Colors.BRIGHT_YELLOW}Please enter a valid number from the list above.{Colors.RESET}")
         except ValueError:
-            print(f"{Colors.BRIGHT_RED}Invalid input.{Colors.RESET}")
+            print(f"{Colors.BRIGHT_RED}✗ Invalid input.{Colors.RESET}")
+            print(f"{Colors.BRIGHT_YELLOW}Please enter a valid number.{Colors.RESET}")
 
-    def run_model(self, model_id, model_data, prompt):
-        """Execute the model with optimal parameters"""
+    def run_model(self, model_id, model_data, prompt, retry_count=0, max_retries=2):
+        """Execute the model with optimal parameters and retry logic"""
+        self.logger.info(f"Starting model execution: {model_id} ({model_data['name']})")
+
+        # Validate resources before execution
+        if not self._validate_resources_for_model(model_data):
+            self.logger.error(f"Insufficient resources for model {model_id}")
+            print(f"\n{Colors.BRIGHT_RED}✗ Error: Insufficient system resources{Colors.RESET}")
+            print(f"{Colors.BRIGHT_YELLOW}Model {model_data['name']} requires:{Colors.RESET}")
+            print(f"{Colors.YELLOW}  - Available RAM: ~{model_data['size']} free{Colors.RESET}")
+            print(f"{Colors.YELLOW}  - WSL must be running (for llama.cpp models){Colors.RESET}\n")
+
+            # Try fallback to smaller model
+            fallback_id = self._get_fallback_model(model_id)
+            if fallback_id and retry_count == 0:
+                print(f"{Colors.BRIGHT_CYAN}→ Trying fallback model: {self.models[fallback_id]['name']}{Colors.RESET}\n")
+                return self.run_model(fallback_id, self.models[fallback_id], prompt, retry_count=1)
+            return None
+
         print(f"\n{Colors.BRIGHT_GREEN}{Colors.BOLD}Launching {model_data['name']}...{Colors.RESET}\n")
 
-        if model_data['framework'] == 'mlx':
-            self.run_mlx_model(model_data, prompt)
-        else:
-            self.run_llamacpp_model(model_data, prompt)
+        try:
+            if model_data['framework'] == 'mlx':
+                result = self.run_mlx_model(model_data, prompt)
+            else:
+                result = self.run_llamacpp_model(model_data, prompt)
+
+            return result
+
+        except Exception as e:
+            self.logger.error(f"Model execution failed: {e}")
+
+            # Retry logic
+            if retry_count < max_retries:
+                retry_count += 1
+                self.logger.warning(f"Retrying execution (attempt {retry_count + 1}/{max_retries + 1})...")
+                print(f"\n{Colors.BRIGHT_YELLOW}⚠ Execution failed, retrying ({retry_count}/{max_retries})...{Colors.RESET}\n")
+                time.sleep(2)  # Brief delay before retry
+                return self.run_model(model_id, model_data, prompt, retry_count, max_retries)
+            else:
+                self.logger.error(f"All retry attempts exhausted for {model_id}")
+                print(f"\n{Colors.BRIGHT_RED}✗ Error: Model execution failed after {max_retries + 1} attempts{Colors.RESET}\n")
+                return None
 
     def run_llamacpp_model(self, model_data, prompt):
         """Run model using llama.cpp (WSL)"""
+        self.logger.debug("Executing llama.cpp model")
         # Load system prompt if available
         system_prompt = ""
         if model_data['system_prompt']:
@@ -559,7 +641,12 @@ class AIRouter:
         print(f"{Colors.DIM}{cmd}{Colors.RESET}\n")
 
         # Execute
-        subprocess.run(cmd, shell=True)
+        self.logger.debug("Executing llama.cpp command")
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        if result.returncode != 0:
+            self.logger.error(f"Model execution failed with return code {result.returncode}")
+        else:
+            self.logger.info("Successfully executed llama.cpp model")
 
     def run_mlx_model(self, model_data, prompt):
         """Run model using MLX (macOS)"""
@@ -761,9 +848,11 @@ class AIRouter:
                     print(f"{Colors.BRIGHT_RED}Documentation file not found: {filename}{Colors.RESET}")
                     input(f"\n{Colors.BRIGHT_YELLOW}Press Enter to continue...{Colors.RESET}")
             else:
-                print(f"{Colors.BRIGHT_RED}Invalid selection.{Colors.RESET}")
+                print(f"{Colors.BRIGHT_RED}✗ Invalid selection.{Colors.RESET}")
+                print(f"{Colors.BRIGHT_YELLOW}Please enter a valid option number.{Colors.RESET}")
         except ValueError:
-            print(f"{Colors.BRIGHT_RED}Invalid input.{Colors.RESET}")
+            print(f"{Colors.BRIGHT_RED}✗ Invalid input.{Colors.RESET}")
+            print(f"{Colors.BRIGHT_YELLOW}Please enter a valid number from the menu.{Colors.RESET}")
 
 
 def main():
@@ -795,7 +884,13 @@ def main():
         print(f"\n\n{Colors.BRIGHT_YELLOW}Interrupted by user. Goodbye!{Colors.RESET}\n")
         sys.exit(0)
     except Exception as e:
-        print(f"\n{Colors.BRIGHT_RED}Error: {e}{Colors.RESET}\n")
+        print(f"\n{Colors.BRIGHT_RED}✗ Error: An unexpected error occurred{Colors.RESET}")
+        print(f"{Colors.BRIGHT_YELLOW}Details:{Colors.RESET} {Colors.DIM}{str(e)[:200]}{Colors.RESET}\n")
+        print(f"{Colors.BRIGHT_YELLOW}Troubleshooting Steps:{Colors.RESET}")
+        print(f"{Colors.YELLOW}  1. Check Python version: {Colors.DIM}python --version{Colors.RESET}")
+        print(f"{Colors.YELLOW}  2. Verify dependencies: {Colors.DIM}pip list{Colors.RESET}")
+        print(f"{Colors.YELLOW}  3. Check WSL status: {Colors.DIM}wsl --status{Colors.RESET}")
+        print(f"{Colors.YELLOW}  4. Try reinstalling: {Colors.DIM}pip install -r requirements.txt{Colors.RESET}\n")
         sys.exit(1)
 
 

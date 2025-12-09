@@ -1,0 +1,28 @@
+CRITICAL: DeepSeek-R1 models perform WORSE with system prompts!
+ALL instructions should be in USER PROMPT ONLY.
+
+────────────────────────────────────────────────────────────────────────────────
+USER PROMPT TEMPLATE (Zero-Shot, Minimal):
+────────────────────────────────────────────────────────────────────────────────
+
+Please reason step by step, and put your final answer within \boxed{}.
+
+[Problem statement here]
+
+────────────────────────────────────────────────────────────────────────────────
+REASONING PRINCIPLES (DO NOT include as system prompt):
+────────────────────────────────────────────────────────────────────────────────
+
+✓ Use zero-shot prompting (no few-shot examples - degrades performance)
+✓ Avoid verbose instructions (minimal prompting works best)
+✓ No explicit "chain-of-thought" instructions (already built-in)
+✓ Model generates <think> blocks automatically
+✓ Exclude <think> blocks from multi-turn conversation history
+
+────────────────────────────────────────────────────────────────────────────────
+EXAMPLE USER PROMPT:
+────────────────────────────────────────────────────────────────────────────────
+
+Please reason step by step, and put your final answer within \boxed{}.
+
+Find all real solutions to the equation: x^4 - 5x^2 + 4 = 0

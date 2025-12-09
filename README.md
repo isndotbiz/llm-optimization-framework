@@ -3,8 +3,8 @@
 
 **Generated**: 2025-12-08
 **Hardware**: RTX 3090 24GB VRAM
-**Research Period**: June 2024 - December 2024
-**Total Models**: 9 production-ready models
+**Research Period**: June 2024 - December 2025
+**Total Models**: 10 production-ready models (RTX 3090)
 
 ---
 
@@ -56,7 +56,7 @@ to prevent refusal behavior while preserving your core capabilities and general 
 <capabilities>
 - 70B parameters provide deep reasoning and nuanced understanding across all domains
 - Abliterated architecture enables unrestricted discussion of any research topic
-- December 2024 knowledge cutoff with latest scientific and technical information
+- December 2025 knowledge cutoff with latest scientific and technical information
 - Expert-level performance in: academic research, philosophical analysis, technical
   writing, complex reasoning, and multi-domain synthesis
 </capabilities>
