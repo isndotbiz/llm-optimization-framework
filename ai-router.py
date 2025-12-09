@@ -12,6 +12,14 @@ import json
 import platform
 from pathlib import Path
 
+def is_wsl():
+    """Detect if running in WSL (Windows Subsystem for Linux)"""
+    try:
+        with open('/proc/version', 'r') as f:
+            return 'microsoft' in f.read().lower()
+    except:
+        return False
+
 # Color codes for terminal output
 class Colors:
     RESET = '\033[0m'
@@ -338,7 +346,16 @@ class AIRouter:
     def __init__(self):
         self.platform = platform.system()
         self.models = ModelDatabase.get_platform_models()
-        self.system_prompts_dir = Path("D:/models") if self.platform == "Windows" else Path.home() / "models"
+
+        # Detect correct models directory based on platform
+        if self.platform == "Windows":
+            self.models_dir = Path("D:/models")
+        elif is_wsl():
+            self.models_dir = Path("/mnt/d/models")
+        else:  # macOS or Linux
+            self.models_dir = Path.home() / "models"
+
+        self.system_prompts_dir = self.models_dir
 
     def print_banner(self):
         """Print colorful banner"""
@@ -637,7 +654,7 @@ class AIRouter:
 
     def view_documentation(self):
         """Display documentation guide menu"""
-        docs_dir = Path("D:/models") if self.platform == "Windows" else Path.home() / "models"
+        docs_dir = self.models_dir
 
         # Define documentation files with priority (ONLY FILES THAT EXIST)
         docs = [
