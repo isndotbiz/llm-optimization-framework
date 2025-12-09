@@ -86,7 +86,7 @@ class ModelDatabase:
         },
         "phi4-14b": {
             "name": "Phi-4 Reasoning Plus 14B Q6_K",
-            "path": "/mnt/d/models/organized/Phi-4-reasoning-plus-Q6_K.gguf",
+            "path": "/mnt/d/models/organized/microsoft_Phi-4-reasoning-plus-Q6_K.gguf",
             "size": "12GB",
             "speed": "35-55 tok/sec",
             "use_case": "Math, reasoning, STEM, logical analysis",
@@ -100,9 +100,9 @@ class ModelDatabase:
             "framework": "llama.cpp"
         },
         "gemma3-27b": {
-            "name": "Gemma 3 27B IQ2_M",
-            "path": "/mnt/d/models/organized/Gemma-3-27B-Instruct-Abliterated-IQ2_M.gguf",
-            "size": "12GB",
+            "name": "Gemma 3 27B Q2_K (Abliterated)",
+            "path": "/mnt/d/models/organized/mlabonne_gemma-3-27b-it-abliterated-Q2_K.gguf",
+            "size": "10GB",
             "speed": "25-40 tok/sec",
             "use_case": "Uncensored chat, creative writing, research",
             "temperature": 0.9,
@@ -111,13 +111,13 @@ class ModelDatabase:
             "context": 128000,
             "special_flags": [],
             "system_prompt": None,
-            "notes": "NO system prompt support. 128K context. Uncensored variant.",
+            "notes": "NO system prompt support. 128K context. Uncensored/abliterated variant.",
             "framework": "llama.cpp"
         },
         "ministral-3-14b": {
             "name": "Ministral-3 14B Reasoning Q5_K_M",
-            "path": "/mnt/d/models/organized/Ministral-3-14B-Reasoning-Q5_K_M.gguf",
-            "size": "10GB",
+            "path": "/mnt/d/models/organized/Ministral-3-14B-Reasoning-2512-Q5_K_M.gguf",
+            "size": "9GB",
             "speed": "35-50 tok/sec",
             "use_case": "Complex reasoning, problem solving, analysis",
             "temperature": 0.7,
@@ -128,39 +128,80 @@ class ModelDatabase:
             "system_prompt": "system-prompt-ministral-3-14b.txt",
             "notes": "256K context window. Excellent for long-context reasoning.",
             "framework": "llama.cpp"
-        }
-    }
-
-    # RTX 4060 Ti 16GB Models
-    RTX4060TI_MODELS = {
-        "qwen3-14b": {
-            "name": "Qwen3 14B Instruct Q4_K_M",
-            "path": "/mnt/d/models/rtx4060ti-16gb/qwen3-14b-instruct/qwen3-14b-instruct-q4_k_m.gguf",
-            "size": "9GB",
-            "speed": "30-45 tok/sec",
-            "use_case": "General purpose, chat, research",
-            "temperature": 0.7,
-            "top_p": 0.8,
-            "top_k": 20,
-            "context": 32768,
-            "special_flags": ["--jinja"],
-            "system_prompt": "system-prompt-qwen3-14b.txt",
-            "notes": "Excellent general-purpose model. Use temp >= 0.6.",
-            "framework": "llama.cpp"
         },
-        "qwen25-14b": {
-            "name": "Qwen2.5 14B Instruct Q4_K_M",
-            "path": "/mnt/d/models/rtx4060ti-16gb/qwen25-14b-instruct/qwen2.5-14b-instruct-q4_k_m.gguf",
-            "size": "9GB",
-            "speed": "30-45 tok/sec",
-            "use_case": "General chat, instruction following, research",
+        "deepseek-r1-14b": {
+            "name": "DeepSeek R1 Distill Qwen 14B Q5_K_M",
+            "path": "/mnt/d/models/organized/DeepSeek-R1-Distill-Qwen-14B-Q5_K_M.gguf",
+            "size": "10GB",
+            "speed": "30-50 tok/sec",
+            "use_case": "Advanced reasoning, research, complex analysis",
             "temperature": 0.7,
             "top_p": 0.9,
             "top_k": 40,
             "context": 32768,
             "special_flags": [],
-            "system_prompt": "system-prompt-qwen25-14b.txt",
-            "notes": "Great for general tasks. Use temp >= 0.6.",
+            "system_prompt": "system-prompt-deepseek-r1.txt",
+            "notes": "DeepSeek R1 distilled to Qwen. Excellent reasoning capabilities.",
+            "framework": "llama.cpp"
+        },
+        "llama33-70b": {
+            "name": "Llama 3.3 70B Instruct IQ2_S (Abliterated)",
+            "path": "/mnt/d/models/organized/Llama-3.3-70B-Instruct-abliterated-IQ2_S.gguf",
+            "size": "21GB",
+            "speed": "15-25 tok/sec",
+            "use_case": "Large-scale reasoning, research, uncensored tasks",
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 131072,
+            "special_flags": [],
+            "system_prompt": "system-prompt-llama33-70b.txt",
+            "notes": "Largest model available. Excellent for complex tasks. Uncensored.",
+            "framework": "llama.cpp"
+        },
+        "dolphin-llama31-8b": {
+            "name": "Dolphin 3.0 Llama 3.1 8B Q6_K",
+            "path": "/mnt/d/models/organized/Dolphin3.0-Llama3.1-8B-Q6_K.gguf",
+            "size": "6GB",
+            "speed": "45-65 tok/sec",
+            "use_case": "Fast general tasks, uncensored chat, quick assistance",
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 32768,
+            "special_flags": [],
+            "system_prompt": "system-prompt-dolphin-8b.txt",
+            "notes": "Fastest model. Uncensored variant of Llama 3.1 8B.",
+            "framework": "llama.cpp"
+        },
+        "dolphin-mistral-24b": {
+            "name": "Dolphin Mistral 24B Venice Q4_K_M",
+            "path": "/mnt/d/models/organized/cognitivecomputations_Dolphin-Mistral-24B-Venice-Edition-Q4_K_M.gguf",
+            "size": "14GB",
+            "speed": "25-40 tok/sec",
+            "use_case": "Uncensored chat, creative tasks, roleplay",
+            "temperature": 0.8,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 32768,
+            "special_flags": [],
+            "system_prompt": None,
+            "notes": "Venice Edition: Completely uncensored. No system prompt support.",
+            "framework": "llama.cpp"
+        },
+        "wizard-vicuna-13b": {
+            "name": "Wizard Vicuna 13B Uncensored Q4_0",
+            "path": "/mnt/d/models/organized/Wizard-Vicuna-13B-Uncensored-Q4_0.gguf",
+            "size": "7GB",
+            "speed": "35-50 tok/sec",
+            "use_case": "General uncensored chat, creative writing",
+            "temperature": 0.8,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 8192,
+            "special_flags": [],
+            "system_prompt": "system-prompt-wizard-vicuna.txt",
+            "notes": "Classic uncensored model. Smaller context window.",
             "framework": "llama.cpp"
         }
     }
@@ -235,9 +276,8 @@ class ModelDatabase:
         system = platform.system()
         if system == "Darwin":  # macOS
             return cls.M4_MODELS
-        else:  # Windows/WSL
-            # Check if RTX 3090 or 4060 Ti
-            return {**cls.RTX3090_MODELS, **cls.RTX4060TI_MODELS}
+        else:  # Windows/WSL - RTX 3090
+            return cls.RTX3090_MODELS
 
     @classmethod
     def detect_use_case(cls, prompt_text):
@@ -317,7 +357,7 @@ class AIRouter:
         if self.platform == "Darwin":
             platform_name = f"{Colors.BRIGHT_GREEN}MacBook M4 Pro (MLX Optimized){Colors.RESET}"
         else:
-            platform_name = f"{Colors.BRIGHT_YELLOW}RTX 3090 / 4060 Ti (WSL Optimized){Colors.RESET}"
+            platform_name = f"{Colors.BRIGHT_YELLOW}RTX 3090 (WSL Optimized){Colors.RESET}"
 
         print(f"\n{Colors.BRIGHT_WHITE}Platform: {platform_name}")
         print(f"{Colors.BRIGHT_WHITE}Available Models: {Colors.BRIGHT_CYAN}{len(self.models)}{Colors.RESET}")
@@ -564,7 +604,7 @@ class AIRouter:
         print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  OPTIMAL PARAMETERS GUIDE (2025 Research){Colors.RESET}")
         print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
 
-        print(f"{Colors.BRIGHT_WHITE}RTX 3090 / 4060 Ti (llama.cpp WSL):{Colors.RESET}\n")
+        print(f"{Colors.BRIGHT_WHITE}RTX 3090 (llama.cpp WSL):{Colors.RESET}\n")
         print(f"{Colors.GREEN}-ngl 999{Colors.RESET}           {Colors.WHITE}Full GPU offload (Aug 2025 default){Colors.RESET}")
         print(f"{Colors.GREEN}-t 24{Colors.RESET}             {Colors.WHITE}Use all CPU threads (Ryzen 9 5900X){Colors.RESET}")
         print(f"{Colors.GREEN}-b 512{Colors.RESET}            {Colors.WHITE}Minimum batch size (2025 research){Colors.RESET}")
