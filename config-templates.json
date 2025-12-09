@@ -1,0 +1,417 @@
+{
+  "configuration_parameters": {
+    "description": "Complete list of all available configuration parameters for LLM inference",
+    "last_updated": "2025-12-08",
+    "research_version": "2025 Sep-Nov Research"
+  },
+
+  "core_parameters": {
+    "model_path": {
+      "type": "string",
+      "required": true,
+      "description": "Absolute path to the GGUF model file",
+      "example": "/mnt/d/models/organized/qwen3-coder-30b.gguf"
+    },
+    "ngl": {
+      "type": "integer",
+      "required": true,
+      "default": 999,
+      "range": [0, 999],
+      "description": "Number of GPU layers to offload. 999 = all layers",
+      "2025_recommendation": "Always use 999 for full GPU offload"
+    },
+    "threads": {
+      "type": "integer",
+      "required": true,
+      "default": 24,
+      "range": [1, 128],
+      "description": "Number of CPU threads for prompt processing",
+      "hardware_specific": {
+        "Ryzen 9 5900X": 24,
+        "Ryzen 7 5800X": 16,
+        "i9-12900K": 24
+      }
+    },
+    "batch_size": {
+      "type": "integer",
+      "required": true,
+      "default": 512,
+      "range": [32, 2048],
+      "description": "Batch size for prompt processing",
+      "2025_recommendation": "Minimum 512, optimal 512-2048"
+    },
+    "ubatch_size": {
+      "type": "integer",
+      "required": false,
+      "default": 512,
+      "range": [32, 2048],
+      "description": "Logical batch size for prompt processing",
+      "2025_recommendation": "Match batch_size or use 512"
+    }
+  },
+
+  "sampling_parameters": {
+    "temperature": {
+      "type": "float",
+      "required": true,
+      "default": 0.7,
+      "range": [0.0, 2.0],
+      "description": "Controls randomness in generation. Higher = more creative",
+      "use_cases": {
+        "technical_docs": [0.2, 0.4],
+        "conversation": [0.5, 0.9],
+        "creative_writing": [0.8, 1.5]
+      },
+      "warnings": {
+        "qwen_models": "NEVER use 0.0 - causes endless loops! Minimum 0.6"
+      }
+    },
+    "top_p": {
+      "type": "float",
+      "required": true,
+      "default": 0.9,
+      "range": [0.0, 1.0],
+      "description": "Nucleus sampling - cumulative probability threshold",
+      "2025_recommendation": "0.9 for general use, 0.8 for Qwen models"
+    },
+    "top_k": {
+      "type": "integer",
+      "required": true,
+      "default": 40,
+      "range": [1, 100],
+      "description": "Sample from top K tokens only",
+      "2025_recommendation": "40 for general, 20 for Qwen models"
+    },
+    "min_p": {
+      "type": "float",
+      "required": false,
+      "default": 0.05,
+      "range": [0.0, 1.0],
+      "description": "Min-P sampling (ICLR 2025) - dynamic truncation based on top token probability",
+      "2025_breakthrough": "Maintains coherence at high temperatures where top-p fails",
+      "recommended_values": {
+        "general": 0.05,
+        "creative_with_high_temp": 0.08
+      }
+    },
+    "repeat_penalty": {
+      "type": "float",
+      "required": false,
+      "default": 1.0,
+      "range": [1.0, 2.0],
+      "description": "Penalty for repeating tokens",
+      "2025_recommendation": "1.1-1.15 for general use, 1.5 for quantized Qwen models"
+    },
+    "presence_penalty": {
+      "type": "float",
+      "required": false,
+      "default": 0.0,
+      "range": [-2.0, 2.0],
+      "description": "Penalty for token presence (reduces topic repetition)",
+      "2025_recommendation": "0.0 to 0.6"
+    },
+    "frequency_penalty": {
+      "type": "float",
+      "required": false,
+      "default": 0.0,
+      "range": [-2.0, 2.0],
+      "description": "Penalty proportional to token frequency",
+      "2025_recommendation": "0.0 to 0.6"
+    },
+    "mirostat": {
+      "type": "integer",
+      "required": false,
+      "default": 0,
+      "range": [0, 2],
+      "description": "Mirostat sampling algorithm (0=disabled, 1=Mirostat 1.0, 2=Mirostat 2.0)",
+      "use_case": "Long-form creative text generation"
+    },
+    "mirostat_tau": {
+      "type": "float",
+      "required": false,
+      "default": 5.0,
+      "range": [0.0, 10.0],
+      "description": "Mirostat target entropy"
+    },
+    "mirostat_eta": {
+      "type": "float",
+      "required": false,
+      "default": 0.1,
+      "range": [0.0, 1.0],
+      "description": "Mirostat learning rate"
+    }
+  },
+
+  "context_parameters": {
+    "context_size": {
+      "type": "integer",
+      "required": true,
+      "default": 8192,
+      "range": [512, 262144],
+      "description": "Maximum context window size",
+      "model_limits": {
+        "Qwen3": 32768,
+        "Qwen2.5": 32768,
+        "Phi-4": 16384,
+        "Gemma-3": 128000,
+        "Ministral-3": 262144
+      },
+      "2025_recommendation": "Use model's native context, enable KV cache quantization for >16K"
+    },
+    "max_tokens": {
+      "type": "integer",
+      "required": true,
+      "default": 2048,
+      "range": [1, 32768],
+      "description": "Maximum number of tokens to generate"
+    },
+    "cache_type_k": {
+      "type": "string",
+      "required": false,
+      "default": "q8_0",
+      "options": ["f16", "q8_0", "q4_0"],
+      "description": "KV cache quantization for keys",
+      "2025_feature": "50% memory savings with Q8_0, 75% with Q4_0",
+      "requires": "Flash Attention enabled"
+    },
+    "cache_type_v": {
+      "type": "string",
+      "required": false,
+      "default": "q8_0",
+      "options": ["f16", "q8_0", "q4_0"],
+      "description": "KV cache quantization for values",
+      "2025_feature": "Enables 2x longer contexts with Q8_0"
+    }
+  },
+
+  "performance_parameters": {
+    "flash_attention": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Enable Flash Attention (CUDA only)",
+      "2025_performance": "+20% speed, 50% memory reduction",
+      "2025_status": "Auto-enabled by default in llama.cpp"
+    },
+    "no_ppl": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Skip perplexity calculation",
+      "2025_performance": "+15% speedup for inference"
+    },
+    "mlock": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Lock model in RAM to prevent swapping"
+    },
+    "mmap": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Use memory mapping for model loading",
+      "platform_specific": {
+        "WSL": true,
+        "macOS_M4": false
+      }
+    },
+    "numa": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "description": "Enable NUMA support for multi-socket systems"
+    }
+  },
+
+  "model_specific_flags": {
+    "jinja": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "description": "Enable Jinja template format",
+      "required_for": ["Qwen3", "Phi-4"],
+      "critical": "Phi-4 REQUIRES --jinja to enable reasoning format"
+    },
+    "rope_freq_base": {
+      "type": "integer",
+      "required": false,
+      "default": 10000,
+      "range": [10000, 1000000],
+      "description": "RoPE frequency base for position encoding",
+      "model_specific": {
+        "long_context_models": 1000000
+      }
+    },
+    "rope_freq_scale": {
+      "type": "float",
+      "required": false,
+      "default": 1.0,
+      "range": [0.1, 10.0],
+      "description": "RoPE frequency scaling"
+    }
+  },
+
+  "system_prompt_parameters": {
+    "system_prompt": {
+      "type": "string",
+      "required": false,
+      "default": "",
+      "description": "System-level instructions for the model",
+      "warnings": {
+        "Gemma-3": "NO system prompt support - will be ignored",
+        "DeepSeek-R1": "NO system prompt support - use developer messages"
+      }
+    },
+    "system_prompt_file": {
+      "type": "string",
+      "required": false,
+      "default": "",
+      "description": "Path to file containing system prompt"
+    }
+  },
+
+  "advanced_parameters": {
+    "seed": {
+      "type": "integer",
+      "required": false,
+      "default": -1,
+      "range": [-1, 2147483647],
+      "description": "Random seed for reproducibility (-1 = random)"
+    },
+    "grammar": {
+      "type": "string",
+      "required": false,
+      "default": "",
+      "description": "GBNF grammar for constrained generation"
+    },
+    "json_schema": {
+      "type": "object",
+      "required": false,
+      "default": null,
+      "description": "JSON schema for structured output"
+    },
+    "stop_sequences": {
+      "type": "array",
+      "required": false,
+      "default": [],
+      "description": "Stop generation when these sequences are encountered",
+      "example": ["</s>", "<|im_end|>", "User:"]
+    },
+    "logit_bias": {
+      "type": "object",
+      "required": false,
+      "default": {},
+      "description": "Bias specific tokens (+/- values)",
+      "example": {"13": -100, "42": 50}
+    }
+  },
+
+  "debugging_parameters": {
+    "verbose": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "description": "Enable verbose logging"
+    },
+    "verbose_prompt": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "description": "Show detailed prompt processing info"
+    },
+    "log_disable": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "description": "Disable all logging"
+    }
+  },
+
+  "preset_configurations": {
+    "rtx3090_optimal": {
+      "description": "Optimal settings for RTX 3090 24GB (2025 research)",
+      "ngl": 999,
+      "threads": 24,
+      "batch_size": 512,
+      "ubatch_size": 512,
+      "flash_attention": true,
+      "cache_type_k": "q8_0",
+      "cache_type_v": "q8_0",
+      "no_ppl": true,
+      "mlock": true,
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "top_k": 40,
+      "context_size": 8192
+    },
+    "qwen3_coding": {
+      "description": "Optimized for Qwen3 Coder coding tasks",
+      "temperature": 0.7,
+      "top_p": 0.8,
+      "top_k": 20,
+      "jinja": true,
+      "repeat_penalty": 1.5,
+      "min_temperature": 0.6
+    },
+    "phi4_reasoning": {
+      "description": "Optimized for Phi-4 reasoning tasks",
+      "temperature": 0.7,
+      "jinja": true,
+      "top_p": 0.9,
+      "top_k": 40,
+      "avoid": "DO NOT use 'think step-by-step' prompts"
+    },
+    "creative_writing": {
+      "description": "High creativity for creative writing",
+      "temperature": 1.2,
+      "min_p": 0.08,
+      "top_p": 0.9,
+      "repeat_penalty": 1.1,
+      "mirostat": 2,
+      "mirostat_tau": 5.0
+    },
+    "long_context": {
+      "description": "Optimized for long context (32K+)",
+      "context_size": 32768,
+      "cache_type_k": "q4_0",
+      "cache_type_v": "q4_0",
+      "flash_attention": true,
+      "batch_size": 256
+    }
+  },
+
+  "evaluation_parameters": {
+    "metrics": {
+      "speed": {
+        "prompt_eval_speed": "Tokens per second for prompt processing",
+        "generation_speed": "Tokens per second for generation"
+      },
+      "quality": {
+        "perplexity": "Model perplexity (lower = better)",
+        "coherence": "Response coherence score",
+        "relevance": "Relevance to prompt score",
+        "accuracy": "Factual accuracy score"
+      },
+      "resource": {
+        "vram_usage": "GPU memory usage in GB",
+        "ram_usage": "System RAM usage in GB",
+        "power_draw": "GPU power consumption in watts"
+      }
+    },
+    "test_categories": {
+      "coding": ["code_generation", "code_review", "debugging", "refactoring"],
+      "reasoning": ["math", "logic", "problem_solving", "analysis"],
+      "creative": ["creative_writing", "storytelling", "poetry", "brainstorming"],
+      "knowledge": ["qa", "summarization", "explanation", "research"]
+    },
+    "benchmark_datasets": {
+      "humaneval": "Code generation benchmark",
+      "mbpp": "Python programming benchmark",
+      "gsm8k": "Math reasoning benchmark",
+      "mmlu": "Multi-task language understanding",
+      "arc": "AI2 Reasoning Challenge",
+      "hellaswag": "Common sense reasoning"
+    }
+  }
+}
