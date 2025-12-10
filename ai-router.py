@@ -600,7 +600,11 @@ class AIRouter:
         # Build command with 2025 optimal parameters
         special_flags = ' '.join(model_data['special_flags'])
 
-        cmd = f"""wsl bash -c "~/llama.cpp/build/bin/llama-cli \\
+        # Detect if already running in WSL
+        is_wsl = os.path.exists('/proc/version') and 'microsoft' in open('/proc/version').read().lower()
+        wsl_prefix = "" if is_wsl else "wsl "
+
+        cmd = f"""{wsl_prefix}bash -c "~/llama.cpp/build/bin/llama-cli \\
   -m '{model_data['path']}' \\
   -p '{prompt}' \\
   -ngl 999 \\

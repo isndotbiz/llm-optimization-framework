@@ -876,7 +876,7 @@ class EnhancedAIRouter:
         top_p = self._get_float_input("Top P", model_data['top_p'], 0.0, 1.0)
         top_k = self._get_int_input("Top K", model_data['top_k'], 0, 200)
         max_tokens = self._get_int_input("Max tokens", 4096, 1, 32768)
-        context_limit = self._get_int_input("Context limit (messages, -1 for unlimited)", 50, -1, 100)
+        context_limit = self._get_int_input("Context limit (messages, -1 for unlimited)", 50, -1, 32768)
         presence_penalty = self._get_float_input("Presence penalty", 0.0, -2.0, 2.0)
         frequency_penalty = self._get_float_input("Frequency penalty", 0.0, -2.0, 2.0)
 
@@ -1119,7 +1119,7 @@ class EnhancedAIRouter:
         params["top_p"] = self._get_float_input("Top P", params.get("top_p", 0.9), 0.0, 1.0)
         params["top_k"] = self._get_int_input("Top K", params.get("top_k", 40), 0, 200)
         params["max_tokens"] = self._get_int_input("Max tokens", params.get("max_tokens", 4096), 1, 32768)
-        params["context_limit"] = self._get_int_input("Context limit", params.get("context_limit", 50), -1, 100)
+        params["context_limit"] = self._get_int_input("Context limit", params.get("context_limit", 50), -1, 32768)
         params["presence_penalty"] = self._get_float_input("Presence penalty", params.get("presence_penalty", 0.0), -2.0, 2.0)
         params["frequency_penalty"] = self._get_float_input("Frequency penalty", params.get("frequency_penalty", 0.0), -2.0, 2.0)
 
@@ -1247,7 +1247,36 @@ class EnhancedAIRouter:
 
         special_flags = ' '.join(model_data['special_flags'])
 
-        cmd = f"""wsl bash -c "~/llama.cpp/build/bin/llama-cli \\
+        # Detect if already running in WSL
+        is_wsl = os.path.exists('/proc/version') and 'microsoft' in open('/proc/version').read().lower()
+
+        if is_wsl:
+            # Already in WSL, run directly
+            cmd = f"""bash -c "~/llama.cpp/build/bin/llama-cli \\
+  -m '{model_data['path']}' \\
+  -p '{prompt}' \\
+  -ngl 999 \\
+  -t 24 \\
+  -b 512 \\
+  -ub 512 \\
+  -fa 1 \\
+  --cache-type-k q8_0 \\
+  --cache-type-v q8_0 \\
+  --no-ppl \\
+  --temp {temperature} \\
+  --top-p {top_p} \\
+  --top-k {top_k} \\
+  -n {max_tokens} \\
+  -c {model_data['context']} \\
+  -ptc 10 \\
+  --verbose-prompt \\
+  --log-colors \\
+  {special_flags} \\
+  --mlock"
+"""
+        else:
+            # Running from Windows, need WSL wrapper
+            cmd = f"""wsl bash -c "~/llama.cpp/build/bin/llama-cli \\
   -m '{model_data['path']}' \\
   -p '{prompt}' \\
   -ngl 999 \\
