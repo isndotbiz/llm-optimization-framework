@@ -1,0 +1,58 @@
+================================================================================
+AI ROUTER - MODEL RESPONSE
+================================================================================
+Generated: 2025-12-08 15:30:00
+Model: Qwen3 Coder 30B Q4_K_M
+================================================================================
+
+Here's a Python function to calculate the factorial of a number:
+
+```python
+def factorial(n):
+    """
+    Calculate the factorial of a non-negative integer.
+
+    Args:
+        n (int): A non-negative integer
+
+    Returns:
+        int: The factorial of n
+
+    Raises:
+        ValueError: If n is negative
+    """
+    if n < 0:
+        raise ValueError("Factorial is not defined for negative numbers")
+
+    if n == 0 or n == 1:
+        return 1
+
+    result = 1
+    for i in range(2, n + 1):
+        result *= i
+
+    return result
+
+
+# Example usage
+print(factorial(5))  # Output: 120
+print(factorial(0))  # Output: 1
+```
+
+This function uses an iterative approach to calculate the factorial. For better performance with large numbers, you could also use Python's built-in `math.factorial()` function.
+
+Alternative recursive implementation:
+
+```python
+def factorial_recursive(n):
+    """Recursive implementation of factorial"""
+    if n < 0:
+        raise ValueError("Factorial is not defined for negative numbers")
+
+    if n == 0 or n == 1:
+        return 1
+
+    return n * factorial_recursive(n - 1)
+```
+
+Note that the recursive version is more elegant but can hit Python's recursion limit for large values of n (typically around 1000).

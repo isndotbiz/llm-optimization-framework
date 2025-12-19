@@ -1,0 +1,14 @@
+
+metadata:
+  name: Test Template
+  description: Test
+  category: test
+  variables:
+    - name: input_text
+      description: Test input
+
+system_prompt: |
+  You are a test assistant.
+
+user_prompt: |
+  Process: {{ input_text }}

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wsl --list:*)",
+      "Bash(wsl -d Ubuntu pwd:*)",
+      "Bash(wsl bash:*)",
+      "Bash(wsl -d Ubuntu bash -c:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(sshpass:*)",
+      "Bash(apt-get update:*)",
+      "Bash(apt-get install:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(ssh-keygen:*)",
+      "Bash(sort:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

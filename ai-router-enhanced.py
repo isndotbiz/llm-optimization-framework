@@ -19,15 +19,16 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 from logging_config import setup_logging
 
+
 def is_wsl():
     """Detect if running in WSL (Windows Subsystem for Linux)"""
     try:
         with open('/proc/version', 'r') as f:
             return 'microsoft' in f.read().lower()
-    except:
+    except Exception:
         return False
 
-# Color codes for terminal output
+
 class Colors:
     RESET = '\033[0m'
     BOLD = '\033[1m'
@@ -71,22 +72,33 @@ class ModelDatabase:
     RTX3090_MODELS = {
         "qwen3-coder-30b": {
             "name": "Qwen3 Coder 30B Q4_K_M",
-            "path": "/mnt/d/models/organized/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+            "path": (
+                "/mnt/d/models/organized/"
+                "Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
+            ),
             "size": "18GB",
             "speed": "25-35 tok/sec",
-            "use_case": "Advanced coding, code review, architecture design",
+            "use_case": (
+                "Advanced coding, code review, architecture design"
+            ),
             "temperature": 0.7,
             "top_p": 0.8,
             "top_k": 20,
             "context": 32768,
             "special_flags": ["--jinja"],
             "system_prompt": "system-prompt-qwen3-coder-30b.txt",
-            "notes": "CRITICAL: Never use temp 0 (causes endless loops). Use enable_thinking for reasoning.",
+            "notes": (
+                "CRITICAL: Never use temp 0 (causes endless loops). "
+                "Use enable_thinking for reasoning."
+            ),
             "framework": "llama.cpp"
         },
         "phi4-14b": {
             "name": "Phi-4 Reasoning Plus 14B Q6_K",
-            "path": "/mnt/d/models/organized/microsoft_Phi-4-reasoning-plus-Q6_K.gguf",
+            "path": (
+                "/mnt/d/models/organized/"
+                "microsoft_Phi-4-reasoning-plus-Q6_K.gguf"
+            ),
             "size": "12GB",
             "speed": "35-55 tok/sec",
             "use_case": "Math, reasoning, STEM, logical analysis",
@@ -96,12 +108,18 @@ class ModelDatabase:
             "context": 16384,
             "special_flags": ["--jinja"],
             "system_prompt": "system-prompt-phi4-14b.txt",
-            "notes": "CRITICAL: Requires --jinja flag. DO NOT use 'think step-by-step' prompts.",
+            "notes": (
+                "CRITICAL: Requires --jinja flag. "
+                "DO NOT use 'think step-by-step' prompts."
+            ),
             "framework": "llama.cpp"
         },
         "gemma3-27b": {
             "name": "Gemma 3 27B Q2_K (Abliterated)",
-            "path": "/mnt/d/models/organized/mlabonne_gemma-3-27b-it-abliterated-Q2_K.gguf",
+            "path": (
+                "/mnt/d/models/organized/"
+                "mlabonne_gemma-3-27b-it-abliterated-Q2_K.gguf"
+            ),
             "size": "10GB",
             "speed": "25-40 tok/sec",
             "use_case": "Uncensored chat, creative writing, research",
@@ -111,12 +129,18 @@ class ModelDatabase:
             "context": 128000,
             "special_flags": [],
             "system_prompt": None,
-            "notes": "NO system prompt support. 128K context. Uncensored/abliterated variant.",
+            "notes": (
+                "NO system prompt support. 128K context. "
+                "Uncensored/abliterated variant."
+            ),
             "framework": "llama.cpp"
         },
         "ministral-3-14b": {
             "name": "Ministral-3 14B Reasoning Q5_K_M",
-            "path": "/mnt/d/models/organized/Ministral-3-14B-Reasoning-2512-Q5_K_M.gguf",
+            "path": (
+                "/mnt/d/models/organized/"
+                "Ministral-3-14B-Reasoning-2512-Q5_K_M.gguf"
+            ),
             "size": "9GB",
             "speed": "35-50 tok/sec",
             "use_case": "Complex reasoning, problem solving, analysis",
@@ -126,12 +150,18 @@ class ModelDatabase:
             "context": 262144,
             "special_flags": [],
             "system_prompt": "system-prompt-ministral-3-14b.txt",
-            "notes": "256K context window. Excellent for long-context reasoning.",
+            "notes": (
+                "256K context window. "
+                "Excellent for long-context reasoning."
+            ),
             "framework": "llama.cpp"
         },
         "deepseek-r1-14b": {
             "name": "DeepSeek R1 Distill Qwen 14B Q5_K_M",
-            "path": "/mnt/d/models/organized/DeepSeek-R1-Distill-Qwen-14B-Q5_K_M.gguf",
+            "path": (
+                "/mnt/d/models/organized/"
+                "DeepSeek-R1-Distill-Qwen-14B-Q5_K_M.gguf"
+            ),
             "size": "10GB",
             "speed": "30-50 tok/sec",
             "use_case": "Advanced reasoning, research, complex analysis",
@@ -141,12 +171,18 @@ class ModelDatabase:
             "context": 32768,
             "special_flags": [],
             "system_prompt": "system-prompt-deepseek-r1.txt",
-            "notes": "DeepSeek R1 distilled to Qwen. Excellent reasoning capabilities.",
+            "notes": (
+                "DeepSeek R1 distilled to Qwen. "
+                "Excellent reasoning capabilities."
+            ),
             "framework": "llama.cpp"
         },
         "llama33-70b": {
             "name": "Llama 3.3 70B Instruct IQ2_S (Abliterated)",
-            "path": "/mnt/d/models/organized/Llama-3.3-70B-Instruct-abliterated-IQ2_S.gguf",
+            "path": (
+                "/mnt/d/models/organized/"
+                "Llama-3.3-70B-Instruct-abliterated-IQ2_S.gguf"
+            ),
             "size": "21GB",
             "speed": "15-25 tok/sec",
             "use_case": "Large-scale reasoning, research, uncensored tasks",
@@ -156,7 +192,10 @@ class ModelDatabase:
             "context": 131072,
             "special_flags": [],
             "system_prompt": "system-prompt-llama33-70b.txt",
-            "notes": "Largest model available. Excellent for complex tasks. Uncensored.",
+            "notes": (
+                "Largest model available. "
+                "Excellent for complex tasks. Uncensored."
+            ),
             "framework": "llama.cpp"
         },
         "dolphin-llama31-8b": {
@@ -164,7 +203,9 @@ class ModelDatabase:
             "path": "/mnt/d/models/organized/Dolphin3.0-Llama3.1-8B-Q6_K.gguf",
             "size": "6GB",
             "speed": "45-65 tok/sec",
-            "use_case": "Fast general tasks, uncensored chat, quick assistance",
+            "use_case": (
+                "Fast general tasks, uncensored chat, quick assistance"
+            ),
             "temperature": 0.7,
             "top_p": 0.9,
             "top_k": 40,
@@ -176,7 +217,11 @@ class ModelDatabase:
         },
         "dolphin-mistral-24b": {
             "name": "Dolphin Mistral 24B Venice Q4_K_M",
-            "path": "/mnt/d/models/organized/cognitivecomputations_Dolphin-Mistral-24B-Venice-Edition-Q4_K_M.gguf",
+            "path": (
+                "/mnt/d/models/organized/"
+                "cognitivecomputations_Dolphin-Mistral-24B-Venice-"
+                "Edition-Q4_K_M.gguf"
+            ),
             "size": "14GB",
             "speed": "25-40 tok/sec",
             "use_case": "Uncensored chat, creative tasks, roleplay",
@@ -186,12 +231,15 @@ class ModelDatabase:
             "context": 32768,
             "special_flags": [],
             "system_prompt": None,
-            "notes": "Venice Edition: Completely uncensored. No system prompt support.",
+            "notes": (
+                "Venice Edition: Completely uncensored. "
+                "No system prompt support."
+            ),
             "framework": "llama.cpp"
         },
         "wizard-vicuna-13b": {
             "name": "Wizard Vicuna 13B Uncensored Q4_0",
-            "path": "/mnt/d/models/organized/Wizard-Vicuna-13B-Uncensored-Q4_0.gguf",
+            "path": "/mnt/d/models/organized/Wizard-Vicuna-13B-Uncensored-Q4_0.gguf",  # noqa: E501
             "size": "7GB",
             "speed": "35-50 tok/sec",
             "use_case": "General uncensored chat, creative writing",
@@ -220,7 +268,10 @@ class ModelDatabase:
             "context": 32768,
             "special_flags": [],
             "system_prompt": "system-prompt-qwen25-14b.txt",
-            "notes": "Best daily driver for M4. Use MLX for 2-3x speedup vs llama.cpp.",
+            "notes": (
+                "Best daily driver for M4. "
+                "Use MLX for 2-3x speedup vs llama.cpp."
+            ),
             "framework": "mlx"
         },
         "qwen25-coder-14b-mlx": {
@@ -297,12 +348,15 @@ class ProjectManager:
         self.current_project = None
         self.current_config = None
 
-    def create_project(self, project_name: str, config: Dict[str, Any]) -> bool:
+    def create_project(self, project_name: str, config: Dict[str, Any]) -> bool:  # noqa: E501
         """Create a new project with configuration"""
         try:
             project_path = self.projects_dir / project_name
             if project_path.exists():
-                print(f"{Colors.BRIGHT_RED}Project '{project_name}' already exists!{Colors.RESET}")
+                print(
+                    f"{Colors.BRIGHT_RED}Project '{project_name}' "
+                    f"already exists!{Colors.RESET}"
+                )
                 return False
 
             # Create project structure
@@ -323,17 +377,23 @@ class ProjectManager:
                     "modified": datetime.now().isoformat()
                 }, f, indent=2)
 
-            print(f"{Colors.BRIGHT_GREEN}Project '{project_name}' created successfully!{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_GREEN}Project '{project_name}' "
+                f"created successfully!{Colors.RESET}"
+            )
             return True
         except Exception as e:
-            print(f"{Colors.BRIGHT_RED}Error creating project: {e}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_RED}Error creating project: "
+                f"{e}{Colors.RESET}"
+            )
             return False
 
     def list_projects(self) -> List[str]:
         """List all available projects"""
         try:
             return [p.name for p in self.projects_dir.iterdir() if p.is_dir()]
-        except:
+        except Exception:
             return []
 
     def load_project(self, project_name: str) -> Optional[Dict[str, Any]]:
@@ -343,7 +403,10 @@ class ProjectManager:
             config_path = project_path / "config.json"
 
             if not config_path.exists():
-                print(f"{Colors.BRIGHT_RED}Project configuration not found!{Colors.RESET}")
+                print(
+                    f"{Colors.BRIGHT_RED}Project configuration not "
+                    f"found!{Colors.RESET}"
+                )
                 return None
 
             with open(config_path, 'r', encoding='utf-8') as f:
@@ -353,7 +416,10 @@ class ProjectManager:
             self.current_config = config
             return config
         except Exception as e:
-            print(f"{Colors.BRIGHT_RED}Error loading project: {e}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_RED}Error loading project: "
+                f"{e}{Colors.RESET}"
+            )
             return None
 
     def save_project(self, project_name: str, config: Dict[str, Any]) -> bool:
@@ -367,7 +433,10 @@ class ProjectManager:
 
             return True
         except Exception as e:
-            print(f"{Colors.BRIGHT_RED}Error saving project: {e}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_RED}Error saving project: "
+                f"{e}{Colors.RESET}"
+            )
             return False
 
     def delete_project(self, project_name: str) -> bool:
@@ -376,11 +445,17 @@ class ProjectManager:
             project_path = self.projects_dir / project_name
             if project_path.exists():
                 shutil.rmtree(project_path)
-                print(f"{Colors.BRIGHT_GREEN}Project '{project_name}' deleted successfully!{Colors.RESET}")
+                print(
+                    f"{Colors.BRIGHT_GREEN}Project '{project_name}' "
+                    f"deleted successfully!{Colors.RESET}"
+                )
                 return True
             return False
         except Exception as e:
-            print(f"{Colors.BRIGHT_RED}Error deleting project: {e}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_RED}Error deleting project: "
+                f"{e}{Colors.RESET}"
+            )
             return False
 
 
@@ -400,7 +475,10 @@ class BotManager:
                     bot_data = json.load(f)
                     templates.append((bot_file.stem, bot_data))
         except Exception as e:
-            print(f"{Colors.BRIGHT_YELLOW}Warning: Could not load bot templates: {e}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_YELLOW}Warning: Could not load "
+                f"bot templates: {e}{Colors.RESET}"
+            )
         return templates
 
     def load_bot_template(self, bot_name: str) -> Optional[Dict[str, Any]]:
@@ -413,10 +491,17 @@ class BotManager:
             with open(bot_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
-            print(f"{Colors.BRIGHT_RED}Error loading bot template: {e}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_RED}Error loading bot template: "
+                f"{e}{Colors.RESET}"
+            )
             return None
 
-    def create_bot_from_template(self, template_name: str, project_config: Dict[str, Any]) -> Dict[str, Any]:
+    def create_bot_from_template(
+        self,
+        template_name: str,
+        project_config: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Create a project configuration from a bot template"""
         template = self.load_bot_template(template_name)
         if not template:
@@ -477,7 +562,7 @@ class ProviderManager:
             if self.config_file.exists():
                 with open(self.config_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
-        except:
+        except Exception:
             pass
         return {}
 
@@ -487,18 +572,27 @@ class ProviderManager:
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(self.providers_config, f, indent=2)
         except Exception as e:
-            print(f"{Colors.BRIGHT_RED}Error saving provider config: {e}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_RED}Error saving provider config: "
+                f"{e}{Colors.RESET}"
+            )
 
-    def configure_provider(self, provider_name: str, api_key: Optional[str] = None):
+    def configure_provider(self, provider_name: str, api_key: Optional[str] = None):  # noqa: E501
         """Configure a provider with API key if needed"""
         if provider_name not in self.SUPPORTED_PROVIDERS:
-            print(f"{Colors.BRIGHT_RED}Provider '{provider_name}' not supported!{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_RED}Provider '{provider_name}' "
+                f"not supported!{Colors.RESET}"
+            )
             return False
 
         provider_info = self.SUPPORTED_PROVIDERS[provider_name]
 
         if provider_info["requires_api_key"] and not api_key:
-            print(f"{Colors.BRIGHT_YELLOW}API key required for {provider_info['name']}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_YELLOW}API key required for "
+                f"{provider_info['name']}{Colors.RESET}"
+            )
             return False
 
         self.providers_config[provider_name] = {
@@ -531,7 +625,7 @@ class MemoryManager:
             if self.memory_file.exists():
                 with open(self.memory_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
-        except:
+        except Exception:
             pass
         return {
             "conversations": [],
@@ -546,9 +640,12 @@ class MemoryManager:
             with open(self.memory_file, 'w', encoding='utf-8') as f:
                 json.dump(self.memory, f, indent=2)
         except Exception as e:
-            print(f"{Colors.BRIGHT_RED}Error saving memory: {e}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_RED}Error saving memory: "
+                f"{e}{Colors.RESET}"
+            )
 
-    def add_conversation(self, user_prompt: str, model_response: str, model_id: str):
+    def add_conversation(self, user_prompt: str, model_response: str, model_id: str):  # noqa: E501
         """Add a conversation to memory"""
         conversation = {
             "timestamp": datetime.now().isoformat(),
@@ -559,7 +656,10 @@ class MemoryManager:
         self.memory["conversations"].append(conversation)
         self._save_memory()
 
-    def get_recent_conversations(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_recent_conversations(
+        self,
+        limit: int = 10
+    ) -> List[Dict[str, Any]]:
         """Get recent conversations"""
         return self.memory["conversations"][-limit:]
 
@@ -595,7 +695,7 @@ class WebSearchManager:
             if self.config_file.exists():
                 with open(self.config_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
-        except:
+        except Exception:
             pass
         return {"enabled": False, "apis": {}}
 
@@ -605,12 +705,18 @@ class WebSearchManager:
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(self.config, f, indent=2)
         except Exception as e:
-            print(f"{Colors.BRIGHT_RED}Error saving web search config: {e}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_RED}Error saving web search config: "
+                f"{e}{Colors.RESET}"
+            )
 
     def configure_api(self, api_name: str, api_key: str):
         """Configure a web search API"""
         if api_name not in self.SUPPORTED_APIS:
-            print(f"{Colors.BRIGHT_RED}API '{api_name}' not supported!{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_RED}API '{api_name}' "
+                f"not supported!{Colors.RESET}"
+            )
             return False
 
         if "apis" not in self.config:
@@ -670,7 +776,10 @@ class EnhancedAIRouter:
                     config = json.load(f)
                     self.bypass_mode = config.get('bypass_mode', False)
         except Exception as e:
-            print(f"{Colors.BRIGHT_YELLOW}Warning: Could not load config: {e}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_YELLOW}Warning: Could not load "
+                f"config: {e}{Colors.RESET}"
+            )
             self.bypass_mode = False
 
     def _save_config(self):
@@ -685,23 +794,34 @@ class EnhancedAIRouter:
         except Exception as e:
             print(f"{Colors.BRIGHT_RED}Error saving config: {e}{Colors.RESET}")
 
-    def _confirm(self, prompt_message: str, default_yes: bool = True) -> bool:
+    def _confirm(
+        self,
+        prompt_message: str,
+        default_yes: bool = True
+    ) -> bool:
         """Smart confirmation that respects bypass mode"""
         if self.bypass_mode:
-            print(f"{Colors.DIM}{prompt_message} [Auto-accepted]{Colors.RESET}")
+            print(f"{Colors.DIM}{prompt_message} [Auto-accepted]{Colors.RESET}")  # noqa: E501
             return default_yes
 
         response = input(f"{prompt_message} ").strip().lower()
-        return response in ['', 'y', 'yes'] if default_yes else response in ['y', 'yes']
+        if default_yes:
+            return response in ['', 'y', 'yes']
+        else:
+            return response in ['y', 'yes']
 
-    def _validate_resources_for_model(self, model_data: Dict[str, Any]) -> bool:
+    def _validate_resources_for_model(self, model_data: Dict[str, Any]) -> bool:  # noqa: E501
         """Validate that system has sufficient resources to run the model"""
         try:
             # Check if WSL is available for llama.cpp models
             if model_data['framework'] == 'llama.cpp':
                 if self.platform == "Windows":
                     # Quick WSL check
-                    result = subprocess.run(['wsl', '--status'], capture_output=True, timeout=5)
+                    result = subprocess.run(
+                        ['wsl', '--status'],
+                        capture_output=True,
+                        timeout=5
+                    )
                     if result.returncode != 0:
                         self.logger.warning("WSL not available or not running")
                         return False
@@ -736,32 +856,72 @@ class EnhancedAIRouter:
     def print_banner(self):
         """Print colorful banner"""
         print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}")
-        print("+================================================================================+")
-        print("|                                                                                |")
-        print("|                    AI ROUTER ENHANCED v2.0 - Project Edition                  |")
-        print("|                                                                                |")
-        print("|         Complete AI Project Management with Multi-Provider Support            |")
-        print("|                   Based on 2025 Research (Sep-Nov 2025)                       |")
-        print("|                                                                                |")
-        print("+================================================================================+")
+        print(
+            "+========================================"
+            "========================================"
+        )
+        print(
+            "|                                        "
+            "                                        |"
+        )
+        print(
+            "|                    AI ROUTER ENHANCED "
+            "v2.0 - Project Edition                  |"
+        )
+        print(
+            "|                                        "
+            "                                        |"
+        )
+        print(
+            "|         Complete AI Project Management"
+            " with Multi-Provider Support            |"
+        )
+        print(
+            "|                   Based on 2025 "
+            "Research (Sep-Nov 2025)                       |"
+        )
+        print(
+            "|                                        "
+            "                                        |"
+        )
+        print(
+            "+========================================"
+            "========================================"
+        )
         print(Colors.RESET)
 
         # Bypass mode indicator
         if self.bypass_mode:
-            print(f"\n{Colors.BG_YELLOW}{Colors.BLACK}{Colors.BOLD} AUTO-YES MODE ACTIVE {Colors.RESET}")
+            print(
+                f"\n{Colors.BG_YELLOW}{Colors.BLACK}{Colors.BOLD} "
+                f"AUTO-YES MODE ACTIVE {Colors.RESET}"
+            )
 
         # Current project indicator
         if self.current_project:
-            print(f"\n{Colors.BRIGHT_GREEN}Current Project: {Colors.BRIGHT_WHITE}{self.current_project}{Colors.RESET}")
+            print(
+                f"\n{Colors.BRIGHT_GREEN}Current Project: "
+                f"{Colors.BRIGHT_WHITE}{self.current_project}"
+                f"{Colors.RESET}"
+            )
 
         # Platform info
         if self.platform == "Darwin":
-            platform_name = f"{Colors.BRIGHT_GREEN}MacBook M4 Pro (MLX Optimized){Colors.RESET}"
+            platform_name = (
+                f"{Colors.BRIGHT_GREEN}MacBook M4 Pro "
+                f"(MLX Optimized){Colors.RESET}"
+            )
         else:
-            platform_name = f"{Colors.BRIGHT_YELLOW}RTX 3090 (WSL Optimized){Colors.RESET}"
+            platform_name = (
+                f"{Colors.BRIGHT_YELLOW}RTX 3090 "
+                f"(WSL Optimized){Colors.RESET}"
+            )
 
         print(f"\n{Colors.BRIGHT_WHITE}Platform: {platform_name}")
-        print(f"{Colors.BRIGHT_WHITE}Available Models: {Colors.BRIGHT_CYAN}{len(self.models)}{Colors.RESET}")
+        print(
+            f"{Colors.BRIGHT_WHITE}Available Models: "
+            f"{Colors.BRIGHT_CYAN}{len(self.models)}{Colors.RESET}"
+        )
         print()
 
     def main_menu(self):
@@ -769,26 +929,49 @@ class EnhancedAIRouter:
         while True:
             self.print_banner()
 
-            print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}")
-            print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  MAIN MENU{Colors.RESET}")
-            print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n")
+            print(
+                f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}"
+                f"+=============================================="
+                f"================+{Colors.RESET}"
+            )
+            print(
+                f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  MAIN MENU"
+                f"{Colors.RESET}"
+            )
+            print(
+                f"{Colors.BRIGHT_CYAN}{Colors.BOLD}"
+                f"+=============================================="
+                f"================+{Colors.RESET}\n"
+            )
 
-            print(f"{Colors.BRIGHT_GREEN}[1]{Colors.RESET}  Create New Project")
-            print(f"{Colors.BRIGHT_GREEN}[2]{Colors.RESET}  Load Existing Project")
-            print(f"{Colors.BRIGHT_GREEN}[3]{Colors.RESET}  Create Specialized Bot (from templates)")
-            print(f"{Colors.BRIGHT_GREEN}[4]{Colors.RESET}  View/Edit System Prompt")
-            print(f"{Colors.BRIGHT_GREEN}[5]{Colors.RESET}  Configure Parameters")
+            print(f"{Colors.BRIGHT_GREEN}[1]{Colors.RESET}  Create New Project")  # noqa: E501
+            print(f"{Colors.BRIGHT_GREEN}[2]{Colors.RESET}  Load Existing Project")  # noqa: E501
+            print(
+                f"{Colors.BRIGHT_GREEN}[3]{Colors.RESET}  "
+                f"Create Specialized Bot (from templates)"
+            )
+            print(f"{Colors.BRIGHT_GREEN}[4]{Colors.RESET}  View/Edit System Prompt")  # noqa: E501
+            print(f"{Colors.BRIGHT_GREEN}[5]{Colors.RESET}  Configure Parameters")  # noqa: E501
             print(f"{Colors.BRIGHT_GREEN}[6]{Colors.RESET}  Run Chat Session")
-            print(f"{Colors.BRIGHT_GREEN}[7]{Colors.RESET}  View Conversation History")
-            print(f"{Colors.BRIGHT_GREEN}[8]{Colors.RESET}  Configure Web Search")
-            print(f"{Colors.BRIGHT_GREEN}[9]{Colors.RESET}  Configure Providers")
-            print(f"{Colors.BRIGHT_GREEN}[10]{Colors.RESET} View Documentation")
+            print(f"{Colors.BRIGHT_GREEN}[7]{Colors.RESET}  View Conversation History")  # noqa: E501
+            print(f"{Colors.BRIGHT_GREEN}[8]{Colors.RESET}  Configure Web Search")  # noqa: E501
+            print(f"{Colors.BRIGHT_GREEN}[9]{Colors.RESET}  Configure Providers")  # noqa: E501
+            print(f"{Colors.BRIGHT_GREEN}[10]{Colors.RESET} View Documentation")  # noqa: E501
 
-            bypass_status = f"{Colors.BRIGHT_GREEN}ON{Colors.RESET}" if self.bypass_mode else f"{Colors.BRIGHT_RED}OFF{Colors.RESET}"
-            print(f"{Colors.BRIGHT_GREEN}[11]{Colors.RESET} Settings (Bypass: {bypass_status})")
+            if self.bypass_mode:
+                bypass_status = f"{Colors.BRIGHT_GREEN}ON{Colors.RESET}"
+            else:
+                bypass_status = f"{Colors.BRIGHT_RED}OFF{Colors.RESET}"
+            print(
+                f"{Colors.BRIGHT_GREEN}[11]{Colors.RESET} "
+                f"Settings (Bypass: {bypass_status})"
+            )
             print(f"{Colors.BRIGHT_GREEN}[12]{Colors.RESET} Exit")
 
-            choice = input(f"\n{Colors.BRIGHT_YELLOW}Enter choice [1-12]: {Colors.RESET}").strip()
+            choice = input(
+                f"\n{Colors.BRIGHT_YELLOW}Enter choice [1-12]: "
+                f"{Colors.RESET}"
+            ).strip()
 
             if choice == "1":
                 self.create_new_project()
@@ -816,24 +999,33 @@ class EnhancedAIRouter:
                 print(f"\n{Colors.BRIGHT_GREEN}Goodbye!{Colors.RESET}\n")
                 sys.exit(0)
             else:
-                print(f"{Colors.BRIGHT_RED}Invalid choice. Please try again.{Colors.RESET}")
-                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+                print(
+                    f"{Colors.BRIGHT_RED}Invalid choice. "
+                    f"Please try again.{Colors.RESET}"
+                )
+                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
 
     def create_new_project(self):
         """Create a new project with interactive configuration"""
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  CREATE NEW PROJECT{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n")
+        print(  # noqa: E501
+                    f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}"  # noqa: E501
+            )
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  CREATE NEW PROJECT{Colors.RESET}")  # noqa: E501
+        print(  # noqa: E501
+                    f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n"  # noqa: E501
+            )
 
         # Get project name
-        project_name = input(f"{Colors.BRIGHT_WHITE}Project name: {Colors.RESET}").strip()
+        project_name = input(f"{Colors.BRIGHT_WHITE}Project name: {Colors.RESET}").strip()  # noqa: E501
         if not project_name:
-            print(f"{Colors.BRIGHT_RED}Project name cannot be empty!{Colors.RESET}")
-            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            print(  # noqa: E501
+                    f"{Colors.BRIGHT_RED}Project name cannot be empty!{Colors.RESET}"  # noqa: E501
+            )
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             return
 
         # Get project title
-        title = input(f"{Colors.BRIGHT_WHITE}Project title (display name): {Colors.RESET}").strip()
+        title = input(f"{Colors.BRIGHT_WHITE}Project title (display name): {Colors.RESET}").strip()  # noqa: E501
         if not title:
             title = project_name
 
@@ -842,43 +1034,45 @@ class EnhancedAIRouter:
         model_ids = list(self.models.keys())
         for idx, model_id in enumerate(model_ids, 1):
             model_data = self.models[model_id]
-            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {model_id} - {model_data['name']}")
+            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {model_id} - {model_data['name']}")  # noqa: E501
 
-        model_choice = input(f"\n{Colors.BRIGHT_YELLOW}Select model [1-{len(model_ids)}]: {Colors.RESET}").strip()
+        model_choice = input(f"\n{Colors.BRIGHT_YELLOW}Select model [1-{len(model_ids)}]: {Colors.RESET}").strip()  # noqa: E501
         try:
             model_idx = int(model_choice) - 1
             if 0 <= model_idx < len(model_ids):
                 model_id = model_ids[model_idx]
                 model_data = self.models[model_id]
             else:
-                print(f"{Colors.BRIGHT_RED}Invalid model selection!{Colors.RESET}")
-                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+                print(  # noqa: E501
+                        f"{Colors.BRIGHT_RED}Invalid model selection!{Colors.RESET}"  # noqa: E501
+                )
+                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
                 return
         except ValueError:
-            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")
-            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")  # noqa: E501
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             return
 
         # Get system prompt (if model supports it)
         system_prompt = ""
         if model_data.get('system_prompt'):
-            print(f"\n{Colors.BRIGHT_WHITE}System prompt (leave empty for default):{Colors.RESET}")
+            print(f"\n{Colors.BRIGHT_WHITE}System prompt (leave empty for default):{Colors.RESET}")  # noqa: E501
             custom_prompt = input(f"{Colors.CYAN}> {Colors.RESET}").strip()
             if custom_prompt:
                 system_prompt = custom_prompt
         else:
-            print(f"\n{Colors.BRIGHT_YELLOW}Note: Model '{model_id}' does not support system prompts.{Colors.RESET}")
+            print(f"\n{Colors.BRIGHT_YELLOW}Note: Model '{model_id}' does not support system prompts.{Colors.RESET}")  # noqa: E501
 
         # Get parameters with defaults
-        print(f"\n{Colors.BRIGHT_WHITE}Configure parameters (press Enter for defaults):{Colors.RESET}\n")
+        print(f"\n{Colors.BRIGHT_WHITE}Configure parameters (press Enter for defaults):{Colors.RESET}\n")  # noqa: E501
 
-        temperature = self._get_float_input("Temperature", model_data['temperature'], 0.0, 2.0)
+        temperature = self._get_float_input("Temperature", model_data['temperature'], 0.0, 2.0)  # noqa: E501
         top_p = self._get_float_input("Top P", model_data['top_p'], 0.0, 1.0)
         top_k = self._get_int_input("Top K", model_data['top_k'], 0, 200)
         max_tokens = self._get_int_input("Max tokens", 4096, 1, 32768)
-        context_limit = self._get_int_input("Context limit (messages, -1 for unlimited)", 50, -1, 32768)
-        presence_penalty = self._get_float_input("Presence penalty", 0.0, -2.0, 2.0)
-        frequency_penalty = self._get_float_input("Frequency penalty", 0.0, -2.0, 2.0)
+        context_limit = self._get_int_input("Context limit (messages, -1 for unlimited)", 50, -1, 32768)  # noqa: E501
+        presence_penalty = self._get_float_input("Presence penalty", 0.0, -2.0, 2.0)  # noqa: E501
+        frequency_penalty = self._get_float_input("Frequency penalty", 0.0, -2.0, 2.0)  # noqa: E501
 
         # Create project config
         config = {
@@ -900,7 +1094,7 @@ class EnhancedAIRouter:
             "web_search": {
                 "enabled": False
             },
-            "reasoning_effort": "none"  # none/low/medium/high - currently no models support this
+            "reasoning_effort": "none"  # none/low/medium/high - currently no models support this  # noqa: E501
         }
 
         # Create the project
@@ -908,13 +1102,22 @@ class EnhancedAIRouter:
             self.current_project = project_name
             project_path = self.models_dir / "projects" / project_name
             self.current_memory = MemoryManager(project_path)
-            print(f"\n{Colors.BRIGHT_GREEN}Project '{project_name}' created and loaded!{Colors.RESET}")
+            print(f"\n{Colors.BRIGHT_GREEN}Project '{project_name}' created and loaded!{Colors.RESET}")  # noqa: E501
 
-        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
 
-    def _get_float_input(self, param_name: str, default: float, min_val: float, max_val: float) -> float:
+    def _get_float_input(
+        self,
+        param_name: str,
+        default: float,
+        min_val: float,
+        max_val: float
+    ) -> float:
         """Get float input with validation"""
-        prompt = f"{Colors.WHITE}{param_name} [{min_val}-{max_val}] (default: {default}): {Colors.RESET}"
+        prompt = (
+            f"{Colors.WHITE}{param_name} [{min_val}-{max_val}] "
+            f"(default: {default}): {Colors.RESET}"
+        )
         while True:
             value = input(prompt).strip()
             if not value:
@@ -924,13 +1127,25 @@ class EnhancedAIRouter:
                 if min_val <= value <= max_val:
                     return value
                 else:
-                    print(f"{Colors.BRIGHT_RED}Value must be between {min_val} and {max_val}!{Colors.RESET}")
+                    print(
+                        f"{Colors.BRIGHT_RED}Value must be between "
+                        f"{min_val} and {max_val}!{Colors.RESET}"
+                    )
             except ValueError:
                 print(f"{Colors.BRIGHT_RED}Invalid number!{Colors.RESET}")
 
-    def _get_int_input(self, param_name: str, default: int, min_val: int, max_val: int) -> int:
+    def _get_int_input(
+        self,
+        param_name: str,
+        default: int,
+        min_val: int,
+        max_val: int
+    ) -> int:
         """Get integer input with validation"""
-        prompt = f"{Colors.WHITE}{param_name} [{min_val}-{max_val}] (default: {default}): {Colors.RESET}"
+        prompt = (
+            f"{Colors.WHITE}{param_name} [{min_val}-{max_val}] "
+            f"(default: {default}): {Colors.RESET}"
+        )
         while True:
             value = input(prompt).strip()
             if not value:
@@ -940,20 +1155,29 @@ class EnhancedAIRouter:
                 if min_val <= value <= max_val:
                     return value
                 else:
-                    print(f"{Colors.BRIGHT_RED}Value must be between {min_val} and {max_val}!{Colors.RESET}")
+                    print(
+                        f"{Colors.BRIGHT_RED}Value must be between "
+                        f"{min_val} and {max_val}!{Colors.RESET}"
+                    )
             except ValueError:
                 print(f"{Colors.BRIGHT_RED}Invalid number!{Colors.RESET}")
 
     def load_existing_project(self):
         """Load an existing project"""
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  LOAD PROJECT{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n")
+        print(  # noqa: E501
+                    f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}"  # noqa: E501
+            )
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  LOAD PROJECT{Colors.RESET}")  # noqa: E501
+        print(  # noqa: E501
+                    f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n"  # noqa: E501
+            )
 
         projects = self.project_manager.list_projects()
         if not projects:
-            print(f"{Colors.BRIGHT_YELLOW}No projects found. Create one first!{Colors.RESET}")
-            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            print(  # noqa: E501
+                    f"{Colors.BRIGHT_YELLOW}No projects found. Create one first!{Colors.RESET}"  # noqa: E501
+            )
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             return
 
         print(f"{Colors.BRIGHT_WHITE}Available projects:{Colors.RESET}\n")
@@ -962,7 +1186,10 @@ class EnhancedAIRouter:
 
         print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to menu")
 
-        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select project [0-{len(projects)}]: {Colors.RESET}").strip()
+        choice = input(
+            f"\n{Colors.BRIGHT_YELLOW}Select project "
+            f"[0-{len(projects)}]: {Colors.RESET}"
+        ).strip()
 
         if choice == "0":
             return
@@ -977,39 +1204,43 @@ class EnhancedAIRouter:
                     project_path = self.models_dir / "projects" / project_name
                     self.current_memory = MemoryManager(project_path)
 
-                    print(f"\n{Colors.BRIGHT_GREEN}Project '{project_name}' loaded successfully!{Colors.RESET}")
-                    print(f"\n{Colors.BRIGHT_WHITE}Project Details:{Colors.RESET}")
-                    print(f"  Title: {Colors.CYAN}{config.get('title', 'Untitled')}{Colors.RESET}")
-                    print(f"  Model: {Colors.CYAN}{config.get('model', 'Not set')}{Colors.RESET}")
-                    print(f"  Provider: {Colors.CYAN}{config.get('provider', 'llama-cpp')}{Colors.RESET}")
+                    print(f"\n{Colors.BRIGHT_GREEN}Project '{project_name}' loaded successfully!{Colors.RESET}")  # noqa: E501
+                    print(f"\n{Colors.BRIGHT_WHITE}Project Details:{Colors.RESET}")  # noqa: E501
+                    print(f"  Title: {Colors.CYAN}{config.get('title', 'Untitled')}{Colors.RESET}")  # noqa: E501
+                    print(f"  Model: {Colors.CYAN}{config.get('model', 'Not set')}{Colors.RESET}")  # noqa: E501
+                    print(f"  Provider: {Colors.CYAN}{config.get('provider', 'llama-cpp')}{Colors.RESET}")  # noqa: E501
             else:
-                print(f"{Colors.BRIGHT_RED}Invalid selection!{Colors.RESET}")
+                print(f"{Colors.BRIGHT_RED}Invalid selection!{Colors.RESET}")  # noqa: E501
         except ValueError:
-            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")
+            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")  # noqa: E501
 
-        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
 
     def create_specialized_bot(self):
         """Create a project from a bot template"""
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  CREATE SPECIALIZED BOT{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n")
+        print(  # noqa: E501
+                    f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}"  # noqa: E501
+            )
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  CREATE SPECIALIZED BOT{Colors.RESET}")  # noqa: E501
+        print(  # noqa: E501
+                    f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n"  # noqa: E501
+            )
 
         templates = self.bot_manager.list_bot_templates()
         if not templates:
-            print(f"{Colors.BRIGHT_YELLOW}No bot templates found!{Colors.RESET}")
-            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            print(f"{Colors.BRIGHT_YELLOW}No bot templates found!{Colors.RESET}")  # noqa: E501
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             return
 
         print(f"{Colors.BRIGHT_WHITE}Available bot templates:{Colors.RESET}\n")
         for idx, (template_name, template_data) in enumerate(templates, 1):
-            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {Colors.BRIGHT_WHITE}{template_data.get('title', template_name)}{Colors.RESET}")
-            print(f"    {Colors.CYAN}{template_data.get('description', 'No description')}{Colors.RESET}")
-            print(f"    {Colors.YELLOW}Model: {template_data.get('model', 'Not specified')}{Colors.RESET}\n")
+            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {Colors.BRIGHT_WHITE}{template_data.get('title', template_name)}{Colors.RESET}")  # noqa: E501
+            print(f"    {Colors.CYAN}{template_data.get('description', 'No description')}{Colors.RESET}")  # noqa: E501
+            print(f"    {Colors.YELLOW}Model: {template_data.get('model', 'Not specified')}{Colors.RESET}\n")  # noqa: E501
 
         print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to menu")
 
-        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select template [0-{len(templates)}]: {Colors.RESET}").strip()
+        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select template [0-{len(templates)}]: {Colors.RESET}").strip()  # noqa: E501
 
         if choice == "0":
             return
@@ -1020,10 +1251,12 @@ class EnhancedAIRouter:
                 template_name, template_data = templates[idx]
 
                 # Get project name
-                project_name = input(f"\n{Colors.BRIGHT_WHITE}Project name for this bot: {Colors.RESET}").strip()
+                project_name = input(f"\n{Colors.BRIGHT_WHITE}Project name for this bot: {Colors.RESET}").strip()  # noqa: E501
                 if not project_name:
-                    print(f"{Colors.BRIGHT_RED}Project name cannot be empty!{Colors.RESET}")
-                    input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+                    print(  # noqa: E501
+                            f"{Colors.BRIGHT_RED}Project name cannot be empty!{Colors.RESET}"  # noqa: E501
+                    )
+                    input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
                     return
 
                 # Create config from template
@@ -1036,7 +1269,7 @@ class EnhancedAIRouter:
                     "system_prompt": template_data.get("system_prompt", ""),
                     "parameters": template_data.get("default_parameters", {}),
                     "web_search": {"enabled": False},
-                    "specialization": template_data.get("specialization", "general"),
+                    "specialization": template_data.get("specialization", "general"),  # noqa: E501
                     "reasoning_effort": "none"
                 }
 
@@ -1045,24 +1278,28 @@ class EnhancedAIRouter:
                     self.current_project = project_name
                     project_path = self.models_dir / "projects" / project_name
                     self.current_memory = MemoryManager(project_path)
-                    print(f"\n{Colors.BRIGHT_GREEN}Bot project '{project_name}' created and loaded!{Colors.RESET}")
+                    print(f"\n{Colors.BRIGHT_GREEN}Bot project '{project_name}' created and loaded!{Colors.RESET}")  # noqa: E501
             else:
-                print(f"{Colors.BRIGHT_RED}Invalid selection!{Colors.RESET}")
+                print(f"{Colors.BRIGHT_RED}Invalid selection!{Colors.RESET}")  # noqa: E501
         except ValueError:
-            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")
+            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")  # noqa: E501
 
-        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
 
     def view_edit_system_prompt(self):
         """View or edit current system prompt"""
         if not self.current_project:
-            print(f"\n{Colors.BRIGHT_YELLOW}No project loaded. Please load a project first.{Colors.RESET}")
-            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            print(f"\n{Colors.BRIGHT_YELLOW}No project loaded. Please load a project first.{Colors.RESET}")  # noqa: E501
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             return
 
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  SYSTEM PROMPT{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n")
+        print(  # noqa: E501
+                    f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}"  # noqa: E501
+            )
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  SYSTEM PROMPT{Colors.RESET}")  # noqa: E501
+        print(  # noqa: E501
+                    f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n"  # noqa: E501
+            )
 
         config = self.project_manager.load_project(self.current_project)
         if not config:
@@ -1071,37 +1308,41 @@ class EnhancedAIRouter:
         current_prompt = config.get("system_prompt", "")
 
         if current_prompt:
-            print(f"{Colors.BRIGHT_WHITE}Current system prompt:{Colors.RESET}\n")
+            print(f"{Colors.BRIGHT_WHITE}Current system prompt:{Colors.RESET}\n")  # noqa: E501
             print(f"{Colors.CYAN}{current_prompt}{Colors.RESET}\n")
         else:
-            print(f"{Colors.BRIGHT_YELLOW}No system prompt set.{Colors.RESET}\n")
+            print(f"{Colors.BRIGHT_YELLOW}No system prompt set.{Colors.RESET}\n")  # noqa: E501
 
-        if self._confirm(f"{Colors.BRIGHT_WHITE}Would you like to edit the system prompt? [y/N]:{Colors.RESET}", default_yes=False):
-            print(f"\n{Colors.BRIGHT_WHITE}Enter new system prompt (or 'clear' to remove):{Colors.RESET}")
+        if self._confirm(f"{Colors.BRIGHT_WHITE}Would you like to edit the system prompt? [y/N]:{Colors.RESET}", default_yes=False):  # noqa: E501
+            print(f"\n{Colors.BRIGHT_WHITE}Enter new system prompt (or 'clear' to remove):{Colors.RESET}")  # noqa: E501
             new_prompt = input(f"{Colors.CYAN}> {Colors.RESET}").strip()
 
             if new_prompt.lower() == 'clear':
                 config["system_prompt"] = ""
-                print(f"{Colors.BRIGHT_GREEN}System prompt cleared.{Colors.RESET}")
+                print(f"{Colors.BRIGHT_GREEN}System prompt cleared.{Colors.RESET}")  # noqa: E501
             elif new_prompt:
                 config["system_prompt"] = new_prompt
-                print(f"{Colors.BRIGHT_GREEN}System prompt updated.{Colors.RESET}")
+                print(f"{Colors.BRIGHT_GREEN}System prompt updated.{Colors.RESET}")  # noqa: E501
 
             config["modified"] = datetime.now().isoformat()
             self.project_manager.save_project(self.current_project, config)
 
-        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
 
     def configure_parameters(self):
         """Configure model parameters for current project"""
         if not self.current_project:
-            print(f"\n{Colors.BRIGHT_YELLOW}No project loaded. Please load a project first.{Colors.RESET}")
-            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            print(f"\n{Colors.BRIGHT_YELLOW}No project loaded. Please load a project first.{Colors.RESET}")  # noqa: E501
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             return
 
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  CONFIGURE PARAMETERS{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n")
+        print(  # noqa: E501
+                    f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}"  # noqa: E501
+            )
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  CONFIGURE PARAMETERS{Colors.RESET}")  # noqa: E501
+        print(  # noqa: E501
+                    f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n"  # noqa: E501
+            )
 
         config = self.project_manager.load_project(self.current_project)
         if not config:
@@ -1113,33 +1354,37 @@ class EnhancedAIRouter:
         for key, value in params.items():
             print(f"  {Colors.CYAN}{key}: {Colors.WHITE}{value}{Colors.RESET}")
 
-        print(f"\n{Colors.BRIGHT_WHITE}Update parameters (press Enter to keep current value):{Colors.RESET}\n")
+        print(f"\n{Colors.BRIGHT_WHITE}Update parameters (press Enter to keep current value):{Colors.RESET}\n")  # noqa: E501
 
-        params["temperature"] = self._get_float_input("Temperature", params.get("temperature", 0.7), 0.0, 2.0)
-        params["top_p"] = self._get_float_input("Top P", params.get("top_p", 0.9), 0.0, 1.0)
-        params["top_k"] = self._get_int_input("Top K", params.get("top_k", 40), 0, 200)
-        params["max_tokens"] = self._get_int_input("Max tokens", params.get("max_tokens", 4096), 1, 32768)
-        params["context_limit"] = self._get_int_input("Context limit", params.get("context_limit", 50), -1, 32768)
-        params["presence_penalty"] = self._get_float_input("Presence penalty", params.get("presence_penalty", 0.0), -2.0, 2.0)
-        params["frequency_penalty"] = self._get_float_input("Frequency penalty", params.get("frequency_penalty", 0.0), -2.0, 2.0)
+        params["temperature"] = self._get_float_input("Temperature", params.get("temperature", 0.7), 0.0, 2.0)  # noqa: E501
+        params["top_p"] = self._get_float_input("Top P", params.get("top_p", 0.9), 0.0, 1.0)  # noqa: E501
+        params["top_k"] = self._get_int_input("Top K", params.get("top_k", 40), 0, 200)  # noqa: E501
+        params["max_tokens"] = self._get_int_input("Max tokens", params.get("max_tokens", 4096), 1, 32768)  # noqa: E501
+        params["context_limit"] = self._get_int_input("Context limit", params.get("context_limit", 50), -1, 32768)  # noqa: E501
+        params["presence_penalty"] = self._get_float_input("Presence penalty", params.get("presence_penalty", 0.0), -2.0, 2.0)  # noqa: E501
+        params["frequency_penalty"] = self._get_float_input("Frequency penalty", params.get("frequency_penalty", 0.0), -2.0, 2.0)  # noqa: E501
 
         config["parameters"] = params
         config["modified"] = datetime.now().isoformat()
         self.project_manager.save_project(self.current_project, config)
 
-        print(f"\n{Colors.BRIGHT_GREEN}Parameters updated successfully!{Colors.RESET}")
-        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+        print(f"\n{Colors.BRIGHT_GREEN}Parameters updated successfully!{Colors.RESET}")  # noqa: E501
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
 
     def run_chat_session(self):
         """Run an interactive chat session"""
         if not self.current_project:
-            print(f"\n{Colors.BRIGHT_YELLOW}No project loaded. Please load a project first.{Colors.RESET}")
-            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            print(f"\n{Colors.BRIGHT_YELLOW}No project loaded. Please load a project first.{Colors.RESET}")  # noqa: E501
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             return
 
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  CHAT SESSION{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n")
+        print(  # noqa: E501
+                    f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}"  # noqa: E501
+            )
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  CHAT SESSION{Colors.RESET}")  # noqa: E501
+        print(  # noqa: E501
+                    f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n"  # noqa: E501
+            )
 
         config = self.project_manager.load_project(self.current_project)
         if not config:
@@ -1147,22 +1392,22 @@ class EnhancedAIRouter:
 
         model_id = config.get("model", "qwen3-coder-30b")
         if model_id not in self.all_models:
-            print(f"{Colors.BRIGHT_RED}Model '{model_id}' not found!{Colors.RESET}")
-            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            print(f"{Colors.BRIGHT_RED}Model '{model_id}' not found!{Colors.RESET}")  # noqa: E501
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             return
 
         model_data = self.all_models[model_id]
 
-        print(f"{Colors.BRIGHT_WHITE}Project: {Colors.CYAN}{config.get('title', self.current_project)}{Colors.RESET}")
-        print(f"{Colors.BRIGHT_WHITE}Model: {Colors.CYAN}{model_data['name']}{Colors.RESET}")
-        print(f"{Colors.BRIGHT_WHITE}Type 'exit' or 'quit' to end session{Colors.RESET}\n")
+        print(f"{Colors.BRIGHT_WHITE}Project: {Colors.CYAN}{config.get('title', self.current_project)}{Colors.RESET}")  # noqa: E501
+        print(f"{Colors.BRIGHT_WHITE}Model: {Colors.CYAN}{model_data['name']}{Colors.RESET}")  # noqa: E501
+        print(f"{Colors.BRIGHT_WHITE}Type 'exit' or 'quit' to end session{Colors.RESET}\n")  # noqa: E501
 
         # Interactive chat loop
         while True:
-            prompt = input(f"\n{Colors.BRIGHT_YELLOW}You: {Colors.RESET}").strip()
+            prompt = input(f"\n{Colors.BRIGHT_YELLOW}You: {Colors.RESET}").strip()  # noqa: E501
 
             if prompt.lower() in ['exit', 'quit', 'q']:
-                print(f"{Colors.BRIGHT_GREEN}Chat session ended.{Colors.RESET}")
+                print(f"{Colors.BRIGHT_GREEN}Chat session ended.{Colors.RESET}")  # noqa: E501
                 break
 
             if not prompt:
@@ -1172,29 +1417,29 @@ class EnhancedAIRouter:
             print(f"\n{Colors.BRIGHT_CYAN}Assistant: {Colors.RESET}")
             self._run_model_with_config(model_id, model_data, prompt, config)
 
-            # Save to memory (simplified - in production, capture actual response)
+            # Save to memory (simplified - in production, capture actual response)  # noqa: E501
             if self.current_memory:
-                self.current_memory.add_conversation(prompt, "[Response logged]", model_id)
+                self.current_memory.add_conversation(prompt, "[Response logged]", model_id)  # noqa: E501
 
-        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
 
-    def _run_model_with_config(self, model_id: str, model_data: Dict[str, Any], prompt: str, config: Dict[str, Any], retry_count: int = 0, max_retries: int = 2):
+    def _run_model_with_config(self, model_id: str, model_data: Dict[str, Any], prompt: str, config: Dict[str, Any], retry_count: int = 0, max_retries: int = 2):  # noqa: E501
         """Run model with project configuration and retry logic"""
-        self.logger.info(f"Starting model execution: {model_id} ({model_data['name']})")
+        self.logger.info(f"Starting model execution: {model_id} ({model_data['name']})")  # noqa: E501
 
         # Validate resources before execution
         if not self._validate_resources_for_model(model_data):
             self.logger.error(f"Insufficient resources for model {model_id}")
-            print(f"\n{Colors.BRIGHT_RED}Error: Insufficient system resources{Colors.RESET}")
-            print(f"{Colors.BRIGHT_YELLOW}Model {model_data['name']} requires:{Colors.RESET}")
-            print(f"{Colors.YELLOW}  - Available RAM: ~{model_data['size']} free{Colors.RESET}")
-            print(f"{Colors.YELLOW}  - WSL must be running (for llama.cpp models){Colors.RESET}\n")
+            print(f"\n{Colors.BRIGHT_RED}Error: Insufficient system resources{Colors.RESET}")  # noqa: E501
+            print(f"{Colors.BRIGHT_YELLOW}Model {model_data['name']} requires:{Colors.RESET}")  # noqa: E501
+            print(f"{Colors.YELLOW}  - Available RAM: ~{model_data['size']} free{Colors.RESET}")  # noqa: E501
+            print(f"{Colors.YELLOW}  - WSL must be running (for llama.cpp models){Colors.RESET}\n")  # noqa: E501
 
             # Try fallback to smaller model
             fallback_id = self._get_fallback_model(model_id)
             if fallback_id and retry_count == 0:
-                print(f"{Colors.BRIGHT_CYAN}Trying fallback model: {self.all_models[fallback_id]['name']}{Colors.RESET}\n")
-                return self._run_model_with_config(fallback_id, self.all_models[fallback_id], prompt, config, retry_count=1)
+                print(f"{Colors.BRIGHT_CYAN}Trying fallback model: {self.all_models[fallback_id]['name']}{Colors.RESET}\n")  # noqa: E501
+                return self._run_model_with_config(fallback_id, self.all_models[fallback_id], prompt, config, retry_count=1)  # noqa: E501
             return
 
         params = config.get("parameters", {})
@@ -1209,16 +1454,16 @@ class EnhancedAIRouter:
                         system_prompt = f.read().strip()
                 except Exception as e:
                     self.logger.warning(f"Could not read system prompt: {e}")
-                    print(f"{Colors.BRIGHT_YELLOW}Warning: Could not read system prompt: {e}{Colors.RESET}")
+                    print(f"{Colors.BRIGHT_YELLOW}Warning: Could not read system prompt: {e}{Colors.RESET}")  # noqa: E501
 
-        print(f"\n{Colors.BRIGHT_GREEN}{Colors.BOLD}Launching {model_data['name']}...{Colors.RESET}\n")
+        print(f"\n{Colors.BRIGHT_GREEN}{Colors.BOLD}Launching {model_data['name']}...{Colors.RESET}\n")  # noqa: E501
 
         try:
             # Build command based on framework
             if model_data['framework'] == 'mlx':
                 self._run_mlx_model(model_data, prompt, system_prompt, params)
             else:
-                self._run_llamacpp_model(model_data, prompt, system_prompt, params)
+                self._run_llamacpp_model(model_data, prompt, system_prompt, params)  # noqa: E501
 
             self.logger.info("Model execution completed successfully")
 
@@ -1228,15 +1473,15 @@ class EnhancedAIRouter:
             # Retry logic
             if retry_count < max_retries:
                 retry_count += 1
-                self.logger.warning(f"Retrying execution (attempt {retry_count + 1}/{max_retries + 1})...")
-                print(f"\n{Colors.BRIGHT_YELLOW}Execution failed, retrying ({retry_count}/{max_retries})...{Colors.RESET}\n")
+                self.logger.warning(f"Retrying execution (attempt {retry_count + 1}/{max_retries + 1})...")  # noqa: E501
+                print(f"\n{Colors.BRIGHT_YELLOW}Execution failed, retrying ({retry_count}/{max_retries})...{Colors.RESET}\n")  # noqa: E501
                 time.sleep(2)  # Brief delay before retry
-                return self._run_model_with_config(model_id, model_data, prompt, config, retry_count, max_retries)
+                return self._run_model_with_config(model_id, model_data, prompt, config, retry_count, max_retries)  # noqa: E501
             else:
-                self.logger.error(f"All retry attempts exhausted for {model_id}")
-                print(f"\n{Colors.BRIGHT_RED}Error: Model execution failed after {max_retries + 1} attempts{Colors.RESET}\n")
+                self.logger.error(f"All retry attempts exhausted for {model_id}")  # noqa: E501
+                print(f"\n{Colors.BRIGHT_RED}Error: Model execution failed after {max_retries + 1} attempts{Colors.RESET}\n")  # noqa: E501
 
-    def _run_llamacpp_model(self, model_data: Dict[str, Any], prompt: str, system_prompt: str, params: Dict[str, Any]):
+    def _run_llamacpp_model(self, model_data: Dict[str, Any], prompt: str, system_prompt: str, params: Dict[str, Any]):  # noqa: E501
         """Run model using llama.cpp"""
         self.logger.debug("Executing llama.cpp model")
 
@@ -1247,72 +1492,121 @@ class EnhancedAIRouter:
 
         special_flags = ' '.join(model_data['special_flags'])
 
-        # Detect if already running in WSL
-        is_wsl = os.path.exists('/proc/version') and 'microsoft' in open('/proc/version').read().lower()
+        # Use the proper WSL detection function
+        in_wsl = is_wsl()
+        model_path = model_data['path']
 
-        if is_wsl:
-            # Already in WSL, run directly
-            cmd = f"""bash -c "~/llama.cpp/build/bin/llama-cli \\
-  -m '{model_data['path']}' \\
-  -p '{prompt}' \\
-  -ngl 999 \\
-  -t 24 \\
-  -b 512 \\
-  -ub 512 \\
-  -fa 1 \\
-  --cache-type-k q8_0 \\
-  --cache-type-v q8_0 \\
-  --no-ppl \\
-  --temp {temperature} \\
-  --top-p {top_p} \\
-  --top-k {top_k} \\
-  -n {max_tokens} \\
-  -c {model_data['context']} \\
-  -ptc 10 \\
-  --verbose-prompt \\
-  --log-colors \\
-  {special_flags} \\
-  --mlock"
-"""
+        # Validate model file exists
+        if in_wsl:
+            # Check if file exists at the WSL path
+            check_cmd = f'wsl test -f "{model_path}" && echo "exists"'
+            result = subprocess.run(check_cmd, shell=True, capture_output=True, text=True)
+            if "exists" not in result.stdout:
+                self.logger.error(f"Model file not found: {model_path}")
+                raise FileNotFoundError(f"Model file not found at: {model_path}")
         else:
-            # Running from Windows, need WSL wrapper
-            cmd = f"""wsl bash -c "~/llama.cpp/build/bin/llama-cli \\
-  -m '{model_data['path']}' \\
-  -p '{prompt}' \\
-  -ngl 999 \\
-  -t 24 \\
-  -b 512 \\
-  -ub 512 \\
-  -fa 1 \\
-  --cache-type-k q8_0 \\
-  --cache-type-v q8_0 \\
-  --no-ppl \\
-  --temp {temperature} \\
-  --top-p {top_p} \\
-  --top-k {top_k} \\
-  -n {max_tokens} \\
-  -c {model_data['context']} \\
-  -ptc 10 \\
-  --verbose-prompt \\
-  --log-colors \\
-  {special_flags} \\
-  --mlock"
-"""
+            # Running in Windows - convert path for Windows and check
+            win_path = model_path.replace("/mnt/d/", "D:\\").replace("/", "\\")
+            if not Path(win_path).exists():
+                self.logger.error(f"Model file not found: {win_path}")
+                raise FileNotFoundError(f"Model file not found at: {win_path}")
 
+        # Find llama.cpp binary - check multiple locations
+        llama_cpp_paths = [
+            "/mnt/d/workspace/llama.cpp/build/bin/llama-cli",
+            "~/llama.cpp/build/bin/llama-cli",
+            "llama-cli"  # System PATH
+        ]
+
+        llama_cli_path = None
+        if in_wsl:
+            for path in llama_cpp_paths:
+                if path == "llama-cli":
+                    check_cmd = 'wsl which llama-cli'
+                else:
+                    check_cmd = f'wsl test -f "{path}" && echo "exists"'
+                result = subprocess.run(check_cmd, shell=True, capture_output=True, text=True)
+                if "exists" in result.stdout or result.returncode == 0:
+                    llama_cli_path = path
+                    self.logger.info(f"Found llama.cpp at: {path}")
+                    break
+        else:
+            for path in llama_cpp_paths:
+                if path == "llama-cli":
+                    check_cmd = 'wsl which llama-cli'
+                    result = subprocess.run(check_cmd, shell=True, capture_output=True, text=True)
+                    if result.returncode == 0:
+                        llama_cli_path = "llama-cli"
+                        break
+                else:
+                    check_cmd = f'wsl test -f "{path}" && echo "exists"'
+                    result = subprocess.run(check_cmd, shell=True, capture_output=True, text=True)
+                    if "exists" in result.stdout:
+                        llama_cli_path = path
+                        break
+
+        if not llama_cli_path:
+            self.logger.error(f"llama.cpp binary not found in: {', '.join(llama_cpp_paths)}")
+            raise FileNotFoundError(f"llama.cpp binary not found. Checked: {', '.join(llama_cpp_paths)}")
+
+        # Build command with proper escaping using list format
+        cmd_args = [
+            llama_cli_path,
+            "-m", model_path,
+            "-p", prompt,
+            "-ngl", "999",
+            "-t", "24",
+            "-b", "512",
+            "-ub", "512",
+            "-fa", "1",
+            "--cache-type-k", "q8_0",
+            "--cache-type-v", "q8_0",
+            "--temp", str(temperature),
+            "--top-p", str(top_p),
+            "--top-k", str(top_k),
+            "-n", str(max_tokens),
+            "-c", str(model_data['context']),
+            "-ptc", "10",
+            "--verbose-prompt",
+            "--log-colors", "auto",
+            "--mlock"
+        ]
+
+        # Add system prompt if provided (before -p argument)
         if system_prompt:
-            cmd = cmd.replace(f"-p '{prompt}'", f"--system-prompt '{system_prompt}' -p '{prompt}'")
+            # Find where -p is and insert before it
+            try:
+                p_index = cmd_args.index("-p")
+                cmd_args.insert(p_index, "--system-prompt")
+                cmd_args.insert(p_index + 1, system_prompt)
+            except ValueError:
+                # -p not found, just append
+                cmd_args.extend(["--system-prompt", system_prompt])
 
-        # Execute
-        self.logger.debug("Executing llama.cpp command")
-        result = subprocess.run(cmd, shell=True)
+        # Add special flags
+        if special_flags.strip():
+            cmd_args.extend(special_flags.split())
+
+        # For WSL, wrap with wsl command if needed
+        if not in_wsl:
+            cmd_args = ["wsl"] + cmd_args
+
+        # Execute with proper error capture
+        self.logger.debug(f"Executing llama.cpp: {cmd_args[0]} with {len(cmd_args)-1} arguments")
+        result = subprocess.run(
+            cmd_args,
+            capture_output=False,
+            text=True
+        )
 
         if result.returncode != 0:
-            self.logger.error(f"llama.cpp execution failed with return code {result.returncode}")
-            raise RuntimeError(f"Model execution failed with return code {result.returncode}")
+            error_msg = f"llama.cpp execution failed with return code {result.returncode}"
+            self.logger.error(error_msg)
+            raise RuntimeError(error_msg)
         else:
             self.logger.info("Successfully executed llama.cpp model")
 
-    def _run_mlx_model(self, model_data: Dict[str, Any], prompt: str, system_prompt: str, params: Dict[str, Any]):
+    def _run_mlx_model(self, model_data: Dict[str, Any], prompt: str, system_prompt: str, params: Dict[str, Any]):  # noqa: E501
         """Run model using MLX"""
         self.logger.debug("Executing MLX model")
 
@@ -1328,62 +1622,70 @@ class EnhancedAIRouter:
   --top-p {top_p}"""
 
         if system_prompt:
-            cmd = cmd.replace(f'--prompt "{prompt}"', f'--system-prompt "{system_prompt}" --prompt "{prompt}"')
+            cmd = cmd.replace(f'--prompt "{prompt}"', f'--system-prompt "{system_prompt}" --prompt "{prompt}"')  # noqa: E501
 
         # Execute
         self.logger.debug("Executing MLX command")
         result = subprocess.run(cmd, shell=True)
 
         if result.returncode != 0:
-            self.logger.error(f"MLX execution failed with return code {result.returncode}")
-            raise RuntimeError(f"Model execution failed with return code {result.returncode}")
+            self.logger.error(f"MLX execution failed with return code {result.returncode}")  # noqa: E501
+            raise RuntimeError(f"Model execution failed with return code {result.returncode}")  # noqa: E501
         else:
             self.logger.info("Successfully executed MLX model")
 
     def view_conversation_history(self):
         """View conversation history for current project"""
         if not self.current_project or not self.current_memory:
-            print(f"\n{Colors.BRIGHT_YELLOW}No project loaded. Please load a project first.{Colors.RESET}")
-            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            print(f"\n{Colors.BRIGHT_YELLOW}No project loaded. Please load a project first.{Colors.RESET}")  # noqa: E501
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             return
 
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  CONVERSATION HISTORY{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n")
+        print(  # noqa: E501
+                    f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}"  # noqa: E501
+            )
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  CONVERSATION HISTORY{Colors.RESET}")  # noqa: E501
+        print(  # noqa: E501
+                    f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n"  # noqa: E501
+            )
 
         conversations = self.current_memory.get_recent_conversations(20)
 
         if not conversations:
-            print(f"{Colors.BRIGHT_YELLOW}No conversation history yet.{Colors.RESET}")
+            print(f"{Colors.BRIGHT_YELLOW}No conversation history yet.{Colors.RESET}")  # noqa: E501
         else:
             for idx, conv in enumerate(conversations, 1):
                 timestamp = conv.get("timestamp", "Unknown")
-                print(f"\n{Colors.BRIGHT_WHITE}[{idx}] {timestamp}{Colors.RESET}")
-                print(f"{Colors.BRIGHT_YELLOW}You: {Colors.WHITE}{conv.get('user', '')}{Colors.RESET}")
-                print(f"{Colors.BRIGHT_CYAN}Assistant: {Colors.WHITE}{conv.get('assistant', '')[:200]}...{Colors.RESET}")
-                print(f"{Colors.DIM}Model: {conv.get('model', 'Unknown')}{Colors.RESET}")
+                print(f"\n{Colors.BRIGHT_WHITE}[{idx}] {timestamp}{Colors.RESET}")  # noqa: E501
+                print(f"{Colors.BRIGHT_YELLOW}You: {Colors.WHITE}{conv.get('user', '')}{Colors.RESET}")  # noqa: E501
+                print(f"{Colors.BRIGHT_CYAN}Assistant: {Colors.WHITE}{conv.get('assistant', '')[:200]}...{Colors.RESET}")  # noqa: E501
+                print(f"{Colors.DIM}Model: {conv.get('model', 'Unknown')}{Colors.RESET}")  # noqa: E501
 
-        if conversations and self._confirm(f"\n{Colors.BRIGHT_WHITE}Clear conversation history? [y/N]:{Colors.RESET}", default_yes=False):
+        if conversations and self._confirm(f"\n{Colors.BRIGHT_WHITE}Clear conversation history? [y/N]:{Colors.RESET}", default_yes=False):  # noqa: E501
             self.current_memory.clear_memory()
 
-        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
 
     def configure_web_search(self):
         """Configure web search integration"""
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  WEB SEARCH CONFIGURATION{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n")
+        print(  # noqa: E501
+                    f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}"  # noqa: E501
+            )
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  WEB SEARCH CONFIGURATION{Colors.RESET}")  # noqa: E501
+        print(  # noqa: E501
+                    f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n"  # noqa: E501
+            )
 
-        print(f"{Colors.BRIGHT_WHITE}Supported web search APIs:{Colors.RESET}\n")
+        print(f"{Colors.BRIGHT_WHITE}Supported web search APIs:{Colors.RESET}\n")  # noqa: E501
 
         apis = list(WebSearchManager.SUPPORTED_APIS.items())
         for idx, (api_name, api_info) in enumerate(apis, 1):
-            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {api_info['name']}")
-            print(f"    {Colors.CYAN}{api_info['description']}{Colors.RESET}\n")
+            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {api_info['name']}")  # noqa: E501
+            print(f"    {Colors.CYAN}{api_info['description']}{Colors.RESET}\n")  # noqa: E501
 
         print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to menu")
 
-        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select API to configure [0-{len(apis)}]: {Colors.RESET}").strip()
+        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select API to configure [0-{len(apis)}]: {Colors.RESET}").strip()  # noqa: E501
 
         if choice == "0":
             return
@@ -1392,38 +1694,42 @@ class EnhancedAIRouter:
             idx = int(choice) - 1
             if 0 <= idx < len(apis):
                 api_name, api_info = apis[idx]
-                api_key = input(f"\n{Colors.BRIGHT_WHITE}Enter API key for {api_info['name']}: {Colors.RESET}").strip()
+                api_key = input(f"\n{Colors.BRIGHT_WHITE}Enter API key for {api_info['name']}: {Colors.RESET}").strip()  # noqa: E501
 
                 if api_key:
                     if self.websearch_manager.configure_api(api_name, api_key):
-                        print(f"{Colors.BRIGHT_GREEN}{api_info['name']} configured successfully!{Colors.RESET}")
+                        print(f"{Colors.BRIGHT_GREEN}{api_info['name']} configured successfully!{Colors.RESET}")  # noqa: E501
                 else:
-                    print(f"{Colors.BRIGHT_RED}API key cannot be empty!{Colors.RESET}")
+                    print(f"{Colors.BRIGHT_RED}API key cannot be empty!{Colors.RESET}")  # noqa: E501
             else:
-                print(f"{Colors.BRIGHT_RED}Invalid selection!{Colors.RESET}")
+                print(f"{Colors.BRIGHT_RED}Invalid selection!{Colors.RESET}")  # noqa: E501
         except ValueError:
-            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")
+            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")  # noqa: E501
 
-        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
 
     def configure_providers(self):
         """Configure AI providers"""
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  PROVIDER CONFIGURATION{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n")
+        print(  # noqa: E501
+                    f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}"  # noqa: E501
+            )
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  PROVIDER CONFIGURATION{Colors.RESET}")  # noqa: E501
+        print(  # noqa: E501
+                    f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n"  # noqa: E501
+            )
 
         print(f"{Colors.BRIGHT_WHITE}Supported providers:{Colors.RESET}\n")
 
         providers = list(ProviderManager.SUPPORTED_PROVIDERS.items())
         for idx, (provider_id, provider_info) in enumerate(providers, 1):
-            api_required = "API key required" if provider_info['requires_api_key'] else "No API key needed"
-            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {provider_info['name']}")
-            print(f"    {Colors.CYAN}{provider_info['description']}{Colors.RESET}")
+            api_required = "API key required" if provider_info['requires_api_key'] else "No API key needed"  # noqa: E501
+            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {provider_info['name']}")  # noqa: E501
+            print(f"    {Colors.CYAN}{provider_info['description']}{Colors.RESET}")  # noqa: E501
             print(f"    {Colors.YELLOW}{api_required}{Colors.RESET}\n")
 
         print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to menu")
 
-        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select provider to configure [0-{len(providers)}]: {Colors.RESET}").strip()
+        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select provider to configure [0-{len(providers)}]: {Colors.RESET}").strip()  # noqa: E501
 
         if choice == "0":
             return
@@ -1434,31 +1740,31 @@ class EnhancedAIRouter:
                 provider_id, provider_info = providers[idx]
 
                 if provider_info['requires_api_key']:
-                    api_key = input(f"\n{Colors.BRIGHT_WHITE}Enter API key for {provider_info['name']}: {Colors.RESET}").strip()
+                    api_key = input(f"\n{Colors.BRIGHT_WHITE}Enter API key for {provider_info['name']}: {Colors.RESET}").strip()  # noqa: E501
                     if api_key:
-                        if self.provider_manager.configure_provider(provider_id, api_key):
-                            print(f"{Colors.BRIGHT_GREEN}{provider_info['name']} configured successfully!{Colors.RESET}")
+                        if self.provider_manager.configure_provider(provider_id, api_key):  # noqa: E501
+                            print(f"{Colors.BRIGHT_GREEN}{provider_info['name']} configured successfully!{Colors.RESET}")  # noqa: E501
                     else:
-                        print(f"{Colors.BRIGHT_RED}API key cannot be empty!{Colors.RESET}")
+                        print(f"{Colors.BRIGHT_RED}API key cannot be empty!{Colors.RESET}")  # noqa: E501
                 else:
                     if self.provider_manager.configure_provider(provider_id):
-                        print(f"{Colors.BRIGHT_GREEN}{provider_info['name']} is ready to use!{Colors.RESET}")
+                        print(f"{Colors.BRIGHT_GREEN}{provider_info['name']} is ready to use!{Colors.RESET}")  # noqa: E501
             else:
-                print(f"{Colors.BRIGHT_RED}Invalid selection!{Colors.RESET}")
+                print(f"{Colors.BRIGHT_RED}Invalid selection!{Colors.RESET}")  # noqa: E501
         except ValueError:
-            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")
+            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")  # noqa: E501
 
-        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
 
     def view_documentation(self):
         """View documentation (reused from original)"""
         docs_dir = self.models_dir
 
         docs = [
-            ("HOW-TO-RUN-AI-ROUTER.md", "How to Run the AI Router", "Getting started, usage, troubleshooting"),
-            ("BOT-PROJECT-QUICK-START.md", "Bot & Project Management", "Create bots and projects with custom configs"),
-            ("SYSTEM-PROMPTS-QUICK-START.md", "System Prompts Quick Start", "Using and customizing system prompts"),
-            ("2025-RESEARCH-SUMMARY.md", "2025 Research Summary", "Latest research findings and best practices"),
+            ("HOW-TO-RUN-AI-ROUTER.md", "How to Run the AI Router", "Getting started, usage, troubleshooting"),  # noqa: E501
+            ("BOT-PROJECT-QUICK-START.md", "Bot & Project Management", "Create bots and projects with custom configs"),  # noqa: E501
+            ("SYSTEM-PROMPTS-QUICK-START.md", "System Prompts Quick Start", "Using and customizing system prompts"),  # noqa: E501
+            ("2025-RESEARCH-SUMMARY.md", "2025 Research Summary", "Latest research findings and best practices"),  # noqa: E501
         ]
 
         # Filter existing docs
@@ -1468,13 +1774,17 @@ class EnhancedAIRouter:
                 existing_docs.append((filename, title, desc))
 
         if not existing_docs:
-            print(f"\n{Colors.BRIGHT_YELLOW}No documentation files found.{Colors.RESET}")
-            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            print(f"\n{Colors.BRIGHT_YELLOW}No documentation files found.{Colors.RESET}")  # noqa: E501
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             return
 
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  DOCUMENTATION{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n")
+        print(  # noqa: E501
+                    f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}"  # noqa: E501
+            )
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  DOCUMENTATION{Colors.RESET}")  # noqa: E501
+        print(  # noqa: E501
+                    f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n"  # noqa: E501
+            )
 
         for idx, (filename, title, desc) in enumerate(existing_docs, 1):
             print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {title}")
@@ -1482,7 +1792,7 @@ class EnhancedAIRouter:
 
         print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to menu")
 
-        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select document [0-{len(existing_docs)}]: {Colors.RESET}").strip()
+        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select document [0-{len(existing_docs)}]: {Colors.RESET}").strip()  # noqa: E501
 
         if choice != "0":
             try:
@@ -1494,67 +1804,71 @@ class EnhancedAIRouter:
                     with open(doc_path, 'r', encoding='utf-8') as f:
                         content = f.read()
 
-                    print(f"\n{Colors.BRIGHT_CYAN}=== {title} ==={Colors.RESET}\n")
+                    print(f"\n{Colors.BRIGHT_CYAN}=== {title} ==={Colors.RESET}\n")  # noqa: E501
                     print(content[:2000])  # Show first 2000 chars
-                    print(f"\n{Colors.DIM}[Content truncated for display]{Colors.RESET}")
-            except:
+                    print(f"\n{Colors.DIM}[Content truncated for display]{Colors.RESET}")  # noqa: E501
+            except Exception:
                 pass
 
-        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
 
     def settings_menu(self):
         """Settings menu"""
         while True:
-            print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}")
-            print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  SETTINGS{Colors.RESET}")
-            print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n")
+            print(  # noqa: E501
+                    f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}"  # noqa: E501
+            )
+            print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}|  SETTINGS{Colors.RESET}")  # noqa: E501
+            print(  # noqa: E501
+                    f"{Colors.BRIGHT_CYAN}{Colors.BOLD}+==============================================================+{Colors.RESET}\n"  # noqa: E501
+            )
 
-            bypass_status = f"{Colors.BRIGHT_GREEN}ENABLED{Colors.RESET}" if self.bypass_mode else f"{Colors.BRIGHT_RED}DISABLED{Colors.RESET}"
+            bypass_status = f"{Colors.BRIGHT_GREEN}ENABLED{Colors.RESET}" if self.bypass_mode else f"{Colors.BRIGHT_RED}DISABLED{Colors.RESET}"  # noqa: E501
 
-            print(f"{Colors.BRIGHT_GREEN}[1]{Colors.RESET} Toggle Bypass Mode (Currently: {bypass_status})")
-            print(f"{Colors.BRIGHT_GREEN}[2]{Colors.RESET} View Current Project Info")
+            print(f"{Colors.BRIGHT_GREEN}[1]{Colors.RESET} Toggle Bypass Mode (Currently: {bypass_status})")  # noqa: E501
+            print(f"{Colors.BRIGHT_GREEN}[2]{Colors.RESET} View Current Project Info")  # noqa: E501
             print(f"{Colors.BRIGHT_GREEN}[3]{Colors.RESET} Delete Project")
-            print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to main menu")
+            print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to main menu")  # noqa: E501
 
-            choice = input(f"\n{Colors.BRIGHT_YELLOW}Enter choice: {Colors.RESET}").strip()
+            choice = input(f"\n{Colors.BRIGHT_YELLOW}Enter choice: {Colors.RESET}").strip()  # noqa: E501
 
             if choice == "1":
                 self.bypass_mode = not self.bypass_mode
                 self._save_config()
                 status = "enabled" if self.bypass_mode else "disabled"
-                print(f"\n{Colors.BRIGHT_GREEN}Bypass mode {status}!{Colors.RESET}")
-                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+                print(f"\n{Colors.BRIGHT_GREEN}Bypass mode {status}!{Colors.RESET}")  # noqa: E501
+                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             elif choice == "2":
                 if self.current_project:
-                    config = self.project_manager.load_project(self.current_project)
+                    config = self.project_manager.load_project(self.current_project)  # noqa: E501
                     if config:
-                        print(f"\n{Colors.BRIGHT_WHITE}Current Project:{Colors.RESET}")
+                        print(f"\n{Colors.BRIGHT_WHITE}Current Project:{Colors.RESET}")  # noqa: E501
                         print(json.dumps(config, indent=2))
                 else:
-                    print(f"\n{Colors.BRIGHT_YELLOW}No project loaded.{Colors.RESET}")
-                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+                    print(f"\n{Colors.BRIGHT_YELLOW}No project loaded.{Colors.RESET}")  # noqa: E501
+                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             elif choice == "3":
                 projects = self.project_manager.list_projects()
                 if projects:
                     print(f"\n{Colors.BRIGHT_WHITE}Projects:{Colors.RESET}\n")
                     for idx, proj in enumerate(projects, 1):
-                        print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {proj}")
+                        print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {proj}")  # noqa: E501
 
-                    del_choice = input(f"\n{Colors.BRIGHT_YELLOW}Delete project number (0 to cancel): {Colors.RESET}").strip()
+                    del_choice = input(f"\n{Colors.BRIGHT_YELLOW}Delete project number (0 to cancel): {Colors.RESET}").strip()  # noqa: E501
                     try:
                         idx = int(del_choice) - 1
                         if 0 <= idx < len(projects):
                             proj_name = projects[idx]
-                            if self._confirm(f"{Colors.BRIGHT_RED}Really delete '{proj_name}'? [y/N]:{Colors.RESET}", default_yes=False):
+                            if self._confirm(f"{Colors.BRIGHT_RED}Really delete '{proj_name}'? [y/N]:{Colors.RESET}", default_yes=False):  # noqa: E501
                                 self.project_manager.delete_project(proj_name)
                                 if self.current_project == proj_name:
                                     self.current_project = None
                                     self.current_memory = None
-                    except:
+                    except Exception:
                         pass
                 else:
-                    print(f"\n{Colors.BRIGHT_YELLOW}No projects to delete.{Colors.RESET}")
-                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+                    print(f"\n{Colors.BRIGHT_YELLOW}No projects to delete.{Colors.RESET}")  # noqa: E501
+                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")  # noqa: E501
             elif choice == "0":
                 break
 
@@ -1565,7 +1879,7 @@ def main():
         router = EnhancedAIRouter()
         router.main_menu()
     except KeyboardInterrupt:
-        print(f"\n\n{Colors.BRIGHT_YELLOW}Interrupted by user. Goodbye!{Colors.RESET}\n")
+        print(f"\n\n{Colors.BRIGHT_YELLOW}Interrupted by user. Goodbye!{Colors.RESET}\n")  # noqa: E501
         sys.exit(0)
     except Exception as e:
         print(f"\n{Colors.BRIGHT_RED}Error: {e}{Colors.RESET}\n")

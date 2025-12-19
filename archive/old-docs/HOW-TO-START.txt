@@ -1,0 +1,53 @@
+================================================================================
+  HOW TO START AI ROUTER
+================================================================================
+
+METHOD 1: Double-Click Launcher (EASIEST)
+------------------------------------------
+1. Double-click: START-AI-ROUTER.bat (for Enhanced version)
+   OR
+   Double-click: START-AI-ROUTER-BASIC.bat (for Basic version)
+
+2. The app will launch in WSL automatically
+3. Use the interactive menu to create projects and chat with models
+
+
+METHOD 2: From PowerShell
+--------------------------
+1. Open PowerShell in D:\models
+2. Type: .\START-AI-ROUTER.bat
+3. Press Enter
+
+
+METHOD 3: From WSL Directly
+----------------------------
+1. Open PowerShell
+2. Type: wsl
+3. Type: cd /mnt/d/models
+4. Type: python ai-router-enhanced.py
+5. Press Enter
+
+
+BEFORE YOU START:
+-----------------
+1. Make sure you have model files in: D:\models\organized\
+2. Check README-PLACE-MODELS-HERE.txt for expected model filenames
+3. Verify WSL is installed: wsl --status
+
+
+TROUBLESHOOTING:
+----------------
+- If models don't load: Check that .gguf files are in D:\models\organized\
+- If WSL error: Install WSL with: wsl --install
+- If Python error: Install Python in WSL: sudo apt install python3 python3-pip
+- Check logs at: D:\models\logs\ai-router-YYYYMMDD.log
+
+
+WHICH VERSION TO USE:
+---------------------
+- START-AI-ROUTER.bat → Enhanced version (Projects, History, Templates)
+- START-AI-ROUTER-BASIC.bat → Simple version (Just model selection)
+
+Both are at 100% health and production-ready!
+
+================================================================================

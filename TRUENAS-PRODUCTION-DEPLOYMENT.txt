@@ -1,0 +1,356 @@
+================================================================================
+TrueNAS AI ROUTER - PRODUCTION DEPLOYMENT
+RTX 4060 Ti (16GB) - Pre-Tuned Model Collection
+================================================================================
+
+STATUS: READY FOR DEPLOYMENT TO 10.0.0.89
+
+Your pre-tuned model collection is perfectly optimized for the 16GB 4060 Ti:
+
+✅ Dolphin Llama 3.1 8B Q6_K (6.2GB) - Uncensored, fastest
+✅ Llama 3.1 8B Instruct Q6_K (6.2GB) - Production-grade Meta model
+✅ Qwen 2.5 14B Instruct Q4_K_M (8.4GB) - Balanced, multilingual
+✅ Qwen 2.5 14B Uncensored Q4_K_M (8.4GB) - Creative/uncensored
+✅ Qwen 2.5 Coder 7B Q5_K_M (5.1GB) - Code generation, fastest
+
+Total: ~34GB of models (can run ANY 2 simultaneously, or 1 large model)
+
+================================================================================
+DEPLOYMENT CHECKLIST
+================================================================================
+
+PREREQUISITES (Verify on TrueNAS):
+  [ ] RTX 4060 Ti installed and detected (nvidia-smi)
+  [ ] NVIDIA drivers 550+ installed (nvidia-smi --version)
+  [ ] CUDA 12.3+ available (nvcc --version or nvidia-smi)
+  [ ] llama.cpp built with CUDA support (/root/llama.cpp/build/bin/llama-cli --version)
+  [ ] Python 3.9+ installed (python3 --version)
+  [ ] /mnt/models dataset exists (zfs list | grep models)
+
+FILE PREPARATION:
+  [ ] Copy ai-router-truenas-production.py to /mnt/models/
+  [ ] Copy logging_config.py to /mnt/models/
+  [ ] Copy truenas-requirements.txt to /mnt/models/
+  [ ] Copy models from D:/models/rtx4060ti-16gb to /mnt/models/organized/
+
+QUICK SETUP:
+  [ ] SSH to TrueNAS: ssh root@10.0.0.89
+  [ ] Install dependencies: pip3 install -r /mnt/models/truenas-requirements.txt
+  [ ] Run router: cd /mnt/models && python3 ai-router-truenas-production.py
+
+================================================================================
+FILE TRANSFER INSTRUCTIONS
+================================================================================
+
+Option A: Using scp (from Windows/Local Machine)
+-------
+scp -r D:\models\rtx4060ti-16gb\*.gguf root@10.0.0.89:/mnt/models/organized/
+scp -r D:\models\rtx4060ti-16gb\*.txt root@10.0.0.89:/mnt/models/organized/
+scp D:\models\ai-router-truenas-production.py root@10.0.0.89:/mnt/models/
+scp D:\models\logging_config.py root@10.0.0.89:/mnt/models/
+scp D:\models\truenas-requirements.txt root@10.0.0.89:/mnt/models/
+
+Option B: Via SSH + wget
+-------
+ssh root@10.0.0.89
+cd /mnt/models
+# Download from wherever your files are hosted
+
+Option C: Directly on TrueNAS
+-------
+ssh root@10.0.0.89
+zfs set mountpoint=/mnt/models tank/models  # If needed
+mkdir -p /mnt/models/organized
+# Use SFTP or copy directly if files are on network share
+
+================================================================================
+DEPLOYMENT STEPS (Once Files Copied)
+================================================================================
+
+1. SSH into TrueNAS:
+   ssh root@10.0.0.89
+
+2. Navigate to models directory:
+   cd /mnt/models
+   ls -la  # Verify files are there
+
+3. Install Python dependencies:
+   pip3 install -r truenas-requirements.txt
+
+   Output should show:
+   Successfully installed Flask psutil GPUtil python-dotenv requests Werkzeug
+
+4. Verify model files are in correct location:
+   ls -lh organized/*.gguf
+
+   Should show:
+   - Dolphin3.0-Llama3.1-8B-Q6_K.gguf (6.2G)
+   - llama31-8b-instruct/Meta-Llama-3.1-8B-Instruct-Q6_K.gguf (6.2G)
+   - qwen25-14b-instruct/Qwen2.5-14B-Instruct-Q4_K_M.gguf (8.4G)
+   - qwen25-14b-uncensored/Qwen2.5-14B_Uncensored_Instruct-Q4_K_M.gguf (8.4G)
+   - qwen25-coder-7b/qwen2.5-coder-7b-instruct-q5_k_m.gguf (5.1G)
+
+5. Verify system prompts:
+   ls -lh organized/*SYSTEM-PROMPT.txt
+
+   Should show:
+   - Llama-3.1-8B-SYSTEM-PROMPT.txt
+   - Qwen-14B-Instruct-SYSTEM-PROMPT.txt
+   - Qwen-14B-Uncensored-SYSTEM-PROMPT.txt
+   - Qwen-Coder-7B-SYSTEM-PROMPT.txt
+
+6. Verify llama.cpp is ready:
+   /root/llama.cpp/build/bin/llama-cli --version
+
+   Should return version info
+
+7. Test GPU detection:
+   nvidia-smi
+
+   Should show RTX 4060 Ti with 16GB memory
+
+8. START THE ROUTER:
+   python3 ai-router-truenas-production.py
+
+   You should see banner:
+   ================================================================================
+   TrueNAS AI ROUTER v3.1 - Production Edition
+
+   RTX 4060 Ti (16GB) - Pre-Tuned Model Collection
+   ================================================================================
+
+9. CREATE A PROJECT:
+   Select [1] Create New Project
+   - Project name: test
+   - Title: Test Project
+   - Select model: 1 (Dolphin)
+   - Project created!
+
+10. RUN CHAT:
+    Select [2] Load Existing Project
+    - Choose 'test'
+    Select [3] Run Chat Session
+    - Type a prompt and press Enter
+    - Model should load and respond
+    - Type 'exit' to quit
+
+================================================================================
+FIRST RUN CHECKLIST
+================================================================================
+
+Model Loading:
+  ✓ Model file loads without "No such file" error
+  ✓ CUDA initialization shows (watch for "ggml_cuda_init" messages)
+  ✓ Model starts generating tokens
+  ✓ Speed is reasonable (60+ tok/sec for Dolphin, 50+ for others)
+
+VRAM Management:
+  ✓ GPU memory usage increases when model loads
+  ✓ No "CUDA out of memory" errors
+  ✓ Stays below 16GB (safe margin 1GB)
+  ✓ Frees memory after inference completes
+
+Performance Monitoring:
+  ✓ Monitor GPU with: watch -n 1 nvidia-smi
+  ✓ Check temperature stays <80°C
+  ✓ No throttling messages in nvidia-smi
+
+API Testing:
+  From another terminal or machine:
+  curl http://10.0.0.89:5000/api/health
+
+  Should return JSON with GPU status
+
+================================================================================
+PRODUCTION CONFIGURATION
+================================================================================
+
+Recommended Setup:
+
+1. Run as systemd service (auto-start):
+   Create /etc/systemd/system/ai-router.service:
+
+   [Unit]
+   Description=TrueNAS AI Router
+   After=network.target
+
+   [Service]
+   Type=simple
+   User=root
+   WorkingDirectory=/mnt/models
+   ExecStart=/usr/bin/python3 /mnt/models/ai-router-truenas-production.py
+   Restart=on-failure
+   RestartSec=10
+
+   [Install]
+   WantedBy=multi-user.target
+
+   Then:
+   systemctl daemon-reload
+   systemctl enable ai-router
+   systemctl start ai-router
+
+2. Monitor with screen/tmux:
+   screen -S ai-router
+   cd /mnt/models
+   python3 ai-router-truenas-production.py
+   # Press Ctrl+A then D to detach
+   # Reconnect: screen -r ai-router
+
+3. Enable API for remote access:
+   (Already running on port 5000)
+
+   Add firewall rules if needed:
+   ufw allow 5000/tcp
+
+   For production HTTPS, use nginx reverse proxy
+
+4. Regular backups:
+   Backup /mnt/models/projects regularly
+   Contains all conversation history and configurations
+
+================================================================================
+EXPECTED PERFORMANCE
+================================================================================
+
+Model Load Times:
+  - First load: 30-60 seconds
+  - Subsequent: 5-10 seconds
+
+Token Generation Speed:
+  - Dolphin 8B: 65-85 tok/sec
+  - Llama 3.1 8B: 60-80 tok/sec
+  - Qwen 14B: 55-75 tok/sec
+  - Qwen Coder 7B: 70-90 tok/sec
+
+VRAM Usage:
+  - Idle: <1GB
+  - Model loaded (no inference): 6-8GB
+  - During inference: 6-15GB (depends on model)
+  - Safety margin: Always 1GB free
+
+Temperature (RTX 4060 Ti):
+  - Idle: 30-35°C
+  - Under load: 60-75°C (normal)
+  - Throttle start: 83°C
+  - Max safe: 90°C
+  - Emergency shutdown: 93°C
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+GPU not detected:
+  Error: "No GPU found"
+  Solution:
+    1. Check: nvidia-smi
+    2. If fails, drivers not installed
+    3. If nvidia-smi works but router doesn't detect:
+       - Verify llama.cpp built with CUDA: /root/llama.cpp/build/bin/llama-cli --help | grep cuda
+       - Check PATH: echo $PATH | grep cuda
+       - May need to rebuild llama.cpp with CUDA support
+
+Model file not found:
+  Error: "Cannot open model file"
+  Solution:
+    1. Verify path is correct: ls -lh /mnt/models/organized/*.gguf
+    2. Check permissions: chmod 644 /mnt/models/organized/*.gguf
+    3. Ensure full path in code matches
+
+VRAM exhausted:
+  Error: "CUDA out of memory" or "ggml_cuda_alloc"
+  Solution:
+    1. Close other GPU applications
+    2. Check current usage: nvidia-smi
+    3. Use smaller model or quantization
+    4. Restart llama.cpp process
+
+Port 5000 already in use:
+  Error: "Address already in use"
+  Solution:
+    1. Find process: netstat -tlnp | grep 5000
+    2. Kill it: kill -9 <PID>
+    3. Or change port in code: self.api_port = 5001
+
+================================================================================
+API USAGE EXAMPLES
+================================================================================
+
+Health Check:
+curl http://10.0.0.89:5000/api/health
+
+List Models:
+curl http://10.0.0.89:5000/api/models
+
+List Projects:
+curl http://10.0.0.89:5000/api/projects
+
+Python Example:
+import requests
+
+response = requests.get('http://10.0.0.89:5000/api/health')
+print(response.json())
+
+================================================================================
+NEXT STEPS AFTER DEPLOYMENT
+================================================================================
+
+1. Create multiple projects for different use cases:
+   - coding-project (use Qwen Coder)
+   - general-chat (use Dolphin)
+   - multilingual (use Qwen 14B Instruct)
+
+2. Customize system prompts for your needs
+
+3. Set up monitoring/alerting:
+   - GPU temperature alerts
+   - High VRAM usage warnings
+   - API uptime monitoring
+
+4. Enable HTTPS for remote API access:
+   - Use nginx reverse proxy
+   - Install SSL certificates
+   - Configure TrueNAS firewall rules
+
+5. Backup strategy:
+   - Regular backups of /mnt/models/projects
+   - Archive old conversations
+
+6. Performance optimization:
+   - Monitor token generation speed
+   - Adjust batch sizes if needed
+   - Track temperature under load
+
+================================================================================
+SUPPORT
+================================================================================
+
+Logs:
+  /mnt/models/logs/ai-router-*.log
+  tail -f /mnt/models/logs/ai-router-*.log
+
+GPU Monitoring:
+  nvidia-smi
+  nvidia-smi -l 1  # Updates every second
+  watch -n 1 nvidia-smi
+
+Model Testing:
+  /root/llama.cpp/build/bin/llama-cli -m /mnt/models/organized/Dolphin3.0-Llama3.1-8B-Q6_K.gguf -p "test" -n 10 -ngl 999
+
+Documentation:
+  - TRUENAS-DEPLOYMENT-GUIDE.md (comprehensive)
+  - TRUENAS-QUICK-START.txt (quick reference)
+  - This file (production deployment)
+
+================================================================================
+VERSION INFORMATION
+================================================================================
+
+Application: TrueNAS AI Router v3.1 - Production Edition
+GPU: NVIDIA RTX 4060 Ti (16GB)
+Framework: llama.cpp with CUDA 12.x
+Server: TrueNAS at 10.0.0.89
+Models: 5 pre-tuned production models
+Status: ✅ READY FOR IMMEDIATE DEPLOYMENT
+
+================================================================================

@@ -1,0 +1,29 @@
+name: "Code Analysis Context"
+description: "Template for analyzing code files"
+instructions: |
+  The following code files have been provided for context and analysis:
+
+  {% for item in context_items %}
+  ## {{ item.label }}
+  {% if item.path %}
+  File: {{ item.path }}
+  {% endif %}
+  Language: {{ item.language }}
+
+  ```{{ item.language }}
+  {{ item.content }}
+  ```
+  {% endfor %}
+
+  ================================================================================
+
+  USER REQUEST:
+  {{ user_prompt }}
+
+  Please analyze the provided code and respond to the user's request. Consider:
+  - Code structure and architecture
+  - Potential bugs or issues
+  - Performance considerations
+  - Best practices and improvements
+  - Security concerns
+  - Code quality and maintainability

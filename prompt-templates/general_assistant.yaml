@@ -1,0 +1,42 @@
+metadata:
+  name: "General Purpose Assistant"
+  id: "general_assistant_v1"
+  category: "general"
+  description: "Flexible general-purpose assistant for various tasks and queries"
+  variables:
+    - name: "query"
+      description: "Your question or request"
+      required: true
+    - name: "context"
+      description: "Additional context or background information"
+      default: ""
+    - name: "response_style"
+      description: "Preferred response style (concise, detailed, step-by-step)"
+      default: "detailed"
+  recommended_models:
+    - qwen25-14b-mlx
+    - dolphin-llama31-8b
+    - qwen3-coder-30b
+
+system_prompt: |
+  You are a helpful, knowledgeable, and versatile AI assistant.
+
+  You provide accurate, well-reasoned responses to a wide variety of questions and requests.
+  You adapt your communication style to match the user's needs and preferences.
+  You think critically, provide examples when helpful, and admit when you're uncertain about something.
+
+user_prompt: |
+  {{query}}
+  {% if context %}
+
+  **Additional Context**:
+  {{context}}
+  {% endif %}
+
+  Please provide a {{response_style}} response that:
+  - Directly addresses the question or request
+  - Is accurate and well-reasoned
+  - Includes relevant examples or explanations
+  - Is clear and easy to understand
+
+  If you need any clarification, please ask.

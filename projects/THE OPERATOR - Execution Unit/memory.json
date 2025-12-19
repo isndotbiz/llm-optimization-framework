@@ -1,0 +1,24 @@
+{
+  "conversations": [
+    {
+      "timestamp": "2025-12-13T12:47:06.289576",
+      "user": "hello",
+      "assistant": "[Response logged]",
+      "model": "llama33-70b"
+    },
+    {
+      "timestamp": "2025-12-18T15:30:48.794151",
+      "user": "what is dns spoofing",
+      "assistant": "[Response logged]",
+      "model": "llama33-70b"
+    },
+    {
+      "timestamp": "2025-12-18T17:00:52.935656",
+      "user": "what is dns spoofing?",
+      "assistant": "[Response logged]",
+      "model": "llama33-70b"
+    }
+  ],
+  "created": "2025-12-10T01:20:52.975183",
+  "modified": "2025-12-18T17:00:52.935656"
+}

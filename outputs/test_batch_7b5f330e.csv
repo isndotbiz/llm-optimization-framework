@@ -1,0 +1,6 @@
+index,prompt,response,success,tokens_in,tokens_out,duration,error
+0,Explain what is a linked list and provide a simple Python example,Response to: Explain what is a linked list ...,True,12,50,0.10,
+1,Write a Python function to reverse a string without using built-in reverse,Response to: Write a Python function to rev...,True,12,50,0.10,
+2,What are the benefits of functional programming compared to imperative programming?,Response to: What are the benefits of funct...,True,11,50,0.10,
+3,Explain the concept of recursion with a practical example,Response to: Explain the concept of recursi...,True,9,50,0.10,
+4,What is the difference between a stack and a queue? When would you use each?,Response to: What is the difference between...,True,15,50,0.10,

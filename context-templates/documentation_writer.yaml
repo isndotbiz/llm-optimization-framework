@@ -1,0 +1,30 @@
+name: "Documentation Writer Context"
+description: "Template for writing comprehensive documentation"
+instructions: |
+  The following files have been provided as context for documentation generation:
+
+  {% for item in context_items %}
+  ## {{ item.label }}
+  {% if item.path %}
+  Source: {{ item.path }}
+  {% endif %}
+  Type: {{ item.language }}
+
+  ```{{ item.language }}
+  {{ item.content }}
+  ```
+  {% endfor %}
+
+  ================================================================================
+
+  USER REQUEST:
+  {{ user_prompt }}
+
+  Based on the provided context, please generate comprehensive documentation that:
+  - Clearly explains functionality and purpose
+  - Includes usage examples with code snippets
+  - Documents all parameters, return values, and exceptions
+  - Provides step-by-step guides where appropriate
+  - Uses clear, concise language accessible to the target audience
+  - Includes relevant warnings, notes, and best practices
+  - Follows markdown formatting conventions

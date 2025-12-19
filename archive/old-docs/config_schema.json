@@ -1,0 +1,203 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI Router Project Configuration Schema",
+  "description": "Comprehensive project and bot configuration for AI Router",
+  "definitions": {
+    "project_config": {
+      "type": "object",
+      "properties": {
+        "project_name": {
+          "type": "string",
+          "description": "Unique project name"
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title for the project"
+        },
+        "description": {
+          "type": "string",
+          "description": "Project description"
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["llama-cpp", "ollama", "openrouter", "openai", "claude"],
+          "description": "LLM provider to use"
+        },
+        "model": {
+          "type": "string",
+          "description": "Model identifier or path"
+        },
+        "system_prompt": {
+          "type": "string",
+          "description": "System prompt for this project (null if model doesn't support)"
+        },
+        "context_limit": {
+          "type": "integer",
+          "description": "Maximum context messages (-1 for unlimited, otherwise 1-100)",
+          "minimum": -1,
+          "maximum": 100
+        },
+        "max_tokens": {
+          "type": "integer",
+          "description": "Maximum generation tokens",
+          "minimum": 1,
+          "maximum": 32768
+        },
+        "temperature": {
+          "type": "number",
+          "description": "Temperature (creativity)",
+          "minimum": 0.0,
+          "maximum": 2.0
+        },
+        "presence_penalty": {
+          "type": "number",
+          "description": "Presence penalty (-2 to 2, balanced to open-minded)",
+          "minimum": -2.0,
+          "maximum": 2.0
+        },
+        "frequency_penalty": {
+          "type": "number",
+          "description": "Frequency penalty (-2 to 2, balanced to less repetition)",
+          "minimum": -2.0,
+          "maximum": 2.0
+        },
+        "top_p": {
+          "type": "number",
+          "description": "Top P (0.0 to 1.0, precise to creative)",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "top_k": {
+          "type": "integer",
+          "description": "Top K (0 to 200)",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "reasoning_effort": {
+          "type": "string",
+          "enum": ["none", "low", "medium", "high"],
+          "description": "Reasoning effort (only for supported models)"
+        },
+        "enable_web_search": {
+          "type": "boolean",
+          "description": "Enable web search integration"
+        },
+        "web_search_provider": {
+          "type": "string",
+          "enum": ["brave", "perplexity"],
+          "description": "Web search provider"
+        },
+        "web_search_api_key": {
+          "type": "string",
+          "description": "API key for web search"
+        },
+        "enable_memory": {
+          "type": "boolean",
+          "description": "Enable conversation memory"
+        },
+        "memory_type": {
+          "type": "string",
+          "enum": ["short_term", "long_term", "both"],
+          "description": "Type of memory to use"
+        },
+        "api_key": {
+          "type": "string",
+          "description": "API key for commercial providers"
+        },
+        "api_endpoint": {
+          "type": "string",
+          "description": "Custom API endpoint"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["project_name", "provider", "model"]
+    },
+    "bot_config": {
+      "type": "object",
+      "properties": {
+        "bot_name": {
+          "type": "string",
+          "description": "Unique bot name"
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title for the bot"
+        },
+        "description": {
+          "type": "string",
+          "description": "Bot description and purpose"
+        },
+        "specialization": {
+          "type": "string",
+          "description": "Bot specialization (coding, research, creative, etc.)"
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["llama-cpp", "ollama", "openrouter", "openai", "claude"]
+        },
+        "model": {
+          "type": "string",
+          "description": "Recommended model for this bot"
+        },
+        "system_prompt": {
+          "type": "string",
+          "description": "Specialized system prompt for this bot"
+        },
+        "default_parameters": {
+          "type": "object",
+          "description": "Default parameters optimized for this bot's purpose"
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "MCP tools this bot should have access to"
+        }
+      },
+      "required": ["bot_name", "specialization", "system_prompt"]
+    },
+    "provider_config": {
+      "type": "object",
+      "properties": {
+        "provider_name": {
+          "type": "string",
+          "enum": ["llama-cpp", "ollama", "openrouter", "openai", "claude"]
+        },
+        "api_key": {
+          "type": "string",
+          "description": "API key (for commercial providers)"
+        },
+        "api_endpoint": {
+          "type": "string",
+          "description": "API endpoint URL"
+        },
+        "auth_type": {
+          "type": "string",
+          "enum": ["none", "api_key", "oauth"],
+          "description": "Authentication type"
+        },
+        "oauth_credentials": {
+          "type": "object",
+          "description": "OAuth credentials if using OAuth"
+        },
+        "default_model": {
+          "type": "string",
+          "description": "Default model for this provider"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this provider is enabled"
+        }
+      },
+      "required": ["provider_name", "enabled"]
+    }
+  }
+}

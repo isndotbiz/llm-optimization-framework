@@ -1,0 +1,356 @@
+# Error Handling Workflow Example
+# Demonstrates retry logic, fallbacks, and validation
+
+workflow:
+  name: "DataExtractionWithErrorHandling"
+  version: "1.0"
+  description: "Extract and process data with comprehensive error handling"
+
+  variables:
+    source_url: ""
+    max_retries: 3
+    fallback_enabled: true
+
+  error_handling:
+    global_handlers:
+      - error_type: "NetworkError"
+        handler: "retry_with_backoff"
+        retry_count: 3
+        backoff: "exponential"
+
+      - error_type: "ValidationError"
+        handler: "human_intervention"
+        notification:
+          type: "email"
+          recipient: "data-team@example.com"
+
+      - error_type: "TimeoutError"
+        handler: "use_fallback"
+        fallback_action: "use_cached_data"
+
+    default_handler: "log_and_continue"
+
+  steps:
+    - id: "fetch_data"
+      name: "Fetch Data from Source"
+      type: "action"
+      action: "http_fetch"
+      params:
+        url: "{{source_url}}"
+        timeout: 30000  # 30 seconds
+      outputs:
+        - name: "raw_data"
+          type: "string"
+      error_handling:
+        retry:
+          max_attempts: 3
+          backoff: "exponential"
+          initial_delay: 1000
+          max_delay: 10000
+        retry_conditions:
+          - "status_code == 429"
+          - "status_code == 503"
+          - "timeout == true"
+        on_max_retries: "use_fallback_source"
+
+    - id: "use_fallback_source"
+      name: "Use Fallback Data Source"
+      type: "action"
+      action: "http_fetch"
+      params:
+        url: "{{fallback_url}}"
+        timeout: 30000
+      outputs:
+        - name: "raw_data"
+          type: "string"
+      error_handling:
+        on_error: "load_cached_data"
+
+    - id: "load_cached_data"
+      name: "Load Cached Data"
+      type: "action"
+      action: "load_from_cache"
+      params:
+        key: "{{source_url}}"
+        max_age: 86400  # 24 hours
+      outputs:
+        - name: "raw_data"
+          type: "string"
+      error_handling:
+        on_error: "fail_gracefully"
+
+    - id: "parse_data"
+      name: "Parse Data Structure"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.1
+      depends_on: ["fetch_data"]
+      prompt: |
+        Parse this data into structured JSON format:
+        {{steps.fetch_data.outputs.raw_data ||
+          steps.use_fallback_source.outputs.raw_data ||
+          steps.load_cached_data.outputs.raw_data}}
+
+        Extract:
+        - title
+        - date
+        - content
+        - metadata
+
+        Return valid JSON only.
+      outputs:
+        - name: "parsed_data"
+          type: "object"
+      error_handling:
+        retry:
+          max_attempts: 2
+        on_error: "simple_parse_fallback"
+
+    - id: "simple_parse_fallback"
+      name: "Fallback: Simple Parsing"
+      type: "llm_call"
+      model: "gpt-3.5-turbo"
+      temperature: 0.1
+      prompt: |
+        Extract basic information from this data:
+        {{steps.fetch_data.outputs.raw_data}}
+
+        Just extract:
+        - title
+        - date
+
+        Return as simple JSON.
+      outputs:
+        - name: "parsed_data"
+          type: "object"
+
+    - id: "validate_schema"
+      name: "Validate Data Schema"
+      type: "validation"
+      depends_on: ["parse_data"]
+      validator: "json_schema_validator"
+      input: "{{steps.parse_data.outputs.parsed_data || steps.simple_parse_fallback.outputs.parsed_data}}"
+      schema:
+        type: "object"
+        required: ["title", "date"]
+        properties:
+          title:
+            type: "string"
+            minLength: 1
+          date:
+            type: "string"
+            pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          content:
+            type: "string"
+      outputs:
+        - name: "is_valid"
+          type: "boolean"
+        - name: "errors"
+          type: "array"
+      error_handling:
+        on_invalid: "attempt_fix"
+
+    - id: "attempt_fix"
+      name: "Attempt to Fix Validation Errors"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.2
+      depends_on: ["validate_schema"]
+      condition: "{{steps.validate_schema.outputs.is_valid == false}}"
+      max_iterations: 2
+      prompt: |
+        Fix these validation errors in the data:
+
+        Data:
+        {{steps.parse_data.outputs.parsed_data}}
+
+        Validation errors:
+        {{steps.validate_schema.outputs.errors}}
+
+        Required schema:
+        - title: non-empty string
+        - date: YYYY-MM-DD format
+        - content: string (optional)
+
+        Return corrected JSON.
+      outputs:
+        - name: "fixed_data"
+          type: "object"
+      error_handling:
+        on_max_iterations: "manual_review_required"
+        on_error: "use_partial_data"
+
+    - id: "revalidate"
+      name: "Revalidate Fixed Data"
+      type: "validation"
+      depends_on: ["attempt_fix"]
+      condition: "{{steps.validate_schema.outputs.is_valid == false}}"
+      validator: "json_schema_validator"
+      input: "{{steps.attempt_fix.outputs.fixed_data}}"
+      schema:
+        type: "object"
+        required: ["title", "date"]
+        properties:
+          title:
+            type: "string"
+            minLength: 1
+          date:
+            type: "string"
+            pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+      outputs:
+        - name: "is_valid"
+          type: "boolean"
+        - name: "errors"
+          type: "array"
+
+    - id: "enrich_data"
+      name: "Enrich with Additional Info"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.4
+      depends_on: ["validate_schema"]
+      condition: "{{steps.validate_schema.outputs.is_valid == true || steps.revalidate.outputs.is_valid == true}}"
+      prompt: |
+        Enrich this data with additional context:
+        {{steps.parse_data.outputs.parsed_data || steps.attempt_fix.outputs.fixed_data}}
+
+        Add:
+        - Summary (2-3 sentences)
+        - Key topics (3-5 keywords)
+        - Category classification
+        - Sentiment analysis
+
+        Return as enhanced JSON object.
+      outputs:
+        - name: "enriched_data"
+          type: "object"
+      error_handling:
+        retry:
+          max_attempts: 2
+        on_error: "skip_enrichment"
+
+    - id: "skip_enrichment"
+      name: "Skip Enrichment Step"
+      type: "expression"
+      expression: "{{steps.parse_data.outputs.parsed_data || steps.attempt_fix.outputs.fixed_data}}"
+      outputs:
+        - name: "enriched_data"
+          type: "object"
+
+    - id: "quality_check"
+      name: "Final Quality Check"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.1
+      depends_on: ["enrich_data"]
+      prompt: |
+        Perform final quality check on this data:
+        {{steps.enrich_data.outputs.enriched_data || steps.skip_enrichment.outputs.enriched_data}}
+
+        Check for:
+        - Data completeness
+        - Logical consistency
+        - Format correctness
+
+        Return JSON:
+        {
+          "quality_score": 1-10,
+          "passed": true/false,
+          "issues": [],
+          "warnings": []
+        }
+      outputs:
+        - name: "quality_report"
+          type: "object"
+
+    - id: "check_quality_passed"
+      name: "Check Quality Threshold"
+      type: "expression"
+      depends_on: ["quality_check"]
+      expression: "{{steps.quality_check.outputs.quality_report.quality_score >= 7}}"
+      outputs:
+        - name: "quality_passed"
+          type: "boolean"
+
+    - id: "manual_review_required"
+      name: "Request Manual Review"
+      type: "user_confirmation"
+      depends_on: ["check_quality_passed"]
+      condition: "{{steps.check_quality_passed.outputs.quality_passed == false}}"
+      message: |
+        Data quality check failed. Manual review required.
+
+        Quality Score: {{steps.quality_check.outputs.quality_report.quality_score}}/10
+
+        Issues:
+        {{steps.quality_check.outputs.quality_report.issues}}
+
+        Warnings:
+        {{steps.quality_check.outputs.quality_report.warnings}}
+
+        Data:
+        {{steps.enrich_data.outputs.enriched_data}}
+
+        Approve this data or request corrections?
+      outputs:
+        - name: "manually_approved"
+          type: "boolean"
+
+    - id: "save_to_database"
+      name: "Save Processed Data"
+      type: "action"
+      action: "database_insert"
+      depends_on: ["quality_check"]
+      condition: |
+        {{steps.check_quality_passed.outputs.quality_passed == true ||
+          steps.manual_review_required.outputs.manually_approved == true}}
+      params:
+        table: "processed_data"
+        data: "{{steps.enrich_data.outputs.enriched_data}}"
+        quality_metadata: "{{steps.quality_check.outputs.quality_report}}"
+      outputs:
+        - name: "record_id"
+      error_handling:
+        retry:
+          max_attempts: 3
+          backoff: "linear"
+        on_error: "save_to_backup"
+        compensation: "rollback_database_insert"
+
+    - id: "save_to_backup"
+      name: "Save to Backup Storage"
+      type: "action"
+      action: "save_to_file"
+      params:
+        path: "/backup/failed_inserts/"
+        filename: "data_{{timestamp}}.json"
+        data: "{{steps.enrich_data.outputs.enriched_data}}"
+      outputs:
+        - name: "backup_path"
+
+    - id: "send_notification"
+      name: "Send Completion Notification"
+      type: "action"
+      action: "send_email"
+      depends_on: ["save_to_database"]
+      params:
+        to: "team@example.com"
+        subject: "Data Processing Complete"
+        body: |
+          Data processing workflow completed successfully.
+
+          Record ID: {{steps.save_to_database.outputs.record_id}}
+          Quality Score: {{steps.quality_check.outputs.quality_report.quality_score}}/10
+          Source: {{source_url}}
+
+          Workflow ID: {{workflow_execution_id}}
+      error_handling:
+        on_error: "ignore"  # Don't fail workflow if notification fails
+
+# Compensation actions for rollback
+compensations:
+  - id: "rollback_database_insert"
+    action: "database_delete"
+    params:
+      table: "processed_data"
+      record_id: "{{steps.save_to_database.outputs.record_id}}"

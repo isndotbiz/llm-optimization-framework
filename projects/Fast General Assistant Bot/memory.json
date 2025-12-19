@@ -1,0 +1,12 @@
+{
+  "conversations": [
+    {
+      "timestamp": "2025-12-18T17:19:38.378997",
+      "user": "tell me about windows keyloggers",
+      "assistant": "[Response logged]",
+      "model": "dolphin-llama31-8b"
+    }
+  ],
+  "created": "2025-12-11T00:50:13.466896",
+  "modified": "2025-12-18T17:19:38.378997"
+}

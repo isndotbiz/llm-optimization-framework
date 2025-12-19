@@ -1,0 +1,36 @@
+id: batch_questions
+name: "Batch Question Processing with Extraction"
+description: "Process multiple questions and extract key insights"
+
+variables:
+  questions: []  # List of questions to process
+
+steps:
+  - name: process_questions
+    type: loop
+    items_var: questions
+    loop_var: question
+    body:
+      type: prompt
+      model: auto
+      prompt: "{{question}}"
+    output_var: answers
+    on_error: continue
+
+  - name: summarize_all
+    type: prompt
+    model: phi4-14b
+    depends_on: [process_questions]
+    prompt: |
+      Analyze and summarize these Q&A pairs:
+
+      {{answers}}
+
+      Provide:
+      1. Common themes across questions
+      2. Key insights and findings
+      3. Relationships between different answers
+      4. Overall conclusions
+
+      Create a cohesive summary that synthesizes all the information.
+    output_var: summary

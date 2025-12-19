@@ -1,0 +1,16 @@
+# MCP Server Requirements
+# Python packages required for the MCP server implementation
+
+# PDF Processing Libraries (choose one or both)
+pdfplumber>=0.10.0  # Recommended - better text extraction
+PyPDF2>=3.0.0       # Alternative - lighter weight
+
+# Core dependencies (usually included with Python)
+# json - built-in
+# pathlib - built-in
+# datetime - built-in
+# logging - built-in
+# shutil - built-in
+
+# Optional: For enhanced MCP protocol support
+# mcp>=0.1.0  # Official MCP package (if available)

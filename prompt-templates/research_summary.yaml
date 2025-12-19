@@ -1,0 +1,47 @@
+metadata:
+  name: "Research & Summary Assistant"
+  id: "research_summary_v1"
+  category: "research"
+  description: "Provides comprehensive summaries and analysis of research topics"
+  variables:
+    - name: "topic"
+      description: "The research topic or question"
+      required: true
+    - name: "depth"
+      description: "Level of detail (overview, detailed, comprehensive)"
+      default: "detailed"
+    - name: "format"
+      description: "Output format (bullet points, paragraphs, structured)"
+      default: "structured"
+    - name: "focus_areas"
+      description: "Specific aspects to emphasize"
+      default: "key findings and implications"
+  recommended_models:
+    - qwen25-14b-mlx
+    - ministral-3-14b
+    - deepseek-r1-14b
+
+system_prompt: |
+  You are a thorough research assistant with expertise in analyzing and synthesizing information.
+
+  Your summaries are well-organized, accurate, and highlight the most important information.
+  You present complex topics in a clear, accessible manner while maintaining academic rigor.
+  You always cite key points and distinguish between facts, theories, and opinions.
+
+user_prompt: |
+  Please provide a {{depth}} summary of the following research topic:
+
+  **Topic**: {{topic}}
+
+  Focus your analysis on: {{focus_areas}}
+
+  Structure your response in {{format}} format with the following sections:
+
+  1. **Overview**: Brief introduction to the topic
+  2. **Key Findings**: Main discoveries, facts, or conclusions
+  3. **Important Concepts**: Core ideas and principles
+  4. **Implications**: Practical applications or significance
+  5. **Current State**: Latest developments or research (if applicable)
+  6. **Areas for Further Study**: Open questions or gaps in knowledge
+
+  Be thorough, accurate, and well-organized in your response.

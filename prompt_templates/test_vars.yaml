@@ -1,0 +1,9 @@
+
+metadata:
+  name: Variable Test
+  variables:
+    - name: var1
+    - name: var2
+
+user_prompt: |
+  {{ var1 }} and {{ var2 }}

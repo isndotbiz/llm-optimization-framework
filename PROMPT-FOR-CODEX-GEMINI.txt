@@ -1,0 +1,238 @@
+================================================================================
+QUICK VERSION - Use this for fast analysis
+================================================================================
+
+TASK: Analyze 5 Python files for code quality issues and recommend open source tools.
+
+PROJECT: AI Router System (intelligent model selection for GPU/MacBook/TrueNAS)
+FILES:
+1. ai-router.py
+2. ai-router-enhanced.py
+3. ai-router-mlx.py
+4. ai-router-truenas.py
+5. ai-router-truenas-production.py
+
+ANALYZE FOR THESE ISSUES:
+- Runtime/Exception Errors: Unhandled exceptions, missing error handling
+- Type Safety: Missing type hints, type inconsistencies
+- Logic Errors: Off-by-one errors, infinite loops, unreachable code
+- Security: Command injection, path traversal, hardcoded secrets, input validation
+- Resource Management: File/connection leaks, memory efficiency
+- Performance: Algorithm efficiency, N+1 patterns, unnecessary computation
+- Logging/Debugging: Insufficient logging, unclear error messages
+- Documentation: Missing docstrings, comment coverage
+- Testability: Design patterns that make testing difficult
+- Concurrency: Race conditions, thread safety (if applicable)
+
+FOR EACH ISSUE, PROVIDE:
+1. Severity (Critical/High/Medium/Low)
+2. Affected files
+3. Specific example locations
+4. Recommended fix
+5. Open source tool to detect/fix it
+
+RECOMMENDATION MATRIX:
+Tool | Type | Install | Primary Use | Priority (1-10) | Setup Time
+
+TOP 10 TOOLS TO RECOMMEND:
+1. [Tool Name] - [Why it matters for this project]
+2. [Tool Name] - [Why it matters for this project]
+...
+
+PHASED IMPLEMENTATION:
+Phase 1 (Quick wins): [2-3 tools]
+Phase 2 (Core quality): [3-4 tools]
+Phase 3 (Advanced): [3-4 tools]
+
+================================================================================
+COMPREHENSIVE VERSION - Use this for detailed analysis
+================================================================================
+
+You are analyzing an AI Router Python project for comprehensive code quality improvement.
+
+PROJECT DETAILS:
+- Language: Python 3.x
+- Use Cases: CLI for AI model selection, TrueNAS integration, REST APIs
+- Environments: WSL/RTX 3090, MacBook M4, TrueNAS
+- Dependencies: llama.cpp, MLX framework, Flask, psutil, GPUtil, subprocess
+
+EVALUATION FRAMEWORK:
+
+1. RUNTIME ERRORS & EXCEPTION HANDLING
+   - Identify all potential runtime errors
+   - Assess exception handling coverage
+   - List unhandled edge cases
+   - Recommend defensive programming patterns
+
+2. TYPE SAFETY & TYPE HINTS
+   - Measure current type hint coverage
+   - Identify type inconsistencies
+   - Suggest protocol/ABC improvements
+   - Recommend type checking tools
+
+3. SECURITY VULNERABILITIES (OWASP TOP 10)
+   - Command injection risks in subprocess calls
+   - Path traversal in file operations
+   - Input validation gaps
+   - Hardcoded secrets/credentials
+   - Unsafe operations
+
+4. RESOURCE MANAGEMENT
+   - File handles and cleanup
+   - Process lifecycle
+   - Memory efficiency
+   - Context manager usage
+   - Temporary file handling
+
+5. PERFORMANCE OPTIMIZATION
+   - Algorithm efficiency
+   - Loop optimization
+   - Memory usage patterns
+   - String handling efficiency
+
+6. CODE ORGANIZATION & MAINTAINABILITY
+   - Modularity assessment
+   - Cyclomatic complexity
+   - Code duplication
+   - Design pattern usage
+
+7. LOGGING & OBSERVABILITY
+   - Logging coverage
+   - Debug information
+   - Error message clarity
+   - Structured logging potential
+
+8. TESTABILITY
+   - Unit test potential
+   - Mock-friendly design
+   - Dependency injection opportunities
+   - Test fixture requirements
+
+9. DOCUMENTATION COMPLETENESS
+   - Docstring coverage
+   - Type hint documentation
+   - Complex logic explanation
+   - Configuration documentation
+
+10. DEPENDENCY MANAGEMENT
+    - Version pinning needs
+    - Compatibility issues
+    - Transitive dependencies
+    - Security updates
+
+FOR EACH CATEGORY WITH ISSUES:
+- Severity Level & Impact
+- Affected Files & Line Numbers
+- Code Examples of Problems
+- Specific Recommended Fixes
+- Open Source Tools to Address
+
+OPEN SOURCE TOOLS ANALYSIS:
+
+For each recommended tool, provide:
+- Tool Name & Repository
+- Category (linter/type-checker/security-scanner/formatter/tester/coverage)
+- Installation: pip install [exact command]
+- Configuration File: .toml/.yaml/.ini example
+- GitHub Actions Integration: workflow example
+- Pre-commit Integration: hook configuration
+- Output Format: what it produces
+- Cost: Free/Freemium/Paid
+- Learning Curve: Easy/Medium/Hard
+- Team Adoption Likelihood: High/Medium/Low
+
+PRIORITIZATION MATRIX:
+Create table with columns:
+- Tool Name
+- Impact (Code Quality Improvement %)
+- Implementation Difficulty (1-10, 10=hardest)
+- Ongoing Maintenance (hours/week)
+- Team Adoption Score (1-10)
+- Priority Score (calculate from above)
+
+DELIVERABLES:
+
+1. EXECUTIVE SUMMARY
+   - Current code health score (0-100)
+   - Critical issues (must fix immediately)
+   - High priority issues (fix this sprint)
+   - Medium priority issues (backlog)
+   - Estimated effort to fix all issues
+
+2. ISSUE CATALOG BY SEVERITY
+   - 5-10 Critical issues
+   - 10-15 High priority issues
+   - 15-25 Medium priority issues
+   - 25+ Low priority issues
+
+3. TOP 15 RECOMMENDED TOOLS
+   Tool | Category | Priority | Setup Time | Team Impact
+
+4. PHASED IMPLEMENTATION ROADMAP
+
+   Week 1 (Quick Wins):
+   - Tool 1: [install command] [config file] [expected results]
+   - Tool 2: [install command] [config file] [expected results]
+   - Tool 3: [install command] [config file] [expected results]
+
+   Week 2 (Core Quality):
+   - Tool 4: [install command] [config file] [expected results]
+   - Tool 5: [install command] [config file] [expected results]
+
+   Week 3+ (Advanced):
+   - Tool 6: [install command] [config file] [expected results]
+   - Tool 7: [install command] [config file] [expected results]
+
+5. PRE-COMMIT HOOK CONFIGURATION
+   - Exact .pre-commit-config.yaml entries
+   - Which tools to run
+   - On failure behavior
+
+6. CI/CD WORKFLOW CONFIGURATION
+   - GitHub Actions workflow for main branch
+   - PR checks configuration
+   - Quality gates definition
+   - Failure conditions
+
+7. TARGET METRICS
+   - Type hint coverage: [current]% -> [target]%
+   - Test coverage: [current]% -> [target]%
+   - Documentation coverage: [current]% -> [target]%
+   - Security issues: [current] -> 0
+   - Critical issues: [current] -> 0
+
+8. TEAM ADOPTION GUIDE
+   - Which tools require most training
+   - Which tools will be most controversial
+   - Change management recommendations
+   - Success metrics
+
+================================================================================
+MINIMAL VERSION - Fastest analysis, 2-minute format
+================================================================================
+
+Analyze these 5 Python files for code quality:
+- ai-router.py (RTX 3090 CLI)
+- ai-router-enhanced.py (Project management)
+- ai-router-mlx.py (MacBook M4)
+- ai-router-truenas.py (TrueNAS with REST API)
+- ai-router-truenas-production.py (Production TrueNAS)
+
+PROVIDE:
+
+ISSUES (top 5 critical):
+1. [Issue] - [Files] - [Fix]
+2. [Issue] - [Files] - [Fix]
+...
+
+TOOLS (top 5 to install):
+1. [Tool name] - [Install] - [Why]
+2. [Tool name] - [Install] - [Why]
+...
+
+IMPLEMENTATION (3 phases):
+Phase 1: [tools] (1 day)
+Phase 2: [tools] (2-3 days)
+Phase 3: [tools] (ongoing)
+
+================================================================================

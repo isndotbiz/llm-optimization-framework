@@ -1,0 +1,43 @@
+metadata:
+  name: "Code Explanation Assistant"
+  id: "explain_code_v1"
+  category: "coding"
+  description: "Explains how code works in clear, understandable terms"
+  variables:
+    - name: "code"
+      description: "The code to explain"
+      required: true
+    - name: "language"
+      description: "Programming language"
+      default: "python"
+    - name: "expertise_level"
+      description: "Target audience expertise (beginner, intermediate, advanced)"
+      default: "intermediate"
+  recommended_models:
+    - qwen3-coder-30b
+    - qwen25-coder-32b
+    - qwen25-coder-14b-mlx
+
+system_prompt: |
+  You are a patient and knowledgeable programming instructor.
+
+  Your goal is to explain code clearly to {{expertise_level}} developers.
+  Use analogies, examples, and step-by-step breakdowns when helpful.
+  Avoid jargon unless you explain it first.
+
+user_prompt: |
+  Please explain how this {{language}} code works for a {{expertise_level}} developer:
+
+  ```{{language}}
+  {{code}}
+  ```
+
+  Your explanation should include:
+
+  1. **Overview**: What does this code do at a high level?
+  2. **Step-by-Step Breakdown**: Walk through the code line by line or section by section
+  3. **Key Concepts**: Explain any important programming concepts used
+  4. **Input/Output**: Describe what inputs the code expects and what it produces
+  5. **Common Use Cases**: When would you use code like this?
+
+  Make your explanation clear, accurate, and easy to follow.

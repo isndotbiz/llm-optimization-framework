@@ -1,0 +1,207 @@
+# Conditional Workflow Example
+# Demonstrates branching logic based on LLM outputs
+
+workflow:
+  name: "ConditionalContentRouter"
+  version: "1.0"
+  description: "Route content through different processing paths based on classification"
+
+  variables:
+    input_text: ""
+    quality_threshold: 7
+
+  steps:
+    - id: "classify_content"
+      name: "Classify Content Type"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.2
+      prompt: |
+        Classify this text into one category:
+        - technical
+        - creative
+        - business
+        - academic
+
+        Text: {{input_text}}
+
+        Return JSON: {"category": "...", "confidence": 0.XX}
+      outputs:
+        - name: "category"
+          type: "string"
+        - name: "confidence"
+          type: "number"
+
+    - id: "assess_quality"
+      name: "Assess Content Quality"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.1
+      depends_on: ["classify_content"]
+      prompt: |
+        Rate the quality of this text from 1-10:
+        {{input_text}}
+
+        Consider:
+        - Clarity
+        - Structure
+        - Grammar
+        - Completeness
+
+        Return JSON: {"quality_score": X, "issues": ["..."]}
+      outputs:
+        - name: "quality_score"
+          type: "number"
+        - name: "issues"
+          type: "array"
+
+    # Branch: High quality content
+    - id: "enhance_high_quality"
+      name: "Enhance High Quality Content"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.5
+      depends_on: ["assess_quality"]
+      condition: "{{steps.assess_quality.outputs.quality_score >= quality_threshold}}"
+      prompt: |
+        This is already good quality content. Make minor enhancements:
+        {{input_text}}
+
+        Focus on:
+        - Polish language
+        - Add impactful phrases
+        - Improve flow
+
+        Keep changes minimal.
+      outputs:
+        - name: "enhanced_content"
+          type: "string"
+
+    # Branch: Low quality content
+    - id: "major_revision"
+      name: "Major Content Revision"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.6
+      depends_on: ["assess_quality"]
+      condition: "{{steps.assess_quality.outputs.quality_score < quality_threshold}}"
+      prompt: |
+        This content needs significant improvement:
+        {{input_text}}
+
+        Issues identified:
+        {{steps.assess_quality.outputs.issues}}
+
+        Rewrite to address all issues while maintaining the core message.
+      outputs:
+        - name: "revised_content"
+          type: "string"
+
+    # Category-specific processing: Technical
+    - id: "add_technical_details"
+      name: "Add Technical Details"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.4
+      depends_on: ["classify_content"]
+      condition: "{{steps.classify_content.outputs.category == 'technical'}}"
+      prompt: |
+        Add technical depth to this content:
+        {{steps.enhance_high_quality.outputs.enhanced_content || steps.major_revision.outputs.revised_content}}
+
+        Include:
+        - Technical specifications
+        - Code examples if relevant
+        - Best practices
+      outputs:
+        - name: "final_content"
+          type: "string"
+
+    # Category-specific processing: Creative
+    - id: "enhance_creativity"
+      name: "Enhance Creative Elements"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.8
+      depends_on: ["classify_content"]
+      condition: "{{steps.classify_content.outputs.category == 'creative'}}"
+      prompt: |
+        Enhance the creative aspects:
+        {{steps.enhance_high_quality.outputs.enhanced_content || steps.major_revision.outputs.revised_content}}
+
+        Add:
+        - Vivid imagery
+        - Metaphors
+        - Engaging language
+      outputs:
+        - name: "final_content"
+          type: "string"
+
+    # Category-specific processing: Business
+    - id: "add_business_context"
+      name: "Add Business Context"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.5
+      depends_on: ["classify_content"]
+      condition: "{{steps.classify_content.outputs.category == 'business'}}"
+      prompt: |
+        Add business context and value proposition:
+        {{steps.enhance_high_quality.outputs.enhanced_content || steps.major_revision.outputs.revised_content}}
+
+        Include:
+        - ROI considerations
+        - Market implications
+        - Strategic insights
+      outputs:
+        - name: "final_content"
+          type: "string"
+
+    # Category-specific processing: Academic
+    - id: "add_academic_rigor"
+      name: "Add Academic Rigor"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.3
+      depends_on: ["classify_content"]
+      condition: "{{steps.classify_content.outputs.category == 'academic'}}"
+      prompt: |
+        Enhance academic rigor:
+        {{steps.enhance_high_quality.outputs.enhanced_content || steps.major_revision.outputs.revised_content}}
+
+        Add:
+        - Citations format
+        - Methodological notes
+        - Theoretical framework references
+      outputs:
+        - name: "final_content"
+          type: "string"
+
+    # Validation gate
+    - id: "final_quality_check"
+      name: "Final Quality Validation"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.1
+      depends_on:
+        - "add_technical_details"
+        - "enhance_creativity"
+        - "add_business_context"
+        - "add_academic_rigor"
+      prompt: |
+        Perform final quality check on this content:
+        {{steps.add_technical_details.outputs.final_content ||
+          steps.enhance_creativity.outputs.final_content ||
+          steps.add_business_context.outputs.final_content ||
+          steps.add_academic_rigor.outputs.final_content}}
+
+        Verify:
+        - No grammatical errors
+        - Logical flow
+        - Completeness
+        - Appropriate for category: {{steps.classify_content.outputs.category}}
+
+        Return JSON: {"approved": true/false, "final_score": X, "notes": "..."}
+      outputs:
+        - name: "validation_result"
+          type: "object"

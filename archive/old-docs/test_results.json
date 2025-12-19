@@ -1,0 +1,270 @@
+{
+  "timestamp": "2025-12-08T23:06:37.659431",
+  "total_tests": 35,
+  "passed": 19,
+  "failed": 16,
+  "duration": 0.20320391654968262,
+  "tests": [
+    {
+      "category": "CORE INFRASTRUCTURE",
+      "name": "Import session_manager",
+      "status": "PASSED",
+      "duration": 0.007509708404541016,
+      "error": null
+    },
+    {
+      "category": "CORE INFRASTRUCTURE",
+      "name": "Database creation",
+      "status": "PASSED",
+      "duration": 0.0018086433410644531,
+      "error": null
+    },
+    {
+      "category": "CORE INFRASTRUCTURE",
+      "name": "CRUD operations",
+      "status": "FAILED",
+      "duration": 0.016885757446289062,
+      "error": "Error binding parameter 3: type 'dict' is not supported",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 148, in test_crud_operations\n    session_id = sm.create_session(\"test_model\", {\"test\": True})\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\models\\session_manager.py\", line 99, in create_session\n    conn.execute(\nsqlite3.ProgrammingError: Error binding parameter 3: type 'dict' is not supported\n"
+    },
+    {
+      "category": "CORE INFRASTRUCTURE",
+      "name": "Search functionality",
+      "status": "FAILED",
+      "duration": 0.012938499450683594,
+      "error": "Error binding parameter 3: type 'dict' is not supported",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 183, in test_search_functionality\n    sid1 = sm.create_session(\"model1\", {\"test\": True})\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\models\\session_manager.py\", line 99, in create_session\n    conn.execute(\nsqlite3.ProgrammingError: Error binding parameter 3: type 'dict' is not supported\n"
+    },
+    {
+      "category": "CORE INFRASTRUCTURE",
+      "name": "Import response_processor",
+      "status": "PASSED",
+      "duration": 0.0005049705505371094,
+      "error": null
+    },
+    {
+      "category": "CORE INFRASTRUCTURE",
+      "name": "Processor initialization",
+      "status": "FAILED",
+      "duration": 0.0,
+      "error": "ResponseProcessor.__init__() missing 1 required positional argument: 'output_dir'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 212, in test_initialization\n    processor = ResponseProcessor()\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: ResponseProcessor.__init__() missing 1 required positional argument: 'output_dir'\n"
+    },
+    {
+      "category": "CORE INFRASTRUCTURE",
+      "name": "Markdown formatting",
+      "status": "FAILED",
+      "duration": 0.0,
+      "error": "ResponseProcessor.__init__() missing 1 required positional argument: 'output_dir'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 218, in test_markdown_formatting\n    processor = ResponseProcessor()\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: ResponseProcessor.__init__() missing 1 required positional argument: 'output_dir'\n"
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "Import template_manager",
+      "status": "PASSED",
+      "duration": 0.05902433395385742,
+      "error": null
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "Template loading",
+      "status": "PASSED",
+      "duration": 0.006386518478393555,
+      "error": null
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "Variable substitution",
+      "status": "FAILED",
+      "duration": 0.008542776107788086,
+      "error": "PromptTemplate.render() got an unexpected keyword argument 'var1'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 288, in test_variable_substitution\n    rendered = pt.render(var1=\"Hello\", var2=\"World\")\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: PromptTemplate.render() got an unexpected keyword argument 'var1'\n"
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "Import context_manager",
+      "status": "PASSED",
+      "duration": 0.0009989738464355469,
+      "error": null
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "File loading",
+      "status": "FAILED",
+      "duration": 0.0,
+      "error": "'ContextManager' object has no attribute 'load_file'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 313, in test_file_loading\n    content = cm.load_file(test_file)\n              ^^^^^^^^^^^^\nAttributeError: 'ContextManager' object has no attribute 'load_file'. Did you mean: 'add_file'?\n"
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "Token estimation",
+      "status": "PASSED",
+      "duration": 0.0,
+      "error": null
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "Context building",
+      "status": "FAILED",
+      "duration": 0.0,
+      "error": "'ContextManager' object has no attribute 'build_context'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 339, in test_context_building\n    context = cm.build_context([file1, file2])\n              ^^^^^^^^^^^^^^^^\nAttributeError: 'ContextManager' object has no attribute 'build_context'\n"
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "Import for processing",
+      "status": "PASSED",
+      "duration": 0.0,
+      "error": null
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "JSON extraction",
+      "status": "FAILED",
+      "duration": 0.0,
+      "error": "ResponseProcessor.__init__() missing 1 required positional argument: 'output_dir'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 363, in test_json_extraction\n    processor = ResponseProcessor()\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: ResponseProcessor.__init__() missing 1 required positional argument: 'output_dir'\n"
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "Code extraction",
+      "status": "FAILED",
+      "duration": 0.0,
+      "error": "ResponseProcessor.__init__() missing 1 required positional argument: 'output_dir'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 373, in test_code_extraction\n    processor = ResponseProcessor()\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: ResponseProcessor.__init__() missing 1 required positional argument: 'output_dir'\n"
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "Import model_selector",
+      "status": "PASSED",
+      "duration": 0.000997781753540039,
+      "error": null
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "Selector initialization",
+      "status": "FAILED",
+      "duration": 0.0,
+      "error": "ModelSelector.__init__() missing 1 required positional argument: 'preferences_file'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 401, in test_initialization\n    selector = ModelSelector()\n               ^^^^^^^^^^^^^^^\nTypeError: ModelSelector.__init__() missing 1 required positional argument: 'preferences_file'\n"
+    },
+    {
+      "category": "INDEPENDENT FEATURES",
+      "name": "Capability matching",
+      "status": "FAILED",
+      "duration": 0.0,
+      "error": "ModelSelector.__init__() missing 1 required positional argument: 'preferences_file'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 407, in test_capability_matching\n    selector = ModelSelector()\n               ^^^^^^^^^^^^^^^\nTypeError: ModelSelector.__init__() missing 1 required positional argument: 'preferences_file'\n"
+    },
+    {
+      "category": "DEPENDENT FEATURES",
+      "name": "Import model_comparison",
+      "status": "PASSED",
+      "duration": 0.0025107860565185547,
+      "error": null
+    },
+    {
+      "category": "DEPENDENT FEATURES",
+      "name": "Comparison creation",
+      "status": "FAILED",
+      "duration": 0.0,
+      "error": "ModelComparison.create_comparison() missing 1 required positional argument: 'model_responses'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 435, in test_comparison_creation\n    comparison = mc.create_comparison(\"Test prompt\")\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: ModelComparison.create_comparison() missing 1 required positional argument: 'model_responses'\n"
+    },
+    {
+      "category": "DEPENDENT FEATURES",
+      "name": "Result storage",
+      "status": "FAILED",
+      "duration": 0.0,
+      "error": "ModelComparison.create_comparison() missing 1 required positional argument: 'model_responses'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 451, in test_result_storage\n    comparison = mc.create_comparison(\"Test prompt\")\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: ModelComparison.create_comparison() missing 1 required positional argument: 'model_responses'\n"
+    },
+    {
+      "category": "DEPENDENT FEATURES",
+      "name": "Import batch_processor",
+      "status": "PASSED",
+      "duration": 0.0022618770599365234,
+      "error": null
+    },
+    {
+      "category": "DEPENDENT FEATURES",
+      "name": "Job creation",
+      "status": "PASSED",
+      "duration": 0.0,
+      "error": null
+    },
+    {
+      "category": "DEPENDENT FEATURES",
+      "name": "Checkpointing",
+      "status": "FAILED",
+      "duration": 0.0,
+      "error": "BatchProcessor.save_checkpoint() missing 1 required positional argument: 'results'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 509, in test_checkpointing\n    bp.save_checkpoint(job)\nTypeError: BatchProcessor.save_checkpoint() missing 1 required positional argument: 'results'\n"
+    },
+    {
+      "category": "DEPENDENT FEATURES",
+      "name": "Import analytics_dashboard",
+      "status": "PASSED",
+      "duration": 0.0010027885437011719,
+      "error": null
+    },
+    {
+      "category": "DEPENDENT FEATURES",
+      "name": "Dashboard initialization",
+      "status": "PASSED",
+      "duration": 0.00864720344543457,
+      "error": null
+    },
+    {
+      "category": "DEPENDENT FEATURES",
+      "name": "Usage statistics",
+      "status": "PASSED",
+      "duration": 0.02340555191040039,
+      "error": null
+    },
+    {
+      "category": "ADVANCED FEATURES",
+      "name": "Import workflow_engine",
+      "status": "PASSED",
+      "duration": 0.0,
+      "error": null
+    },
+    {
+      "category": "ADVANCED FEATURES",
+      "name": "Workflow loading",
+      "status": "PASSED",
+      "duration": 0.0,
+      "error": null
+    },
+    {
+      "category": "ADVANCED FEATURES",
+      "name": "Variable passing",
+      "status": "PASSED",
+      "duration": 0.0,
+      "error": null
+    },
+    {
+      "category": "INTEGRATION TESTS",
+      "name": "Template + Context",
+      "status": "FAILED",
+      "duration": 0.0,
+      "error": "'ContextManager' object has no attribute 'load_file'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 671, in test_template_with_context\n    context = cm.load_file(context_file)\n              ^^^^^^^^^^^^\nAttributeError: 'ContextManager' object has no attribute 'load_file'. Did you mean: 'add_file'?\n"
+    },
+    {
+      "category": "INTEGRATION TESTS",
+      "name": "Session + Analytics",
+      "status": "FAILED",
+      "duration": 0.04071450233459473,
+      "error": "'AnalyticsDashboard' object has no attribute 'get_model_statistics'",
+      "trace": "Traceback (most recent call last):\n  File \"D:\\models\\test_integration.py\", line 85, in run_test\n    test_func()\n  File \"D:\\models\\test_integration.py\", line 705, in test_session_with_analytics\n    model_stats = dashboard.get_model_statistics()\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'AnalyticsDashboard' object has no attribute 'get_model_statistics'. Did you mean: 'get_usage_statistics'?\n"
+    },
+    {
+      "category": "INTEGRATION TESTS",
+      "name": "Batch + Templates",
+      "status": "PASSED",
+      "duration": 0.0009987354278564453,
+      "error": null
+    }
+  ]
+}

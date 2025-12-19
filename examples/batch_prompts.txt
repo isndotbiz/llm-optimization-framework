@@ -1,0 +1,38 @@
+# Example batch prompts file for AI Router Batch Processing
+# Lines starting with # are ignored
+# Each non-empty line is treated as a separate prompt
+
+# Data Structures and Algorithms
+Explain what is a linked list and provide a simple Python example
+Write a Python function to reverse a string without using built-in reverse
+What are the benefits of functional programming compared to imperative programming?
+Explain the concept of recursion with a practical example
+What is the difference between a stack and a queue? When would you use each?
+
+# Python Programming Basics
+How do you handle exceptions in Python? Provide an example
+Explain list comprehensions in Python with 3 different examples
+What are Python decorators and how do you use them?
+Describe the difference between a list and a tuple in Python
+How do you read and write files in Python?
+
+# Web Development Concepts
+What is RESTful API design and what are its key principles?
+Explain the difference between GET and POST HTTP methods
+What is CORS and why is it important in web development?
+Describe how authentication works with JWT tokens
+What are the advantages of using a CSS preprocessor like SASS?
+
+# Database Questions
+Explain the difference between SQL and NoSQL databases
+What is database normalization and why is it important?
+How do you prevent SQL injection attacks?
+Describe what an index is in a database and when to use it
+What is the difference between INNER JOIN and LEFT JOIN?
+
+# General Computer Science
+What is Big O notation and why does it matter?
+Explain the difference between compilation and interpretation
+What is version control and why is Git useful?
+Describe the client-server model in networking
+What are environment variables and how are they used?

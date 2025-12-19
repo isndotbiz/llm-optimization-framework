@@ -1,0 +1,356 @@
+# Human-in-the-Loop Workflow Example
+# Demonstrates user confirmation and intervention points
+
+workflow:
+  name: "EmailCampaignCreation"
+  version: "1.0"
+  description: "Create email campaign with human review and approval"
+
+  variables:
+    campaign_goal: ""
+    target_segment: ""
+    email_count: 3
+    brand_voice: "professional and friendly"
+
+  steps:
+    - id: "generate_strategy"
+      name: "Generate Campaign Strategy"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.6
+      prompt: |
+        Create an email campaign strategy for:
+
+        Goal: {{campaign_goal}}
+        Target audience: {{target_segment}}
+        Number of emails: {{email_count}}
+        Brand voice: {{brand_voice}}
+
+        Include:
+        1. Overall campaign theme
+        2. Email sequence flow
+        3. Key messages for each email
+        4. Call-to-action for each email
+        5. Timing recommendations
+      outputs:
+        - name: "strategy"
+          type: "string"
+
+    - id: "review_strategy"
+      name: "Review Campaign Strategy"
+      type: "user_confirmation"
+      depends_on: ["generate_strategy"]
+      message: |
+        Campaign Strategy:
+        {{steps.generate_strategy.outputs.strategy}}
+
+        Approve this strategy to continue?
+      timeout: 7200  # 2 hours
+      outputs:
+        - name: "strategy_approved"
+          type: "boolean"
+
+    - id: "strategy_feedback"
+      name: "Provide Strategy Feedback"
+      type: "user_input"
+      depends_on: ["review_strategy"]
+      condition: "{{steps.review_strategy.outputs.strategy_approved == false}}"
+      prompt: |
+        What changes would you like to the campaign strategy?
+      inputs:
+        - name: "feedback"
+          type: "text"
+          required: true
+        - name: "key_changes"
+          type: "text"
+          required: false
+      outputs:
+        - name: "feedback"
+        - name: "key_changes"
+
+    - id: "revise_strategy"
+      name: "Revise Strategy Based on Feedback"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.5
+      depends_on: ["strategy_feedback"]
+      condition: "{{steps.review_strategy.outputs.strategy_approved == false}}"
+      prompt: |
+        Revise this campaign strategy based on feedback:
+
+        Original strategy:
+        {{steps.generate_strategy.outputs.strategy}}
+
+        User feedback:
+        {{steps.strategy_feedback.outputs.feedback}}
+
+        Key changes requested:
+        {{steps.strategy_feedback.outputs.key_changes}}
+
+        Create revised strategy incorporating all feedback.
+      outputs:
+        - name: "revised_strategy"
+          type: "string"
+
+    - id: "write_email_1"
+      name: "Write Email 1"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.7
+      depends_on: ["review_strategy"]
+      condition: "{{steps.review_strategy.outputs.strategy_approved == true}}"
+      prompt: |
+        Write the first email in this campaign:
+
+        Strategy: {{steps.generate_strategy.outputs.strategy}}
+        Target: {{target_segment}}
+        Brand voice: {{brand_voice}}
+
+        Include:
+        - Compelling subject line
+        - Personalized greeting
+        - Value proposition
+        - Clear call-to-action
+        - Professional sign-off
+      outputs:
+        - name: "email_content"
+          type: "string"
+        - name: "subject_line"
+          type: "string"
+
+    - id: "write_email_2"
+      name: "Write Email 2"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.7
+      depends_on: ["write_email_1"]
+      prompt: |
+        Write the second email in this campaign:
+
+        Strategy: {{steps.generate_strategy.outputs.strategy}}
+        Previous email: {{steps.write_email_1.outputs.email_content}}
+        Target: {{target_segment}}
+        Brand voice: {{brand_voice}}
+
+        Build on the first email while adding new value.
+        Assume 3 days have passed since email 1.
+      outputs:
+        - name: "email_content"
+          type: "string"
+        - name: "subject_line"
+          type: "string"
+
+    - id: "write_email_3"
+      name: "Write Email 3"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.7
+      depends_on: ["write_email_2"]
+      prompt: |
+        Write the third and final email in this campaign:
+
+        Strategy: {{steps.generate_strategy.outputs.strategy}}
+        Email 1: {{steps.write_email_1.outputs.email_content}}
+        Email 2: {{steps.write_email_2.outputs.email_content}}
+        Target: {{target_segment}}
+        Brand voice: {{brand_voice}}
+
+        Create sense of urgency and final call-to-action.
+        Assume 5 days have passed since email 2.
+      outputs:
+        - name: "email_content"
+          type: "string"
+        - name: "subject_line"
+          type: "string"
+
+    - id: "review_all_emails"
+      name: "Review All Emails"
+      type: "user_review_batch"
+      depends_on: ["write_email_3"]
+      items:
+        - id: "email_1"
+          title: "{{steps.write_email_1.outputs.subject_line}}"
+          content: "{{steps.write_email_1.outputs.email_content}}"
+        - id: "email_2"
+          title: "{{steps.write_email_2.outputs.subject_line}}"
+          content: "{{steps.write_email_2.outputs.email_content}}"
+        - id: "email_3"
+          title: "{{steps.write_email_3.outputs.subject_line}}"
+          content: "{{steps.write_email_3.outputs.email_content}}"
+      review_options:
+        - "Approve"
+        - "Request changes"
+        - "Reject"
+      allow_comments: true
+      outputs:
+        - name: "review_results"
+          type: "object"
+
+    - id: "check_all_approved"
+      name: "Check All Emails Approved"
+      type: "expression"
+      depends_on: ["review_all_emails"]
+      expression: |
+        {{steps.review_all_emails.outputs.review_results.email_1.status == 'Approve' AND
+          steps.review_all_emails.outputs.review_results.email_2.status == 'Approve' AND
+          steps.review_all_emails.outputs.review_results.email_3.status == 'Approve'}}
+      outputs:
+        - name: "all_approved"
+          type: "boolean"
+
+    - id: "revise_emails"
+      name: "Revise Emails Based on Feedback"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.6
+      depends_on: ["check_all_approved"]
+      condition: "{{steps.check_all_approved.outputs.all_approved == false}}"
+      prompt: |
+        Revise these emails based on reviewer feedback:
+
+        Email 1:
+        Subject: {{steps.write_email_1.outputs.subject_line}}
+        Content: {{steps.write_email_1.outputs.email_content}}
+        Feedback: {{steps.review_all_emails.outputs.review_results.email_1.comments}}
+        Status: {{steps.review_all_emails.outputs.review_results.email_1.status}}
+
+        Email 2:
+        Subject: {{steps.write_email_2.outputs.subject_line}}
+        Content: {{steps.write_email_2.outputs.email_content}}
+        Feedback: {{steps.review_all_emails.outputs.review_results.email_2.comments}}
+        Status: {{steps.review_all_emails.outputs.review_results.email_2.status}}
+
+        Email 3:
+        Subject: {{steps.write_email_3.outputs.subject_line}}
+        Content: {{steps.write_email_3.outputs.email_content}}
+        Feedback: {{steps.review_all_emails.outputs.review_results.email_3.comments}}
+        Status: {{steps.review_all_emails.outputs.review_results.email_3.status}}
+
+        Only revise emails marked "Request changes" or "Reject".
+        Maintain campaign coherence.
+
+        Return JSON with revised emails.
+      outputs:
+        - name: "revised_emails"
+          type: "object"
+
+    - id: "a_b_testing"
+      name: "Generate A/B Testing Variants"
+      type: "user_input"
+      depends_on: ["check_all_approved"]
+      condition: "{{steps.check_all_approved.outputs.all_approved == true}}"
+      prompt: |
+        Would you like to generate A/B testing variants for subject lines?
+      inputs:
+        - name: "generate_variants"
+          type: "boolean"
+          default: false
+        - name: "variant_count"
+          type: "number"
+          default: 2
+          min: 2
+          max: 5
+      outputs:
+        - name: "generate_variants"
+        - name: "variant_count"
+
+    - id: "create_subject_variants"
+      name: "Create Subject Line Variants"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.8
+      depends_on: ["a_b_testing"]
+      condition: "{{steps.a_b_testing.outputs.generate_variants == true}}"
+      prompt: |
+        Create {{steps.a_b_testing.outputs.variant_count}} subject line variants for each email:
+
+        Email 1 original: {{steps.write_email_1.outputs.subject_line}}
+        Email 2 original: {{steps.write_email_2.outputs.subject_line}}
+        Email 3 original: {{steps.write_email_3.outputs.subject_line}}
+
+        For each variant, use different approaches:
+        - Question-based
+        - Benefit-focused
+        - Urgency-driven
+        - Curiosity-generating
+        - Personalized
+
+        Return as JSON with variants for each email.
+      outputs:
+        - name: "subject_variants"
+          type: "object"
+
+    - id: "schedule_campaign"
+      name: "Set Campaign Schedule"
+      type: "user_input"
+      depends_on: ["check_all_approved"]
+      condition: "{{steps.check_all_approved.outputs.all_approved == true}}"
+      prompt: |
+        Set the campaign schedule:
+      inputs:
+        - name: "start_date"
+          type: "date"
+          required: true
+        - name: "email_1_time"
+          type: "time"
+          default: "09:00"
+        - name: "days_between_emails"
+          type: "number"
+          default: 3
+          min: 1
+          max: 14
+        - name: "timezone"
+          type: "select"
+          options: ["UTC", "EST", "PST", "CST"]
+          default: "UTC"
+      outputs:
+        - name: "start_date"
+        - name: "email_1_time"
+        - name: "days_between_emails"
+        - name: "timezone"
+
+    - id: "final_confirmation"
+      name: "Final Campaign Confirmation"
+      type: "user_confirmation"
+      depends_on: ["schedule_campaign"]
+      message: |
+        Campaign Summary:
+
+        Goal: {{campaign_goal}}
+        Target: {{target_segment}}
+        Start Date: {{steps.schedule_campaign.outputs.start_date}}
+        Time: {{steps.schedule_campaign.outputs.email_1_time}} {{steps.schedule_campaign.outputs.timezone}}
+        Email Spacing: Every {{steps.schedule_campaign.outputs.days_between_emails}} days
+
+        Emails:
+        1. {{steps.write_email_1.outputs.subject_line}}
+        2. {{steps.write_email_2.outputs.subject_line}}
+        3. {{steps.write_email_3.outputs.subject_line}}
+
+        A/B Testing: {{steps.a_b_testing.outputs.generate_variants}}
+
+        Confirm and launch campaign?
+      outputs:
+        - name: "confirmed"
+          type: "boolean"
+
+    - id: "deploy_campaign"
+      name: "Deploy Campaign"
+      type: "action"
+      action: "deploy_email_campaign"
+      depends_on: ["final_confirmation"]
+      condition: "{{steps.final_confirmation.outputs.confirmed == true}}"
+      params:
+        emails:
+          - content: "{{steps.write_email_1.outputs.email_content}}"
+            subject: "{{steps.write_email_1.outputs.subject_line}}"
+          - content: "{{steps.write_email_2.outputs.email_content}}"
+            subject: "{{steps.write_email_2.outputs.subject_line}}"
+          - content: "{{steps.write_email_3.outputs.email_content}}"
+            subject: "{{steps.write_email_3.outputs.subject_line}}"
+        schedule: "{{steps.schedule_campaign.outputs}}"
+        target_segment: "{{target_segment}}"
+        variants: "{{steps.create_subject_variants.outputs.subject_variants}}"
+      outputs:
+        - name: "campaign_id"
+        - name: "deployment_status"

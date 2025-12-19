@@ -1,0 +1,12 @@
+{
+  "conversations": [
+    {
+      "timestamp": "2025-12-13T13:00:23.330480",
+      "user": "hello",
+      "assistant": "[Response logged]",
+      "model": "gemma3-27b"
+    }
+  ],
+  "created": "2025-12-11T00:51:58.770538",
+  "modified": "2025-12-13T13:00:23.330492"
+}

@@ -1,0 +1,162 @@
+    def post_process_response(self, response_text: str = None, model_name: str = None):
+        """Interactive post-processing menu for model responses"""
+        # Use last response if not provided
+        if response_text is None:
+            if self.last_response is None:
+                print(f"\n{Colors.BRIGHT_RED}No response available for post-processing.{Colors.RESET}")
+                print(f"{Colors.YELLOW}Generate a response first!{Colors.RESET}\n")
+                return
+            response_text = self.last_response
+            model_name = self.last_model_name
+
+        while True:
+            print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+            print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  RESPONSE POST-PROCESSING{Colors.RESET}")
+            print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+            if model_name:
+                print(f"{Colors.BRIGHT_WHITE}Model: {Colors.BRIGHT_GREEN}{model_name}{Colors.RESET}\n")
+
+            print(f"{Colors.BRIGHT_GREEN}[1]{Colors.RESET} Save to file")
+            print(f"{Colors.BRIGHT_GREEN}[2]{Colors.RESET} Extract code blocks")
+            print(f"{Colors.BRIGHT_GREEN}[3]{Colors.RESET} Show statistics")
+            print(f"{Colors.BRIGHT_GREEN}[4]{Colors.RESET} Copy to clipboard")
+            print(f"{Colors.BRIGHT_GREEN}[5]{Colors.RESET} Export as markdown")
+            print(f"{Colors.BRIGHT_GREEN}[6]{Colors.RESET} List saved responses")
+            print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Continue")
+
+            choice = input(f"\n{Colors.BRIGHT_YELLOW}Select option [0-6]: {Colors.RESET}").strip()
+
+            if choice == "0":
+                break
+            elif choice == "1":
+                self._save_response_to_file(response_text, model_name)
+            elif choice == "2":
+                self._extract_and_save_code_blocks(response_text)
+            elif choice == "3":
+                self._show_statistics(response_text)
+            elif choice == "4":
+                self._copy_to_clipboard(response_text)
+            elif choice == "5":
+                self._export_as_markdown(response_text, model_name)
+            elif choice == "6":
+                self._list_saved_responses()
+            else:
+                print(f"{Colors.BRIGHT_RED}Invalid choice. Please try again.{Colors.RESET}")
+
+    def _save_response_to_file(self, response_text: str, model_name: str):
+        """Save response to file"""
+        print(f"\n{Colors.BRIGHT_CYAN}Save Response to File{Colors.RESET}\n")
+
+        # Ask for custom filename
+        print(f"{Colors.WHITE}Press Enter for auto-generated filename, or type a custom name:{Colors.RESET}")
+        filename = input(f"{Colors.YELLOW}Filename: {Colors.RESET}").strip()
+
+        if not filename:
+            filename = None  # Auto-generate
+
+        try:
+            filepath = self.response_processor.save_response(
+                response_text,
+                filename=filename,
+                model_name=model_name
+            )
+            print(f"\n{Colors.BRIGHT_GREEN}Response saved to:{Colors.RESET}")
+            print(f"{Colors.CYAN}{filepath}{Colors.RESET}\n")
+        except Exception as e:
+            print(f"\n{Colors.BRIGHT_RED}Error saving file: {e}{Colors.RESET}\n")
+
+    def _extract_and_save_code_blocks(self, response_text: str):
+        """Extract and save code blocks"""
+        print(f"\n{Colors.BRIGHT_CYAN}Extract Code Blocks{Colors.RESET}\n")
+
+        blocks = self.response_processor.extract_code_blocks(response_text)
+
+        if not blocks:
+            print(f"{Colors.YELLOW}No code blocks found in response.{Colors.RESET}\n")
+            return
+
+        print(f"{Colors.BRIGHT_WHITE}Found {len(blocks)} code block(s):{Colors.RESET}\n")
+        for i, block in enumerate(blocks):
+            print(f"{Colors.GREEN}[{i+1}]{Colors.RESET} Language: {Colors.CYAN}{block['language']}{Colors.RESET}")
+            print(f"    Lines: {len(block['code'].splitlines())}")
+
+        print()
+        if self._confirm(f"{Colors.BRIGHT_YELLOW}Save all code blocks to files? [Y/n]:{Colors.RESET}", default_yes=True):
+            base_name = input(f"{Colors.YELLOW}Base filename (default: 'code'): {Colors.RESET}").strip() or "code"
+
+            try:
+                saved_files = self.response_processor.save_code_blocks(response_text, base_name)
+                print(f"\n{Colors.BRIGHT_GREEN}Saved {len(saved_files)} code file(s):{Colors.RESET}\n")
+                for filepath in saved_files:
+                    print(f"  {Colors.CYAN}{filepath.name}{Colors.RESET}")
+                print()
+            except Exception as e:
+                print(f"\n{Colors.BRIGHT_RED}Error saving code blocks: {e}{Colors.RESET}\n")
+
+    def _show_statistics(self, response_text: str):
+        """Show response statistics"""
+        print(f"\n{Colors.BRIGHT_CYAN}Response Statistics{Colors.RESET}\n")
+
+        stats = self.response_processor.get_statistics(response_text)
+
+        print(f"{Colors.BRIGHT_WHITE}Characters:     {Colors.BRIGHT_GREEN}{stats['char_count']:,}{Colors.RESET}")
+        print(f"{Colors.BRIGHT_WHITE}Words:          {Colors.BRIGHT_GREEN}{stats['word_count']:,}{Colors.RESET}")
+        print(f"{Colors.BRIGHT_WHITE}Lines:          {Colors.BRIGHT_GREEN}{stats['line_count']:,}{Colors.RESET}")
+        print(f"{Colors.BRIGHT_WHITE}Code blocks:    {Colors.BRIGHT_GREEN}{stats['code_blocks']}{Colors.RESET}")
+        print(f"{Colors.BRIGHT_WHITE}Avg line length: {Colors.BRIGHT_GREEN}{stats['avg_line_length']:.1f} chars{Colors.RESET}\n")
+
+    def _copy_to_clipboard(self, response_text: str):
+        """Copy response to clipboard"""
+        print(f"\n{Colors.BRIGHT_CYAN}Copy to Clipboard{Colors.RESET}\n")
+
+        success = self.response_processor.copy_to_clipboard(response_text)
+
+        if success:
+            print(f"{Colors.BRIGHT_GREEN}Response copied to clipboard!{Colors.RESET}\n")
+        else:
+            print(f"{Colors.BRIGHT_YELLOW}Clipboard functionality not available.{Colors.RESET}")
+            print(f"{Colors.YELLOW}Install pyperclip: pip install pyperclip{Colors.RESET}\n")
+
+    def _export_as_markdown(self, response_text: str, model_name: str):
+        """Export response as markdown"""
+        print(f"\n{Colors.BRIGHT_CYAN}Export as Markdown{Colors.RESET}\n")
+
+        filename = input(f"{Colors.YELLOW}Filename (default: auto-generated): {Colors.RESET}").strip()
+
+        if not filename:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"response_{timestamp}.md"
+        elif not filename.endswith('.md'):
+            filename += '.md'
+
+        try:
+            markdown_content = self.response_processor.format_as_markdown(response_text, model_name)
+            filepath = self.output_dir / filename
+            filepath.write_text(markdown_content, encoding='utf-8')
+
+            print(f"\n{Colors.BRIGHT_GREEN}Markdown exported to:{Colors.RESET}")
+            print(f"{Colors.CYAN}{filepath}{Colors.RESET}\n")
+        except Exception as e:
+            print(f"\n{Colors.BRIGHT_RED}Error exporting markdown: {e}{Colors.RESET}\n")
+
+    def _list_saved_responses(self):
+        """List recently saved response files"""
+        print(f"\n{Colors.BRIGHT_CYAN}Recently Saved Responses{Colors.RESET}\n")
+
+        files = self.response_processor.list_saved_responses(limit=10)
+
+        if not files:
+            print(f"{Colors.YELLOW}No saved responses found.{Colors.RESET}\n")
+            return
+
+        print(f"{Colors.BRIGHT_WHITE}Last {len(files)} response(s):{Colors.RESET}\n")
+        for i, filepath in enumerate(files):
+            # Get file modification time
+            mtime = datetime.fromtimestamp(filepath.stat().st_mtime)
+            time_str = mtime.strftime("%Y-%m-%d %H:%M:%S")
+
+            print(f"{Colors.GREEN}[{i+1}]{Colors.RESET} {Colors.WHITE}{filepath.name}{Colors.RESET}")
+            print(f"     {Colors.DIM}{time_str}{Colors.RESET}")
+
+        print()

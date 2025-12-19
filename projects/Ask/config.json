@@ -1,0 +1,21 @@
+{
+  "title": "Ask",
+  "created": "2025-12-13T13:34:14.599682",
+  "modified": "2025-12-13T13:34:14.599700",
+  "model": "dolphin-llama31-8b",
+  "provider": "llama-cpp",
+  "system_prompt": "",
+  "parameters": {
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "top_k": 40,
+    "max_tokens": 4096,
+    "context_limit": 8192,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0
+  },
+  "web_search": {
+    "enabled": false
+  },
+  "reasoning_effort": "none"
+}

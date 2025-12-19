@@ -1,0 +1,83 @@
+id: research_workflow
+name: "Multi-Model Research Workflow"
+description: "Uses multiple models to research a topic comprehensively"
+
+variables:
+  topic: ""
+
+steps:
+  - name: quick_overview
+    type: prompt
+    model: llama33-70b
+    prompt: |
+      Provide a concise overview of: {{topic}}
+
+      Include:
+      - What it is
+      - Why it matters
+      - Key concepts
+      - Current relevance
+
+      Keep it brief (2-3 paragraphs).
+    output_var: overview
+    on_error: continue
+
+  - name: deep_analysis
+    type: prompt
+    model: phi4-14b
+    depends_on: [quick_overview]
+    prompt: |
+      Based on this overview:
+
+      {{overview}}
+
+      Provide a comprehensive analysis of {{topic}} including:
+
+      1. Technical Details
+         - Core technologies and methodologies
+         - Implementation considerations
+         - Technical challenges
+
+      2. Current Research & State of the Art
+         - Recent developments
+         - Leading researchers/organizations
+         - Key papers or resources
+
+      3. Future Trends & Predictions
+         - Emerging directions
+         - Potential breakthroughs
+         - Timeline for advancement
+
+      4. Practical Applications
+         - Real-world use cases
+         - Industry adoption
+         - Impact on different sectors
+
+      Be thorough and cite specific examples where possible.
+    output_var: analysis
+    on_error: continue
+
+  - name: create_summary
+    type: prompt
+    model: qwen3-coder-30b
+    depends_on: [deep_analysis]
+    prompt: |
+      Create a well-structured markdown summary document for: {{topic}}
+
+      Combine these sources:
+
+      Overview:
+      {{overview}}
+
+      Deep Analysis:
+      {{analysis}}
+
+      Format as a professional research document with:
+      - Title and introduction
+      - Clear section headers
+      - Bullet points for key findings
+      - Conclusion with actionable insights
+      - References section (if applicable)
+
+      Make it publication-ready.
+    output_var: final_summary

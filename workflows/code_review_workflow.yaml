@@ -1,0 +1,69 @@
+id: code_review_workflow
+name: "Code Review and Improvement Workflow"
+description: "Reviews code, suggests improvements, then generates improved version"
+
+variables:
+  code: ""  # Will be provided by user
+  language: "python"
+
+steps:
+  - name: review_code
+    type: prompt
+    model: qwen3-coder-30b
+    prompt: |
+      Review this {{language}} code and identify issues:
+      ```{{language}}
+      {{code}}
+      ```
+
+      Analyze for:
+      - Bugs and logical errors
+      - Security vulnerabilities
+      - Performance bottlenecks
+      - Code style and best practices
+      - Potential edge cases
+
+      Provide a detailed review with specific line references.
+    output_var: review_results
+    on_error: continue
+
+  - name: suggest_improvements
+    type: prompt
+    model: qwen3-coder-30b
+    depends_on: [review_code]
+    prompt: |
+      Based on this code review:
+
+      {{review_results}}
+
+      Suggest specific, actionable improvements:
+      1. Priority fixes (critical bugs/security)
+      2. Performance optimizations
+      3. Code quality enhancements
+      4. Additional features or refactoring suggestions
+
+      Be specific and concrete in your recommendations.
+    output_var: improvements
+    on_error: continue
+
+  - name: generate_improved_code
+    type: prompt
+    model: qwen3-coder-30b
+    depends_on: [suggest_improvements]
+    prompt: |
+      Rewrite this {{language}} code incorporating these improvements:
+
+      {{improvements}}
+
+      Original code:
+      ```{{language}}
+      {{code}}
+      ```
+
+      Provide the complete improved code with:
+      - All suggested fixes implemented
+      - Inline comments explaining key changes
+      - Proper error handling
+      - Best practices applied
+    output_var: improved_code
+    on_error: continue

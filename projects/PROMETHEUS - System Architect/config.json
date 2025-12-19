@@ -1,0 +1,21 @@
+{
+  "title": "THE OPERATOR - Execution Unit",
+  "created": "2025-12-10T00:35:00.000000",
+  "modified": "2025-12-13T12:50:31.271786",
+  "model": "llama33-70b",
+  "provider": "llama-cpp",
+  "system_prompt": "",
+  "parameters": {
+    "temperature": 0.6,
+    "top_p": 0.9,
+    "top_k": 40,
+    "max_tokens": 8192,
+    "context_limit": 8192,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0
+  },
+  "web_search": {
+    "enabled": false
+  },
+  "reasoning_effort": "disabled"
+}

@@ -1,0 +1,78 @@
+================================================================================
+  AI ROUTER - QUICK START GUIDE
+================================================================================
+
+EASIEST WAY TO START:
+---------------------
+1. Double-click: START-AI-ROUTER.bat
+2. The app will launch in WSL automatically
+3. Choose an option from the menu and start chatting!
+
+
+ALTERNATIVE METHODS:
+--------------------
+
+Method 1: From WSL (Recommended)
+  wsl
+  cd /mnt/d/models
+  ./start-router.sh
+
+Method 2: From PowerShell
+  .\START-AI-ROUTER.bat
+
+Method 3: Direct WSL command
+  wsl bash -c "cd /mnt/d/models && python3 ai-router-enhanced.py"
+
+
+IMPORTANT NOTES:
+----------------
+- All models are in: D:\models\organized\
+- You have 9 models ready (100GB total)
+- Models work ONLY through WSL (not Windows PowerShell)
+- Both apps are at 100% health
+- Logs are in: D:\models\logs\
+
+
+WHICH VERSION:
+--------------
+START-AI-ROUTER.bat         = Enhanced (Projects, History, Templates)
+START-AI-ROUTER-BASIC.bat   = Basic (Simple model selection)
+
+
+YOUR PROJECTS:
+--------------
+- PROMETHEUS - System Architect
+- THE OPERATOR - Execution Unit
+
+To edit project settings:
+  D:\models\projects\[PROJECT-NAME]\config.json
+
+
+TROUBLESHOOTING:
+----------------
+Read: D:\models\HOW-TO-START.txt
+Or:   D:\models\docs\TROUBLESHOOTING.md
+
+
+DIRECTORY STRUCTURE:
+--------------------
+D:\models\
+  ├── START-AI-ROUTER.bat      ← CLICK THIS!
+  ├── ai-router-enhanced.py     ← Full version (67KB)
+  ├── ai-router.py              ← Basic version (43KB)
+  ├── organized/                ← Your 9 models here
+  ├── projects/                 ← Your AI Router projects
+  ├── logs/                     ← Application logs
+  ├── docs/                     ← Documentation
+  └── archive/                  ← Old files (cleaned up)
+
+
+NEXT STEPS:
+-----------
+1. Double-click START-AI-ROUTER.bat
+2. Choose [2] Load Existing Project
+3. Select a project or create new one
+4. Start chatting with your local LLMs!
+
+
+================================================================================

@@ -60,5 +60,12 @@ temp/
 .cache/
 huggingface/
 
+# Database and session files
+*.db
+*.sqlite
+*.sqlite3
+.ai-router-sessions.db
+.test-preferences.json
+
 # Personal notes (if you want to keep them local)
 # personal-notes.md

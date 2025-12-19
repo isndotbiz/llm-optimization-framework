@@ -1,0 +1,37 @@
+name: "Debugging Assistant Context"
+description: "Template for debugging code and troubleshooting issues"
+instructions: |
+  The following code and information has been provided for debugging:
+
+  {% for item in context_items %}
+  ## {{ item.label }}
+  {% if item.path %}
+  File: {{ item.path }}
+  {% endif %}
+  Language: {{ item.language }}
+
+  ```{{ item.language }}
+  {{ item.content }}
+  ```
+  {% endfor %}
+
+  ================================================================================
+
+  USER REQUEST / ISSUE DESCRIPTION:
+  {{ user_prompt }}
+
+  Please help debug the issue by:
+  1. Analyzing the provided code for potential bugs
+  2. Identifying the root cause of the problem
+  3. Explaining why the issue occurs
+  4. Providing a clear, step-by-step solution
+  5. Suggesting prevention strategies for similar issues
+  6. Recommending testing approaches to verify the fix
+
+  Focus on:
+  - Logic errors and edge cases
+  - Runtime errors and exceptions
+  - Performance bottlenecks
+  - Memory leaks or resource issues
+  - Incorrect assumptions or misunderstandings
+  - Configuration or environment problems

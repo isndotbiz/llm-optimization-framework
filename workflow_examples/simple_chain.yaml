@@ -1,0 +1,79 @@
+# Simple Prompt Chain Example
+# A basic sequential workflow demonstrating variable passing
+
+workflow:
+  name: "SimplePromptChain"
+  version: "1.0"
+  description: "Basic example of chaining prompts with variable passing"
+
+  variables:
+    user_query: "What are the benefits of renewable energy?"
+    style: "educational"
+    target_audience: "high school students"
+
+  steps:
+    - id: "research"
+      name: "Research Topic"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.3
+      prompt: |
+        Research this question and provide 3 key points:
+        {{user_query}}
+
+        Focus on factual, well-supported information.
+      outputs:
+        - name: "key_points"
+          type: "string"
+
+    - id: "expand"
+      name: "Expand Key Points"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.6
+      depends_on: ["research"]
+      prompt: |
+        Take these key points:
+        {{steps.research.outputs.key_points}}
+
+        Expand each point into a detailed paragraph.
+        Style: {{style}}
+        Audience: {{target_audience}}
+      outputs:
+        - name: "expanded_content"
+          type: "string"
+
+    - id: "add_examples"
+      name: "Add Real-World Examples"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.7
+      depends_on: ["expand"]
+      prompt: |
+        Add 2-3 real-world examples to this content:
+        {{steps.expand.outputs.expanded_content}}
+
+        Make examples relatable to: {{target_audience}}
+      outputs:
+        - name: "content_with_examples"
+          type: "string"
+
+    - id: "format"
+      name: "Format Final Output"
+      type: "llm_call"
+      model: "gpt-4"
+      temperature: 0.4
+      depends_on: ["add_examples"]
+      prompt: |
+        Format this content for easy reading:
+        {{steps.add_examples.outputs.content_with_examples}}
+
+        Add:
+        - Clear headings
+        - Bullet points where appropriate
+        - Summary at the end
+
+        Original question: {{user_query}}
+      outputs:
+        - name: "final_output"
+          type: "string"

@@ -1,0 +1,1449 @@
+#!/usr/bin/env python3
+"""
+AI Router Enhanced - Complete AI Project Management System
+Features: Projects, Bots, Multi-Provider Support, Web Search, Memory, MCP Tools
+Version: 2.0
+Author: Enhanced AI Router System
+Date: 2025-12-08
+"""
+
+import os
+import sys
+import json
+import subprocess
+import platform
+import shutil
+from pathlib import Path
+from datetime import datetime
+from typing import Dict, List, Optional, Any, Tuple
+
+def is_wsl():
+    """Detect if running in WSL (Windows Subsystem for Linux)"""
+    try:
+        with open('/proc/version', 'r') as f:
+            return 'microsoft' in f.read().lower()
+    except:
+        return False
+
+# Color codes for terminal output
+class Colors:
+    RESET = '\033[0m'
+    BOLD = '\033[1m'
+    DIM = '\033[2m'
+
+    # Foreground colors
+    BLACK = '\033[30m'
+    RED = '\033[31m'
+    GREEN = '\033[32m'
+    YELLOW = '\033[33m'
+    BLUE = '\033[34m'
+    MAGENTA = '\033[35m'
+    CYAN = '\033[36m'
+    WHITE = '\033[37m'
+
+    # Bright foreground colors
+    BRIGHT_BLACK = '\033[90m'
+    BRIGHT_RED = '\033[91m'
+    BRIGHT_GREEN = '\033[92m'
+    BRIGHT_YELLOW = '\033[93m'
+    BRIGHT_BLUE = '\033[94m'
+    BRIGHT_MAGENTA = '\033[95m'
+    BRIGHT_CYAN = '\033[96m'
+    BRIGHT_WHITE = '\033[97m'
+
+    # Background colors
+    BG_BLACK = '\033[40m'
+    BG_RED = '\033[41m'
+    BG_GREEN = '\033[42m'
+    BG_YELLOW = '\033[43m'
+    BG_BLUE = '\033[44m'
+    BG_MAGENTA = '\033[45m'
+    BG_CYAN = '\033[46m'
+    BG_WHITE = '\033[47m'
+
+
+class ModelDatabase:
+    """Comprehensive model database with 2025 research-optimized settings"""
+
+    # RTX 3090 Models (WSL)
+    RTX3090_MODELS = {
+        "qwen3-coder-30b": {
+            "name": "Qwen3 Coder 30B Q4_K_M",
+            "path": "/mnt/d/models/organized/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+            "size": "18GB",
+            "speed": "25-35 tok/sec",
+            "use_case": "Advanced coding, code review, architecture design",
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "context": 32768,
+            "special_flags": ["--jinja"],
+            "system_prompt": "system-prompt-qwen3-coder-30b.txt",
+            "notes": "CRITICAL: Never use temp 0 (causes endless loops). Use enable_thinking for reasoning.",
+            "framework": "llama.cpp"
+        },
+        "phi4-14b": {
+            "name": "Phi-4 Reasoning Plus 14B Q6_K",
+            "path": "/mnt/d/models/organized/microsoft_Phi-4-reasoning-plus-Q6_K.gguf",
+            "size": "12GB",
+            "speed": "35-55 tok/sec",
+            "use_case": "Math, reasoning, STEM, logical analysis",
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 16384,
+            "special_flags": ["--jinja"],
+            "system_prompt": "system-prompt-phi4-14b.txt",
+            "notes": "CRITICAL: Requires --jinja flag. DO NOT use 'think step-by-step' prompts.",
+            "framework": "llama.cpp"
+        },
+        "gemma3-27b": {
+            "name": "Gemma 3 27B Q2_K (Abliterated)",
+            "path": "/mnt/d/models/organized/mlabonne_gemma-3-27b-it-abliterated-Q2_K.gguf",
+            "size": "10GB",
+            "speed": "25-40 tok/sec",
+            "use_case": "Uncensored chat, creative writing, research",
+            "temperature": 0.9,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 128000,
+            "special_flags": [],
+            "system_prompt": None,
+            "notes": "NO system prompt support. 128K context. Uncensored/abliterated variant.",
+            "framework": "llama.cpp"
+        },
+        "ministral-3-14b": {
+            "name": "Ministral-3 14B Reasoning Q5_K_M",
+            "path": "/mnt/d/models/organized/Ministral-3-14B-Reasoning-2512-Q5_K_M.gguf",
+            "size": "9GB",
+            "speed": "35-50 tok/sec",
+            "use_case": "Complex reasoning, problem solving, analysis",
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 262144,
+            "special_flags": [],
+            "system_prompt": "system-prompt-ministral-3-14b.txt",
+            "notes": "256K context window. Excellent for long-context reasoning.",
+            "framework": "llama.cpp"
+        },
+        "deepseek-r1-14b": {
+            "name": "DeepSeek R1 Distill Qwen 14B Q5_K_M",
+            "path": "/mnt/d/models/organized/DeepSeek-R1-Distill-Qwen-14B-Q5_K_M.gguf",
+            "size": "10GB",
+            "speed": "30-50 tok/sec",
+            "use_case": "Advanced reasoning, research, complex analysis",
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 32768,
+            "special_flags": [],
+            "system_prompt": "system-prompt-deepseek-r1.txt",
+            "notes": "DeepSeek R1 distilled to Qwen. Excellent reasoning capabilities.",
+            "framework": "llama.cpp"
+        },
+        "llama33-70b": {
+            "name": "Llama 3.3 70B Instruct IQ2_S (Abliterated)",
+            "path": "/mnt/d/models/organized/Llama-3.3-70B-Instruct-abliterated-IQ2_S.gguf",
+            "size": "21GB",
+            "speed": "15-25 tok/sec",
+            "use_case": "Large-scale reasoning, research, uncensored tasks",
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 131072,
+            "special_flags": [],
+            "system_prompt": "system-prompt-llama33-70b.txt",
+            "notes": "Largest model available. Excellent for complex tasks. Uncensored.",
+            "framework": "llama.cpp"
+        },
+        "dolphin-llama31-8b": {
+            "name": "Dolphin 3.0 Llama 3.1 8B Q6_K",
+            "path": "/mnt/d/models/organized/Dolphin3.0-Llama3.1-8B-Q6_K.gguf",
+            "size": "6GB",
+            "speed": "45-65 tok/sec",
+            "use_case": "Fast general tasks, uncensored chat, quick assistance",
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 32768,
+            "special_flags": [],
+            "system_prompt": "system-prompt-dolphin-8b.txt",
+            "notes": "Fastest model. Uncensored variant of Llama 3.1 8B.",
+            "framework": "llama.cpp"
+        },
+        "dolphin-mistral-24b": {
+            "name": "Dolphin Mistral 24B Venice Q4_K_M",
+            "path": "/mnt/d/models/organized/cognitivecomputations_Dolphin-Mistral-24B-Venice-Edition-Q4_K_M.gguf",
+            "size": "14GB",
+            "speed": "25-40 tok/sec",
+            "use_case": "Uncensored chat, creative tasks, roleplay",
+            "temperature": 0.8,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 32768,
+            "special_flags": [],
+            "system_prompt": None,
+            "notes": "Venice Edition: Completely uncensored. No system prompt support.",
+            "framework": "llama.cpp"
+        },
+        "wizard-vicuna-13b": {
+            "name": "Wizard Vicuna 13B Uncensored Q4_0",
+            "path": "/mnt/d/models/organized/Wizard-Vicuna-13B-Uncensored-Q4_0.gguf",
+            "size": "7GB",
+            "speed": "35-50 tok/sec",
+            "use_case": "General uncensored chat, creative writing",
+            "temperature": 0.8,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 8192,
+            "special_flags": [],
+            "system_prompt": "system-prompt-wizard-vicuna.txt",
+            "notes": "Classic uncensored model. Smaller context window.",
+            "framework": "llama.cpp"
+        }
+    }
+
+    # MacBook M4 Pro Models (MLX)
+    M4_MODELS = {
+        "qwen25-14b-mlx": {
+            "name": "Qwen2.5 14B Instruct Q5_K_M (MLX)",
+            "path": "~/models/qwen25-14b",
+            "size": "11GB",
+            "speed": "50-70 tok/sec",
+            "use_case": "General purpose, research, chat",
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 32768,
+            "special_flags": [],
+            "system_prompt": "system-prompt-qwen25-14b.txt",
+            "notes": "Best daily driver for M4. Use MLX for 2-3x speedup vs llama.cpp.",
+            "framework": "mlx"
+        },
+        "qwen25-coder-14b-mlx": {
+            "name": "Qwen2.5 Coder 14B Q4_K_M (MLX)",
+            "path": "~/models/qwen25-coder-14b",
+            "size": "8GB",
+            "speed": "50-75 tok/sec",
+            "use_case": "Coding, debugging, technical tasks",
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 32768,
+            "special_flags": [],
+            "system_prompt": "system-prompt-qwen25-coder-14b.txt",
+            "notes": "Best coding model for M4.",
+            "framework": "mlx"
+        },
+        "phi4-14b-mlx": {
+            "name": "Phi-4 14B Q6_K (MLX)",
+            "path": "~/models/phi4-14b",
+            "size": "12GB",
+            "speed": "60-75 tok/sec",
+            "use_case": "Math, reasoning, STEM tasks",
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 16384,
+            "special_flags": [],
+            "system_prompt": "system-prompt-phi4-14b.txt",
+            "notes": "Excellent for reasoning on M4.",
+            "framework": "mlx"
+        },
+        "gemma3-9b-mlx": {
+            "name": "Gemma-3 9B Q6_K (MLX)",
+            "path": "~/models/gemma3-9b",
+            "size": "8GB",
+            "speed": "85-110 tok/sec",
+            "use_case": "Fast responses, chat, general queries",
+            "temperature": 0.9,
+            "top_p": 0.9,
+            "top_k": 40,
+            "context": 128000,
+            "special_flags": [],
+            "system_prompt": None,
+            "notes": "Speed champion on M4. NO system prompt support.",
+            "framework": "mlx"
+        }
+    }
+
+    @classmethod
+    def get_platform_models(cls):
+        """Return models appropriate for current platform"""
+        system = platform.system()
+        if system == "Darwin":  # macOS
+            return cls.M4_MODELS
+        else:  # Windows/WSL - RTX 3090
+            return cls.RTX3090_MODELS
+
+    @classmethod
+    def get_all_models(cls):
+        """Return all available models"""
+        all_models = {}
+        all_models.update(cls.RTX3090_MODELS)
+        all_models.update(cls.M4_MODELS)
+        return all_models
+
+
+class ProjectManager:
+    """Manages AI projects with configurations and memory"""
+
+    def __init__(self, projects_dir: Path):
+        self.projects_dir = projects_dir
+        self.projects_dir.mkdir(parents=True, exist_ok=True)
+        self.current_project = None
+        self.current_config = None
+
+    def create_project(self, project_name: str, config: Dict[str, Any]) -> bool:
+        """Create a new project with configuration"""
+        try:
+            project_path = self.projects_dir / project_name
+            if project_path.exists():
+                print(f"{Colors.BRIGHT_RED}Project '{project_name}' already exists!{Colors.RESET}")
+                return False
+
+            # Create project structure
+            project_path.mkdir(parents=True, exist_ok=True)
+            (project_path / "data").mkdir(exist_ok=True)
+
+            # Save configuration
+            config_path = project_path / "config.json"
+            with open(config_path, 'w', encoding='utf-8') as f:
+                json.dump(config, f, indent=2)
+
+            # Initialize empty memory
+            memory_path = project_path / "memory.json"
+            with open(memory_path, 'w', encoding='utf-8') as f:
+                json.dump({
+                    "conversations": [],
+                    "created": datetime.now().isoformat(),
+                    "modified": datetime.now().isoformat()
+                }, f, indent=2)
+
+            print(f"{Colors.BRIGHT_GREEN}Project '{project_name}' created successfully!{Colors.RESET}")
+            return True
+        except Exception as e:
+            print(f"{Colors.BRIGHT_RED}Error creating project: {e}{Colors.RESET}")
+            return False
+
+    def list_projects(self) -> List[str]:
+        """List all available projects"""
+        try:
+            return [p.name for p in self.projects_dir.iterdir() if p.is_dir()]
+        except:
+            return []
+
+    def load_project(self, project_name: str) -> Optional[Dict[str, Any]]:
+        """Load a project configuration"""
+        try:
+            project_path = self.projects_dir / project_name
+            config_path = project_path / "config.json"
+
+            if not config_path.exists():
+                print(f"{Colors.BRIGHT_RED}Project configuration not found!{Colors.RESET}")
+                return None
+
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+
+            self.current_project = project_name
+            self.current_config = config
+            return config
+        except Exception as e:
+            print(f"{Colors.BRIGHT_RED}Error loading project: {e}{Colors.RESET}")
+            return None
+
+    def save_project(self, project_name: str, config: Dict[str, Any]) -> bool:
+        """Save project configuration"""
+        try:
+            project_path = self.projects_dir / project_name
+            config_path = project_path / "config.json"
+
+            with open(config_path, 'w', encoding='utf-8') as f:
+                json.dump(config, f, indent=2)
+
+            return True
+        except Exception as e:
+            print(f"{Colors.BRIGHT_RED}Error saving project: {e}{Colors.RESET}")
+            return False
+
+    def delete_project(self, project_name: str) -> bool:
+        """Delete a project"""
+        try:
+            project_path = self.projects_dir / project_name
+            if project_path.exists():
+                shutil.rmtree(project_path)
+                print(f"{Colors.BRIGHT_GREEN}Project '{project_name}' deleted successfully!{Colors.RESET}")
+                return True
+            return False
+        except Exception as e:
+            print(f"{Colors.BRIGHT_RED}Error deleting project: {e}{Colors.RESET}")
+            return False
+
+
+class BotManager:
+    """Manages bot templates and specialized bots"""
+
+    def __init__(self, bots_dir: Path):
+        self.bots_dir = bots_dir
+        self.bots_dir.mkdir(parents=True, exist_ok=True)
+
+    def list_bot_templates(self) -> List[Tuple[str, Dict[str, Any]]]:
+        """List all available bot templates"""
+        templates = []
+        try:
+            for bot_file in self.bots_dir.glob("*.json"):
+                with open(bot_file, 'r', encoding='utf-8') as f:
+                    bot_data = json.load(f)
+                    templates.append((bot_file.stem, bot_data))
+        except Exception as e:
+            print(f"{Colors.BRIGHT_YELLOW}Warning: Could not load bot templates: {e}{Colors.RESET}")
+        return templates
+
+    def load_bot_template(self, bot_name: str) -> Optional[Dict[str, Any]]:
+        """Load a specific bot template"""
+        try:
+            bot_path = self.bots_dir / f"{bot_name}.json"
+            if not bot_path.exists():
+                return None
+
+            with open(bot_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"{Colors.BRIGHT_RED}Error loading bot template: {e}{Colors.RESET}")
+            return None
+
+    def create_bot_from_template(self, template_name: str, project_config: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a project configuration from a bot template"""
+        template = self.load_bot_template(template_name)
+        if not template:
+            return project_config
+
+        # Merge template with project config
+        project_config.update({
+            "title": template.get("title", "Untitled Project"),
+            "model": template.get("model", "qwen3-coder-30b"),
+            "system_prompt": template.get("system_prompt", ""),
+            "parameters": template.get("default_parameters", {}),
+            "provider": template.get("provider", "llama-cpp"),
+            "specialization": template.get("specialization", "general")
+        })
+
+        return project_config
+
+
+class ProviderManager:
+    """Manages different AI providers (llama-cpp, ollama, openrouter, etc.)"""
+
+    SUPPORTED_PROVIDERS = {
+        "llama-cpp": {
+            "name": "llama.cpp",
+            "description": "Local model execution with llama.cpp",
+            "requires_api_key": False
+        },
+        "ollama": {
+            "name": "Ollama",
+            "description": "Local model execution with Ollama",
+            "requires_api_key": False
+        },
+        "openrouter": {
+            "name": "OpenRouter",
+            "description": "Access to multiple models via OpenRouter API",
+            "requires_api_key": True
+        },
+        "openai": {
+            "name": "OpenAI",
+            "description": "OpenAI GPT models",
+            "requires_api_key": True
+        },
+        "claude": {
+            "name": "Anthropic Claude",
+            "description": "Claude models via Anthropic API",
+            "requires_api_key": True
+        }
+    }
+
+    def __init__(self, config_dir: Path):
+        self.config_dir = config_dir
+        self.config_file = config_dir / "providers.json"
+        self.providers_config = self._load_config()
+
+    def _load_config(self) -> Dict[str, Any]:
+        """Load provider configuration"""
+        try:
+            if self.config_file.exists():
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+        except:
+            pass
+        return {}
+
+    def _save_config(self):
+        """Save provider configuration"""
+        try:
+            with open(self.config_file, 'w', encoding='utf-8') as f:
+                json.dump(self.providers_config, f, indent=2)
+        except Exception as e:
+            print(f"{Colors.BRIGHT_RED}Error saving provider config: {e}{Colors.RESET}")
+
+    def configure_provider(self, provider_name: str, api_key: Optional[str] = None):
+        """Configure a provider with API key if needed"""
+        if provider_name not in self.SUPPORTED_PROVIDERS:
+            print(f"{Colors.BRIGHT_RED}Provider '{provider_name}' not supported!{Colors.RESET}")
+            return False
+
+        provider_info = self.SUPPORTED_PROVIDERS[provider_name]
+
+        if provider_info["requires_api_key"] and not api_key:
+            print(f"{Colors.BRIGHT_YELLOW}API key required for {provider_info['name']}{Colors.RESET}")
+            return False
+
+        self.providers_config[provider_name] = {
+            "enabled": True,
+            "api_key": api_key if api_key else None,
+            "configured": datetime.now().isoformat()
+        }
+        self._save_config()
+        return True
+
+    def get_provider_for_model(self, model_id: str) -> str:
+        """Auto-detect provider based on model"""
+        # For now, just check if it's an MLX model or llama.cpp model
+        if "mlx" in model_id.lower():
+            return "llama-cpp"  # MLX uses similar interface
+        return "llama-cpp"
+
+
+class MemoryManager:
+    """Manages conversation memory and history"""
+
+    def __init__(self, project_path: Path):
+        self.project_path = project_path
+        self.memory_file = project_path / "memory.json"
+        self.memory = self._load_memory()
+
+    def _load_memory(self) -> Dict[str, Any]:
+        """Load memory from file"""
+        try:
+            if self.memory_file.exists():
+                with open(self.memory_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+        except:
+            pass
+        return {
+            "conversations": [],
+            "created": datetime.now().isoformat(),
+            "modified": datetime.now().isoformat()
+        }
+
+    def _save_memory(self):
+        """Save memory to file"""
+        try:
+            self.memory["modified"] = datetime.now().isoformat()
+            with open(self.memory_file, 'w', encoding='utf-8') as f:
+                json.dump(self.memory, f, indent=2)
+        except Exception as e:
+            print(f"{Colors.BRIGHT_RED}Error saving memory: {e}{Colors.RESET}")
+
+    def add_conversation(self, user_prompt: str, model_response: str, model_id: str):
+        """Add a conversation to memory"""
+        conversation = {
+            "timestamp": datetime.now().isoformat(),
+            "user": user_prompt,
+            "assistant": model_response,
+            "model": model_id
+        }
+        self.memory["conversations"].append(conversation)
+        self._save_memory()
+
+    def get_recent_conversations(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get recent conversations"""
+        return self.memory["conversations"][-limit:]
+
+    def clear_memory(self):
+        """Clear all conversation memory"""
+        self.memory["conversations"] = []
+        self._save_memory()
+        print(f"{Colors.BRIGHT_GREEN}Memory cleared!{Colors.RESET}")
+
+
+class WebSearchManager:
+    """Manages web search integration"""
+
+    SUPPORTED_APIS = {
+        "brave": {
+            "name": "Brave Search API",
+            "description": "Brave Search for web results"
+        },
+        "perplexity": {
+            "name": "Perplexity API",
+            "description": "Perplexity AI for search and answers"
+        }
+    }
+
+    def __init__(self, config_dir: Path):
+        self.config_dir = config_dir
+        self.config_file = config_dir / "websearch.json"
+        self.config = self._load_config()
+
+    def _load_config(self) -> Dict[str, Any]:
+        """Load web search configuration"""
+        try:
+            if self.config_file.exists():
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+        except:
+            pass
+        return {"enabled": False, "apis": {}}
+
+    def _save_config(self):
+        """Save web search configuration"""
+        try:
+            with open(self.config_file, 'w', encoding='utf-8') as f:
+                json.dump(self.config, f, indent=2)
+        except Exception as e:
+            print(f"{Colors.BRIGHT_RED}Error saving web search config: {e}{Colors.RESET}")
+
+    def configure_api(self, api_name: str, api_key: str):
+        """Configure a web search API"""
+        if api_name not in self.SUPPORTED_APIS:
+            print(f"{Colors.BRIGHT_RED}API '{api_name}' not supported!{Colors.RESET}")
+            return False
+
+        if "apis" not in self.config:
+            self.config["apis"] = {}
+
+        self.config["apis"][api_name] = {
+            "api_key": api_key,
+            "configured": datetime.now().isoformat()
+        }
+        self.config["enabled"] = True
+        self._save_config()
+        return True
+
+
+class EnhancedAIRouter:
+    """Enhanced AI Router with full project management"""
+
+    def __init__(self):
+        self.platform = platform.system()
+        self.models = ModelDatabase.get_platform_models()
+        self.all_models = ModelDatabase.get_all_models()
+
+        # Detect correct models directory based on platform
+        if self.platform == "Windows":
+            self.models_dir = Path("D:/models")
+        elif is_wsl():
+            self.models_dir = Path("/mnt/d/models")
+        else:  # macOS or Linux
+            self.models_dir = Path.home() / "models"
+
+        self.system_prompts_dir = self.models_dir
+
+        # Initialize managers
+        self.project_manager = ProjectManager(self.models_dir / "projects")
+        self.bot_manager = BotManager(self.models_dir / "bots")
+        self.provider_manager = ProviderManager(self.models_dir)
+        self.websearch_manager = WebSearchManager(self.models_dir)
+
+        # Current session state
+        self.current_project = None
+        self.current_memory = None
+
+        # Bypass mode
+        self.bypass_mode = False
+        self.config_file = self.models_dir / ".ai-router-config.json"
+        self._load_config()
+
+    def _load_config(self):
+        """Load configuration from JSON file"""
+        try:
+            if self.config_file.exists():
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                    self.bypass_mode = config.get('bypass_mode', False)
+        except Exception as e:
+            print(f"{Colors.BRIGHT_YELLOW}Warning: Could not load config: {e}{Colors.RESET}")
+            self.bypass_mode = False
+
+    def _save_config(self):
+        """Save configuration to JSON file"""
+        try:
+            config = {
+                'bypass_mode': self.bypass_mode,
+                'version': '2.0'
+            }
+            with open(self.config_file, 'w', encoding='utf-8') as f:
+                json.dump(config, f, indent=2)
+        except Exception as e:
+            print(f"{Colors.BRIGHT_RED}Error saving config: {e}{Colors.RESET}")
+
+    def _confirm(self, prompt_message: str, default_yes: bool = True) -> bool:
+        """Smart confirmation that respects bypass mode"""
+        if self.bypass_mode:
+            print(f"{Colors.DIM}{prompt_message} [Auto-accepted]{Colors.RESET}")
+            return default_yes
+
+        response = input(f"{prompt_message} ").strip().lower()
+        return response in ['', 'y', 'yes'] if default_yes else response in ['y', 'yes']
+
+    def print_banner(self):
+        """Print colorful banner"""
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}")
+        print("╔════════════════════════════════════════════════════════════════════════════════╗")
+        print("║                                                                                ║")
+        print("║                    AI ROUTER ENHANCED v2.0 - Project Edition                  ║")
+        print("║                                                                                ║")
+        print("║         Complete AI Project Management with Multi-Provider Support            ║")
+        print("║                   Based on 2025 Research (Sep-Nov 2025)                       ║")
+        print("║                                                                                ║")
+        print("╚════════════════════════════════════════════════════════════════════════════════╝")
+        print(Colors.RESET)
+
+        # Bypass mode indicator
+        if self.bypass_mode:
+            print(f"\n{Colors.BG_YELLOW}{Colors.BLACK}{Colors.BOLD} AUTO-YES MODE ACTIVE {Colors.RESET}")
+
+        # Current project indicator
+        if self.current_project:
+            print(f"\n{Colors.BRIGHT_GREEN}Current Project: {Colors.BRIGHT_WHITE}{self.current_project}{Colors.RESET}")
+
+        # Platform info
+        if self.platform == "Darwin":
+            platform_name = f"{Colors.BRIGHT_GREEN}MacBook M4 Pro (MLX Optimized){Colors.RESET}"
+        else:
+            platform_name = f"{Colors.BRIGHT_YELLOW}RTX 3090 (WSL Optimized){Colors.RESET}"
+
+        print(f"\n{Colors.BRIGHT_WHITE}Platform: {platform_name}")
+        print(f"{Colors.BRIGHT_WHITE}Available Models: {Colors.BRIGHT_CYAN}{len(self.models)}{Colors.RESET}")
+        print()
+
+    def main_menu(self):
+        """Display and handle main menu"""
+        while True:
+            self.print_banner()
+
+            print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+            print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  MAIN MENU{Colors.RESET}")
+            print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+            print(f"{Colors.BRIGHT_GREEN}[1]{Colors.RESET}  Create New Project")
+            print(f"{Colors.BRIGHT_GREEN}[2]{Colors.RESET}  Load Existing Project")
+            print(f"{Colors.BRIGHT_GREEN}[3]{Colors.RESET}  Create Specialized Bot (from templates)")
+            print(f"{Colors.BRIGHT_GREEN}[4]{Colors.RESET}  View/Edit System Prompt")
+            print(f"{Colors.BRIGHT_GREEN}[5]{Colors.RESET}  Configure Parameters")
+            print(f"{Colors.BRIGHT_GREEN}[6]{Colors.RESET}  Run Chat Session")
+            print(f"{Colors.BRIGHT_GREEN}[7]{Colors.RESET}  View Conversation History")
+            print(f"{Colors.BRIGHT_GREEN}[8]{Colors.RESET}  Configure Web Search")
+            print(f"{Colors.BRIGHT_GREEN}[9]{Colors.RESET}  Configure Providers")
+            print(f"{Colors.BRIGHT_GREEN}[10]{Colors.RESET} View Documentation")
+
+            bypass_status = f"{Colors.BRIGHT_GREEN}ON{Colors.RESET}" if self.bypass_mode else f"{Colors.BRIGHT_RED}OFF{Colors.RESET}"
+            print(f"{Colors.BRIGHT_GREEN}[11]{Colors.RESET} Settings (Bypass: {bypass_status})")
+            print(f"{Colors.BRIGHT_GREEN}[12]{Colors.RESET} Exit")
+
+            choice = input(f"\n{Colors.BRIGHT_YELLOW}Enter choice [1-12]: {Colors.RESET}").strip()
+
+            if choice == "1":
+                self.create_new_project()
+            elif choice == "2":
+                self.load_existing_project()
+            elif choice == "3":
+                self.create_specialized_bot()
+            elif choice == "4":
+                self.view_edit_system_prompt()
+            elif choice == "5":
+                self.configure_parameters()
+            elif choice == "6":
+                self.run_chat_session()
+            elif choice == "7":
+                self.view_conversation_history()
+            elif choice == "8":
+                self.configure_web_search()
+            elif choice == "9":
+                self.configure_providers()
+            elif choice == "10":
+                self.view_documentation()
+            elif choice == "11":
+                self.settings_menu()
+            elif choice == "12":
+                print(f"\n{Colors.BRIGHT_GREEN}Goodbye!{Colors.RESET}\n")
+                sys.exit(0)
+            else:
+                print(f"{Colors.BRIGHT_RED}Invalid choice. Please try again.{Colors.RESET}")
+                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+
+    def create_new_project(self):
+        """Create a new project with interactive configuration"""
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  CREATE NEW PROJECT{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+        # Get project name
+        project_name = input(f"{Colors.BRIGHT_WHITE}Project name: {Colors.RESET}").strip()
+        if not project_name:
+            print(f"{Colors.BRIGHT_RED}Project name cannot be empty!{Colors.RESET}")
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            return
+
+        # Get project title
+        title = input(f"{Colors.BRIGHT_WHITE}Project title (display name): {Colors.RESET}").strip()
+        if not title:
+            title = project_name
+
+        # Select model
+        print(f"\n{Colors.BRIGHT_WHITE}Available models:{Colors.RESET}\n")
+        model_ids = list(self.models.keys())
+        for idx, model_id in enumerate(model_ids, 1):
+            model_data = self.models[model_id]
+            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {model_id} - {model_data['name']}")
+
+        model_choice = input(f"\n{Colors.BRIGHT_YELLOW}Select model [1-{len(model_ids)}]: {Colors.RESET}").strip()
+        try:
+            model_idx = int(model_choice) - 1
+            if 0 <= model_idx < len(model_ids):
+                model_id = model_ids[model_idx]
+                model_data = self.models[model_id]
+            else:
+                print(f"{Colors.BRIGHT_RED}Invalid model selection!{Colors.RESET}")
+                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+                return
+        except ValueError:
+            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            return
+
+        # Get system prompt (if model supports it)
+        system_prompt = ""
+        if model_data.get('system_prompt'):
+            print(f"\n{Colors.BRIGHT_WHITE}System prompt (leave empty for default):{Colors.RESET}")
+            custom_prompt = input(f"{Colors.CYAN}> {Colors.RESET}").strip()
+            if custom_prompt:
+                system_prompt = custom_prompt
+        else:
+            print(f"\n{Colors.BRIGHT_YELLOW}Note: Model '{model_id}' does not support system prompts.{Colors.RESET}")
+
+        # Get parameters with defaults
+        print(f"\n{Colors.BRIGHT_WHITE}Configure parameters (press Enter for defaults):{Colors.RESET}\n")
+
+        temperature = self._get_float_input("Temperature", model_data['temperature'], 0.0, 2.0)
+        top_p = self._get_float_input("Top P", model_data['top_p'], 0.0, 1.0)
+        top_k = self._get_int_input("Top K", model_data['top_k'], 0, 200)
+        max_tokens = self._get_int_input("Max tokens", 4096, 1, 32768)
+        context_limit = self._get_int_input("Context limit (messages, -1 for unlimited)", 50, -1, 100)
+        presence_penalty = self._get_float_input("Presence penalty", 0.0, -2.0, 2.0)
+        frequency_penalty = self._get_float_input("Frequency penalty", 0.0, -2.0, 2.0)
+
+        # Create project config
+        config = {
+            "title": title,
+            "created": datetime.now().isoformat(),
+            "modified": datetime.now().isoformat(),
+            "model": model_id,
+            "provider": "llama-cpp",
+            "system_prompt": system_prompt,
+            "parameters": {
+                "temperature": temperature,
+                "top_p": top_p,
+                "top_k": top_k,
+                "max_tokens": max_tokens,
+                "context_limit": context_limit,
+                "presence_penalty": presence_penalty,
+                "frequency_penalty": frequency_penalty
+            },
+            "web_search": {
+                "enabled": False
+            },
+            "reasoning_effort": "none"  # none/low/medium/high - currently no models support this
+        }
+
+        # Create the project
+        if self.project_manager.create_project(project_name, config):
+            self.current_project = project_name
+            project_path = self.models_dir / "projects" / project_name
+            self.current_memory = MemoryManager(project_path)
+            print(f"\n{Colors.BRIGHT_GREEN}Project '{project_name}' created and loaded!{Colors.RESET}")
+
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+
+    def _get_float_input(self, param_name: str, default: float, min_val: float, max_val: float) -> float:
+        """Get float input with validation"""
+        prompt = f"{Colors.WHITE}{param_name} [{min_val}-{max_val}] (default: {default}): {Colors.RESET}"
+        while True:
+            value = input(prompt).strip()
+            if not value:
+                return default
+            try:
+                value = float(value)
+                if min_val <= value <= max_val:
+                    return value
+                else:
+                    print(f"{Colors.BRIGHT_RED}Value must be between {min_val} and {max_val}!{Colors.RESET}")
+            except ValueError:
+                print(f"{Colors.BRIGHT_RED}Invalid number!{Colors.RESET}")
+
+    def _get_int_input(self, param_name: str, default: int, min_val: int, max_val: int) -> int:
+        """Get integer input with validation"""
+        prompt = f"{Colors.WHITE}{param_name} [{min_val}-{max_val}] (default: {default}): {Colors.RESET}"
+        while True:
+            value = input(prompt).strip()
+            if not value:
+                return default
+            try:
+                value = int(value)
+                if min_val <= value <= max_val:
+                    return value
+                else:
+                    print(f"{Colors.BRIGHT_RED}Value must be between {min_val} and {max_val}!{Colors.RESET}")
+            except ValueError:
+                print(f"{Colors.BRIGHT_RED}Invalid number!{Colors.RESET}")
+
+    def load_existing_project(self):
+        """Load an existing project"""
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  LOAD PROJECT{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+        projects = self.project_manager.list_projects()
+        if not projects:
+            print(f"{Colors.BRIGHT_YELLOW}No projects found. Create one first!{Colors.RESET}")
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            return
+
+        print(f"{Colors.BRIGHT_WHITE}Available projects:{Colors.RESET}\n")
+        for idx, project in enumerate(projects, 1):
+            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {project}")
+
+        print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to menu")
+
+        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select project [0-{len(projects)}]: {Colors.RESET}").strip()
+
+        if choice == "0":
+            return
+
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(projects):
+                project_name = projects[idx]
+                config = self.project_manager.load_project(project_name)
+                if config:
+                    self.current_project = project_name
+                    project_path = self.models_dir / "projects" / project_name
+                    self.current_memory = MemoryManager(project_path)
+
+                    print(f"\n{Colors.BRIGHT_GREEN}Project '{project_name}' loaded successfully!{Colors.RESET}")
+                    print(f"\n{Colors.BRIGHT_WHITE}Project Details:{Colors.RESET}")
+                    print(f"  Title: {Colors.CYAN}{config.get('title', 'Untitled')}{Colors.RESET}")
+                    print(f"  Model: {Colors.CYAN}{config.get('model', 'Not set')}{Colors.RESET}")
+                    print(f"  Provider: {Colors.CYAN}{config.get('provider', 'llama-cpp')}{Colors.RESET}")
+            else:
+                print(f"{Colors.BRIGHT_RED}Invalid selection!{Colors.RESET}")
+        except ValueError:
+            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")
+
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+
+    def create_specialized_bot(self):
+        """Create a project from a bot template"""
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  CREATE SPECIALIZED BOT{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+        templates = self.bot_manager.list_bot_templates()
+        if not templates:
+            print(f"{Colors.BRIGHT_YELLOW}No bot templates found!{Colors.RESET}")
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            return
+
+        print(f"{Colors.BRIGHT_WHITE}Available bot templates:{Colors.RESET}\n")
+        for idx, (template_name, template_data) in enumerate(templates, 1):
+            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {Colors.BRIGHT_WHITE}{template_data.get('title', template_name)}{Colors.RESET}")
+            print(f"    {Colors.CYAN}{template_data.get('description', 'No description')}{Colors.RESET}")
+            print(f"    {Colors.YELLOW}Model: {template_data.get('model', 'Not specified')}{Colors.RESET}\n")
+
+        print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to menu")
+
+        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select template [0-{len(templates)}]: {Colors.RESET}").strip()
+
+        if choice == "0":
+            return
+
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(templates):
+                template_name, template_data = templates[idx]
+
+                # Get project name
+                project_name = input(f"\n{Colors.BRIGHT_WHITE}Project name for this bot: {Colors.RESET}").strip()
+                if not project_name:
+                    print(f"{Colors.BRIGHT_RED}Project name cannot be empty!{Colors.RESET}")
+                    input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+                    return
+
+                # Create config from template
+                config = {
+                    "title": template_data.get("title", project_name),
+                    "created": datetime.now().isoformat(),
+                    "modified": datetime.now().isoformat(),
+                    "model": template_data.get("model", "qwen3-coder-30b"),
+                    "provider": template_data.get("provider", "llama-cpp"),
+                    "system_prompt": template_data.get("system_prompt", ""),
+                    "parameters": template_data.get("default_parameters", {}),
+                    "web_search": {"enabled": False},
+                    "specialization": template_data.get("specialization", "general"),
+                    "reasoning_effort": "none"
+                }
+
+                # Create the project
+                if self.project_manager.create_project(project_name, config):
+                    self.current_project = project_name
+                    project_path = self.models_dir / "projects" / project_name
+                    self.current_memory = MemoryManager(project_path)
+                    print(f"\n{Colors.BRIGHT_GREEN}Bot project '{project_name}' created and loaded!{Colors.RESET}")
+            else:
+                print(f"{Colors.BRIGHT_RED}Invalid selection!{Colors.RESET}")
+        except ValueError:
+            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")
+
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+
+    def view_edit_system_prompt(self):
+        """View or edit current system prompt"""
+        if not self.current_project:
+            print(f"\n{Colors.BRIGHT_YELLOW}No project loaded. Please load a project first.{Colors.RESET}")
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            return
+
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  SYSTEM PROMPT{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+        config = self.project_manager.load_project(self.current_project)
+        if not config:
+            return
+
+        current_prompt = config.get("system_prompt", "")
+
+        if current_prompt:
+            print(f"{Colors.BRIGHT_WHITE}Current system prompt:{Colors.RESET}\n")
+            print(f"{Colors.CYAN}{current_prompt}{Colors.RESET}\n")
+        else:
+            print(f"{Colors.BRIGHT_YELLOW}No system prompt set.{Colors.RESET}\n")
+
+        if self._confirm(f"{Colors.BRIGHT_WHITE}Would you like to edit the system prompt? [y/N]:{Colors.RESET}", default_yes=False):
+            print(f"\n{Colors.BRIGHT_WHITE}Enter new system prompt (or 'clear' to remove):{Colors.RESET}")
+            new_prompt = input(f"{Colors.CYAN}> {Colors.RESET}").strip()
+
+            if new_prompt.lower() == 'clear':
+                config["system_prompt"] = ""
+                print(f"{Colors.BRIGHT_GREEN}System prompt cleared.{Colors.RESET}")
+            elif new_prompt:
+                config["system_prompt"] = new_prompt
+                print(f"{Colors.BRIGHT_GREEN}System prompt updated.{Colors.RESET}")
+
+            config["modified"] = datetime.now().isoformat()
+            self.project_manager.save_project(self.current_project, config)
+
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+
+    def configure_parameters(self):
+        """Configure model parameters for current project"""
+        if not self.current_project:
+            print(f"\n{Colors.BRIGHT_YELLOW}No project loaded. Please load a project first.{Colors.RESET}")
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            return
+
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  CONFIGURE PARAMETERS{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+        config = self.project_manager.load_project(self.current_project)
+        if not config:
+            return
+
+        params = config.get("parameters", {})
+
+        print(f"{Colors.BRIGHT_WHITE}Current parameters:{Colors.RESET}\n")
+        for key, value in params.items():
+            print(f"  {Colors.CYAN}{key}: {Colors.WHITE}{value}{Colors.RESET}")
+
+        print(f"\n{Colors.BRIGHT_WHITE}Update parameters (press Enter to keep current value):{Colors.RESET}\n")
+
+        params["temperature"] = self._get_float_input("Temperature", params.get("temperature", 0.7), 0.0, 2.0)
+        params["top_p"] = self._get_float_input("Top P", params.get("top_p", 0.9), 0.0, 1.0)
+        params["top_k"] = self._get_int_input("Top K", params.get("top_k", 40), 0, 200)
+        params["max_tokens"] = self._get_int_input("Max tokens", params.get("max_tokens", 4096), 1, 32768)
+        params["context_limit"] = self._get_int_input("Context limit", params.get("context_limit", 50), -1, 100)
+        params["presence_penalty"] = self._get_float_input("Presence penalty", params.get("presence_penalty", 0.0), -2.0, 2.0)
+        params["frequency_penalty"] = self._get_float_input("Frequency penalty", params.get("frequency_penalty", 0.0), -2.0, 2.0)
+
+        config["parameters"] = params
+        config["modified"] = datetime.now().isoformat()
+        self.project_manager.save_project(self.current_project, config)
+
+        print(f"\n{Colors.BRIGHT_GREEN}Parameters updated successfully!{Colors.RESET}")
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+
+    def run_chat_session(self):
+        """Run an interactive chat session"""
+        if not self.current_project:
+            print(f"\n{Colors.BRIGHT_YELLOW}No project loaded. Please load a project first.{Colors.RESET}")
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            return
+
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  CHAT SESSION{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+        config = self.project_manager.load_project(self.current_project)
+        if not config:
+            return
+
+        model_id = config.get("model", "qwen3-coder-30b")
+        if model_id not in self.all_models:
+            print(f"{Colors.BRIGHT_RED}Model '{model_id}' not found!{Colors.RESET}")
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            return
+
+        model_data = self.all_models[model_id]
+
+        print(f"{Colors.BRIGHT_WHITE}Project: {Colors.CYAN}{config.get('title', self.current_project)}{Colors.RESET}")
+        print(f"{Colors.BRIGHT_WHITE}Model: {Colors.CYAN}{model_data['name']}{Colors.RESET}")
+        print(f"{Colors.BRIGHT_WHITE}Type 'exit' or 'quit' to end session{Colors.RESET}\n")
+
+        # Interactive chat loop
+        while True:
+            prompt = input(f"\n{Colors.BRIGHT_YELLOW}You: {Colors.RESET}").strip()
+
+            if prompt.lower() in ['exit', 'quit', 'q']:
+                print(f"{Colors.BRIGHT_GREEN}Chat session ended.{Colors.RESET}")
+                break
+
+            if not prompt:
+                continue
+
+            # Execute model
+            print(f"\n{Colors.BRIGHT_CYAN}Assistant: {Colors.RESET}")
+            self._run_model_with_config(model_id, model_data, prompt, config)
+
+            # Save to memory (simplified - in production, capture actual response)
+            if self.current_memory:
+                self.current_memory.add_conversation(prompt, "[Response logged]", model_id)
+
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+
+    def _run_model_with_config(self, model_id: str, model_data: Dict[str, Any], prompt: str, config: Dict[str, Any]):
+        """Run model with project configuration"""
+        params = config.get("parameters", {})
+        system_prompt = config.get("system_prompt", "")
+
+        # Load system prompt from file if not custom
+        if not system_prompt and model_data.get('system_prompt'):
+            prompt_file = self.system_prompts_dir / model_data['system_prompt']
+            if prompt_file.exists():
+                try:
+                    with open(prompt_file, 'r', encoding='utf-8') as f:
+                        system_prompt = f.read().strip()
+                except Exception as e:
+                    print(f"{Colors.BRIGHT_YELLOW}Warning: Could not read system prompt: {e}{Colors.RESET}")
+
+        # Build command based on framework
+        if model_data['framework'] == 'mlx':
+            self._run_mlx_model(model_data, prompt, system_prompt, params)
+        else:
+            self._run_llamacpp_model(model_data, prompt, system_prompt, params)
+
+    def _run_llamacpp_model(self, model_data: Dict[str, Any], prompt: str, system_prompt: str, params: Dict[str, Any]):
+        """Run model using llama.cpp"""
+        temperature = params.get("temperature", model_data['temperature'])
+        top_p = params.get("top_p", model_data['top_p'])
+        top_k = params.get("top_k", model_data['top_k'])
+        max_tokens = params.get("max_tokens", 4096)
+
+        special_flags = ' '.join(model_data['special_flags'])
+
+        cmd = f"""wsl bash -c "~/llama.cpp/build/bin/llama-cli \\
+  -m '{model_data['path']}' \\
+  -p '{prompt}' \\
+  -ngl 999 \\
+  -t 24 \\
+  -b 512 \\
+  -ub 512 \\
+  -fa 1 \\
+  --cache-type-k q8_0 \\
+  --cache-type-v q8_0 \\
+  --no-ppl \\
+  --temp {temperature} \\
+  --top-p {top_p} \\
+  --top-k {top_k} \\
+  -n {max_tokens} \\
+  -c {model_data['context']} \\
+  -ptc 10 \\
+  --verbose-prompt \\
+  --log-colors \\
+  {special_flags} \\
+  --mlock"
+"""
+
+        if system_prompt:
+            cmd = cmd.replace(f"-p '{prompt}'", f"--system-prompt '{system_prompt}' -p '{prompt}'")
+
+        # Execute
+        subprocess.run(cmd, shell=True)
+
+    def _run_mlx_model(self, model_data: Dict[str, Any], prompt: str, system_prompt: str, params: Dict[str, Any]):
+        """Run model using MLX"""
+        temperature = params.get("temperature", model_data['temperature'])
+        top_p = params.get("top_p", model_data['top_p'])
+        max_tokens = params.get("max_tokens", 2048)
+
+        cmd = f"""mlx_lm.generate \\
+  --model {model_data['path']} \\
+  --prompt "{prompt}" \\
+  --max-tokens {max_tokens} \\
+  --temp {temperature} \\
+  --top-p {top_p}"""
+
+        if system_prompt:
+            cmd = cmd.replace(f'--prompt "{prompt}"', f'--system-prompt "{system_prompt}" --prompt "{prompt}"')
+
+        # Execute
+        subprocess.run(cmd, shell=True)
+
+    def view_conversation_history(self):
+        """View conversation history for current project"""
+        if not self.current_project or not self.current_memory:
+            print(f"\n{Colors.BRIGHT_YELLOW}No project loaded. Please load a project first.{Colors.RESET}")
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            return
+
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  CONVERSATION HISTORY{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+        conversations = self.current_memory.get_recent_conversations(20)
+
+        if not conversations:
+            print(f"{Colors.BRIGHT_YELLOW}No conversation history yet.{Colors.RESET}")
+        else:
+            for idx, conv in enumerate(conversations, 1):
+                timestamp = conv.get("timestamp", "Unknown")
+                print(f"\n{Colors.BRIGHT_WHITE}[{idx}] {timestamp}{Colors.RESET}")
+                print(f"{Colors.BRIGHT_YELLOW}You: {Colors.WHITE}{conv.get('user', '')}{Colors.RESET}")
+                print(f"{Colors.BRIGHT_CYAN}Assistant: {Colors.WHITE}{conv.get('assistant', '')[:200]}...{Colors.RESET}")
+                print(f"{Colors.DIM}Model: {conv.get('model', 'Unknown')}{Colors.RESET}")
+
+        if conversations and self._confirm(f"\n{Colors.BRIGHT_WHITE}Clear conversation history? [y/N]:{Colors.RESET}", default_yes=False):
+            self.current_memory.clear_memory()
+
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+
+    def configure_web_search(self):
+        """Configure web search integration"""
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  WEB SEARCH CONFIGURATION{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+        print(f"{Colors.BRIGHT_WHITE}Supported web search APIs:{Colors.RESET}\n")
+
+        apis = list(WebSearchManager.SUPPORTED_APIS.items())
+        for idx, (api_name, api_info) in enumerate(apis, 1):
+            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {api_info['name']}")
+            print(f"    {Colors.CYAN}{api_info['description']}{Colors.RESET}\n")
+
+        print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to menu")
+
+        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select API to configure [0-{len(apis)}]: {Colors.RESET}").strip()
+
+        if choice == "0":
+            return
+
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(apis):
+                api_name, api_info = apis[idx]
+                api_key = input(f"\n{Colors.BRIGHT_WHITE}Enter API key for {api_info['name']}: {Colors.RESET}").strip()
+
+                if api_key:
+                    if self.websearch_manager.configure_api(api_name, api_key):
+                        print(f"{Colors.BRIGHT_GREEN}{api_info['name']} configured successfully!{Colors.RESET}")
+                else:
+                    print(f"{Colors.BRIGHT_RED}API key cannot be empty!{Colors.RESET}")
+            else:
+                print(f"{Colors.BRIGHT_RED}Invalid selection!{Colors.RESET}")
+        except ValueError:
+            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")
+
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+
+    def configure_providers(self):
+        """Configure AI providers"""
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  PROVIDER CONFIGURATION{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+        print(f"{Colors.BRIGHT_WHITE}Supported providers:{Colors.RESET}\n")
+
+        providers = list(ProviderManager.SUPPORTED_PROVIDERS.items())
+        for idx, (provider_id, provider_info) in enumerate(providers, 1):
+            api_required = "API key required" if provider_info['requires_api_key'] else "No API key needed"
+            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {provider_info['name']}")
+            print(f"    {Colors.CYAN}{provider_info['description']}{Colors.RESET}")
+            print(f"    {Colors.YELLOW}{api_required}{Colors.RESET}\n")
+
+        print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to menu")
+
+        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select provider to configure [0-{len(providers)}]: {Colors.RESET}").strip()
+
+        if choice == "0":
+            return
+
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(providers):
+                provider_id, provider_info = providers[idx]
+
+                if provider_info['requires_api_key']:
+                    api_key = input(f"\n{Colors.BRIGHT_WHITE}Enter API key for {provider_info['name']}: {Colors.RESET}").strip()
+                    if api_key:
+                        if self.provider_manager.configure_provider(provider_id, api_key):
+                            print(f"{Colors.BRIGHT_GREEN}{provider_info['name']} configured successfully!{Colors.RESET}")
+                    else:
+                        print(f"{Colors.BRIGHT_RED}API key cannot be empty!{Colors.RESET}")
+                else:
+                    if self.provider_manager.configure_provider(provider_id):
+                        print(f"{Colors.BRIGHT_GREEN}{provider_info['name']} is ready to use!{Colors.RESET}")
+            else:
+                print(f"{Colors.BRIGHT_RED}Invalid selection!{Colors.RESET}")
+        except ValueError:
+            print(f"{Colors.BRIGHT_RED}Invalid input!{Colors.RESET}")
+
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+
+    def view_documentation(self):
+        """View documentation (reused from original)"""
+        docs_dir = self.models_dir
+
+        docs = [
+            ("HOW-TO-RUN-AI-ROUTER.md", "How to Run the AI Router", "Getting started, usage, troubleshooting"),
+            ("BOT-PROJECT-QUICK-START.md", "Bot & Project Management", "Create bots and projects with custom configs"),
+            ("SYSTEM-PROMPTS-QUICK-START.md", "System Prompts Quick Start", "Using and customizing system prompts"),
+            ("2025-RESEARCH-SUMMARY.md", "2025 Research Summary", "Latest research findings and best practices"),
+        ]
+
+        # Filter existing docs
+        existing_docs = []
+        for filename, title, desc in docs:
+            if (docs_dir / filename).exists():
+                existing_docs.append((filename, title, desc))
+
+        if not existing_docs:
+            print(f"\n{Colors.BRIGHT_YELLOW}No documentation files found.{Colors.RESET}")
+            input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            return
+
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  DOCUMENTATION{Colors.RESET}")
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+        for idx, (filename, title, desc) in enumerate(existing_docs, 1):
+            print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {title}")
+            print(f"    {Colors.CYAN}{desc}{Colors.RESET}\n")
+
+        print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to menu")
+
+        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select document [0-{len(existing_docs)}]: {Colors.RESET}").strip()
+
+        if choice != "0":
+            try:
+                idx = int(choice) - 1
+                if 0 <= idx < len(existing_docs):
+                    filename, title, desc = existing_docs[idx]
+                    doc_path = docs_dir / filename
+
+                    with open(doc_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+
+                    print(f"\n{Colors.BRIGHT_CYAN}=== {title} ==={Colors.RESET}\n")
+                    print(content[:2000])  # Show first 2000 chars
+                    print(f"\n{Colors.DIM}[Content truncated for display]{Colors.RESET}")
+            except:
+                pass
+
+        input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+
+    def settings_menu(self):
+        """Settings menu"""
+        while True:
+            print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+            print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  SETTINGS{Colors.RESET}")
+            print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+
+            bypass_status = f"{Colors.BRIGHT_GREEN}ENABLED{Colors.RESET}" if self.bypass_mode else f"{Colors.BRIGHT_RED}DISABLED{Colors.RESET}"
+
+            print(f"{Colors.BRIGHT_GREEN}[1]{Colors.RESET} Toggle Bypass Mode (Currently: {bypass_status})")
+            print(f"{Colors.BRIGHT_GREEN}[2]{Colors.RESET} View Current Project Info")
+            print(f"{Colors.BRIGHT_GREEN}[3]{Colors.RESET} Delete Project")
+            print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} Return to main menu")
+
+            choice = input(f"\n{Colors.BRIGHT_YELLOW}Enter choice: {Colors.RESET}").strip()
+
+            if choice == "1":
+                self.bypass_mode = not self.bypass_mode
+                self._save_config()
+                status = "enabled" if self.bypass_mode else "disabled"
+                print(f"\n{Colors.BRIGHT_GREEN}Bypass mode {status}!{Colors.RESET}")
+                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            elif choice == "2":
+                if self.current_project:
+                    config = self.project_manager.load_project(self.current_project)
+                    if config:
+                        print(f"\n{Colors.BRIGHT_WHITE}Current Project:{Colors.RESET}")
+                        print(json.dumps(config, indent=2))
+                else:
+                    print(f"\n{Colors.BRIGHT_YELLOW}No project loaded.{Colors.RESET}")
+                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            elif choice == "3":
+                projects = self.project_manager.list_projects()
+                if projects:
+                    print(f"\n{Colors.BRIGHT_WHITE}Projects:{Colors.RESET}\n")
+                    for idx, proj in enumerate(projects, 1):
+                        print(f"{Colors.BRIGHT_GREEN}[{idx}]{Colors.RESET} {proj}")
+
+                    del_choice = input(f"\n{Colors.BRIGHT_YELLOW}Delete project number (0 to cancel): {Colors.RESET}").strip()
+                    try:
+                        idx = int(del_choice) - 1
+                        if 0 <= idx < len(projects):
+                            proj_name = projects[idx]
+                            if self._confirm(f"{Colors.BRIGHT_RED}Really delete '{proj_name}'? [y/N]:{Colors.RESET}", default_yes=False):
+                                self.project_manager.delete_project(proj_name)
+                                if self.current_project == proj_name:
+                                    self.current_project = None
+                                    self.current_memory = None
+                    except:
+                        pass
+                else:
+                    print(f"\n{Colors.BRIGHT_YELLOW}No projects to delete.{Colors.RESET}")
+                input(f"\n{Colors.BRIGHT_CYAN}Press Enter to continue...{Colors.RESET}")
+            elif choice == "0":
+                break
+
+
+def main():
+    """Main entry point"""
+    try:
+        router = EnhancedAIRouter()
+        router.main_menu()
+    except KeyboardInterrupt:
+        print(f"\n\n{Colors.BRIGHT_YELLOW}Interrupted by user. Goodbye!{Colors.RESET}\n")
+        sys.exit(0)
+    except Exception as e:
+        print(f"\n{Colors.BRIGHT_RED}Error: {e}{Colors.RESET}\n")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

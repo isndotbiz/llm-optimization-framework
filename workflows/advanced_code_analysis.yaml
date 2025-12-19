@@ -1,0 +1,111 @@
+id: advanced_code_analysis
+name: "Advanced Code Analysis with Conditional Logic"
+description: "Analyzes code and conditionally performs security audit or performance optimization"
+
+variables:
+  code: ""
+  language: "python"
+  analysis_type: "general"  # Options: general, security, performance
+
+steps:
+  - name: initial_scan
+    type: prompt
+    model: qwen3-coder-30b
+    prompt: |
+      Perform an initial code scan of this {{language}} code:
+
+      ```{{language}}
+      {{code}}
+      ```
+
+      Identify the primary concerns:
+      - Does it have security vulnerabilities? (yes/no)
+      - Does it have performance issues? (yes/no)
+      - Overall code quality rating (1-10)
+
+      Respond in this format:
+      Security Concerns: [yes/no]
+      Performance Issues: [yes/no]
+      Quality Rating: [1-10]
+      Brief Summary: [your summary]
+    output_var: scan_results
+    on_error: continue
+
+  - name: extract_security_flag
+    type: extract
+    from_step: initial_scan
+    pattern: "Security Concerns:\\s*(yes|no)"
+    output_var: has_security_issues
+
+  - name: extract_performance_flag
+    type: extract
+    from_step: initial_scan
+    pattern: "Performance Issues:\\s*(yes|no)"
+    output_var: has_performance_issues
+
+  - name: security_audit
+    type: conditional
+    condition: "{{has_security_issues}} == yes"
+    then:
+      type: prompt
+      model: qwen3-coder-30b
+      prompt: |
+        SECURITY AUDIT for {{language}} code:
+
+        {{code}}
+
+        Perform deep security analysis:
+        1. Input validation vulnerabilities
+        2. SQL injection risks
+        3. XSS vulnerabilities
+        4. Authentication/authorization issues
+        5. Sensitive data exposure
+        6. Cryptographic weaknesses
+
+        Provide detailed findings with remediation steps.
+    output_var: security_report
+
+  - name: performance_optimization
+    type: conditional
+    condition: "{{has_performance_issues}} == yes"
+    then:
+      type: prompt
+      model: qwen3-coder-30b
+      prompt: |
+        PERFORMANCE OPTIMIZATION for {{language}} code:
+
+        {{code}}
+
+        Analyze and suggest optimizations for:
+        1. Algorithm complexity
+        2. Memory usage
+        3. I/O operations
+        4. Database queries
+        5. Caching opportunities
+        6. Async/parallel processing
+
+        Provide specific code examples.
+    output_var: performance_report
+
+  - name: final_recommendations
+    type: prompt
+    model: phi4-14b
+    depends_on: [initial_scan]
+    prompt: |
+      Create final recommendations based on this analysis:
+
+      Initial Scan:
+      {{scan_results}}
+
+      Security Report:
+      {{security_report}}
+
+      Performance Report:
+      {{performance_report}}
+
+      Provide:
+      1. Executive Summary
+      2. Priority Action Items
+      3. Long-term Improvements
+      4. Code Quality Checklist
+    output_var: final_recommendations

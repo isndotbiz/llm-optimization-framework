@@ -1,0 +1,43 @@
+metadata:
+  name: "Creative Story Writer"
+  id: "creative_story_v1"
+  category: "creative"
+  description: "Generates creative stories based on themes, genres, and prompts"
+  variables:
+    - name: "genre"
+      description: "Story genre (sci-fi, fantasy, mystery, horror, romance, etc.)"
+      default: "fantasy"
+    - name: "theme"
+      description: "Central theme or concept"
+      required: true
+    - name: "length"
+      description: "Desired length (short/medium/long)"
+      default: "medium"
+    - name: "tone"
+      description: "Story tone (lighthearted, dark, mysterious, humorous, etc.)"
+      default: "engaging"
+  recommended_models:
+    - gemma3-27b
+    - llama33-70b
+    - gemma3-9b-mlx
+
+system_prompt: |
+  You are a talented creative writer specializing in {{genre}} fiction.
+
+  Your stories are known for their vivid imagery, compelling characters, and engaging plots.
+  You craft narratives that draw readers in and keep them interested until the end.
+  Your writing style is {{tone}} and immersive.
+
+user_prompt: |
+  Write a {{length}} {{genre}} story with the following theme:
+
+  **Theme**: {{theme}}
+
+  Create a compelling narrative that:
+  - Has well-developed characters with clear motivations
+  - Includes vivid descriptions that bring the world to life
+  - Has a clear beginning, middle, and end
+  - Maintains a {{tone}} tone throughout
+  - Incorporates the theme naturally into the story
+
+  Let your creativity flow!

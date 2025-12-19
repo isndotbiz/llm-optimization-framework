@@ -8,20 +8,21 @@ Based on 2025 Research Findings (Sep-Nov 2025)
 import os
 import sys
 import subprocess
-import json
 import platform
+import time
 from pathlib import Path
 from logging_config import setup_logging
+
 
 def is_wsl():
     """Detect if running in WSL (Windows Subsystem for Linux)"""
     try:
         with open('/proc/version', 'r') as f:
             return 'microsoft' in f.read().lower()
-    except:
+    except Exception:
         return False
 
-# Color codes for terminal output
+
 class Colors:
     RESET = '\033[0m'
     BOLD = '\033[1m'
@@ -65,7 +66,8 @@ class ModelDatabase:
     RTX3090_MODELS = {
         "qwen3-coder-30b": {
             "name": "Qwen3 Coder 30B Q4_K_M",
-            "path": "/mnt/d/models/organized/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+            "path": ("/mnt/d/models/organized/"
+                     "Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"),
             "size": "18GB",
             "speed": "25-35 tok/sec",
             "use_case": "Advanced coding, code review, architecture design",
@@ -75,12 +77,14 @@ class ModelDatabase:
             "context": 32768,
             "special_flags": ["--jinja"],
             "system_prompt": "system-prompt-qwen3-coder-30b.txt",
-            "notes": "CRITICAL: Never use temp 0 (causes endless loops). Use enable_thinking for reasoning.",
+            "notes": ("CRITICAL: Never use temp 0 (causes endless loops). "
+                      "Use enable_thinking for reasoning."),
             "framework": "llama.cpp"
         },
         "phi4-14b": {
             "name": "Phi-4 Reasoning Plus 14B Q6_K",
-            "path": "/mnt/d/models/organized/microsoft_Phi-4-reasoning-plus-Q6_K.gguf",
+            "path": ("/mnt/d/models/organized/"
+                     "microsoft_Phi-4-reasoning-plus-Q6_K.gguf"),
             "size": "12GB",
             "speed": "35-55 tok/sec",
             "use_case": "Math, reasoning, STEM, logical analysis",
@@ -90,12 +94,14 @@ class ModelDatabase:
             "context": 16384,
             "special_flags": ["--jinja"],
             "system_prompt": "system-prompt-phi4-14b.txt",
-            "notes": "CRITICAL: Requires --jinja flag. DO NOT use 'think step-by-step' prompts.",
+            "notes": ("CRITICAL: Requires --jinja flag. "
+                      "DO NOT use 'think step-by-step' prompts."),
             "framework": "llama.cpp"
         },
         "gemma3-27b": {
             "name": "Gemma 3 27B Q2_K (Abliterated)",
-            "path": "/mnt/d/models/organized/mlabonne_gemma-3-27b-it-abliterated-Q2_K.gguf",
+            "path": ("/mnt/d/models/organized/"
+                     "mlabonne_gemma-3-27b-it-abliterated-Q2_K.gguf"),
             "size": "10GB",
             "speed": "25-40 tok/sec",
             "use_case": "Uncensored chat, creative writing, research",
@@ -105,12 +111,14 @@ class ModelDatabase:
             "context": 128000,
             "special_flags": [],
             "system_prompt": None,
-            "notes": "NO system prompt support. 128K context. Uncensored/abliterated variant.",
+            "notes": ("NO system prompt support. 128K context. "
+                      "Uncensored/abliterated variant."),
             "framework": "llama.cpp"
         },
         "ministral-3-14b": {
             "name": "Ministral-3 14B Reasoning Q5_K_M",
-            "path": "/mnt/d/models/organized/Ministral-3-14B-Reasoning-2512-Q5_K_M.gguf",
+            "path": ("/mnt/d/models/organized/"
+                     "Ministral-3-14B-Reasoning-2512-Q5_K_M.gguf"),
             "size": "9GB",
             "speed": "35-50 tok/sec",
             "use_case": "Complex reasoning, problem solving, analysis",
@@ -120,12 +128,14 @@ class ModelDatabase:
             "context": 262144,
             "special_flags": [],
             "system_prompt": "system-prompt-ministral-3-14b.txt",
-            "notes": "256K context window. Excellent for long-context reasoning.",
+            "notes": ("256K context window. "
+                      "Excellent for long-context reasoning."),
             "framework": "llama.cpp"
         },
         "deepseek-r1-14b": {
             "name": "DeepSeek R1 Distill Qwen 14B Q5_K_M",
-            "path": "/mnt/d/models/organized/DeepSeek-R1-Distill-Qwen-14B-Q5_K_M.gguf",
+            "path": ("/mnt/d/models/organized/"
+                     "DeepSeek-R1-Distill-Qwen-14B-Q5_K_M.gguf"),
             "size": "10GB",
             "speed": "30-50 tok/sec",
             "use_case": "Advanced reasoning, research, complex analysis",
@@ -135,12 +145,14 @@ class ModelDatabase:
             "context": 32768,
             "special_flags": [],
             "system_prompt": "system-prompt-deepseek-r1.txt",
-            "notes": "DeepSeek R1 distilled to Qwen. Excellent reasoning capabilities.",
+            "notes": ("DeepSeek R1 distilled to Qwen. "
+                      "Excellent reasoning capabilities."),
             "framework": "llama.cpp"
         },
         "llama33-70b": {
             "name": "Llama 3.3 70B Instruct IQ2_S (Abliterated)",
-            "path": "/mnt/d/models/organized/Llama-3.3-70B-Instruct-abliterated-IQ2_S.gguf",
+            "path": ("/mnt/d/models/organized/"
+                     "Llama-3.3-70B-Instruct-abliterated-IQ2_S.gguf"),
             "size": "21GB",
             "speed": "15-25 tok/sec",
             "use_case": "Large-scale reasoning, research, uncensored tasks",
@@ -150,7 +162,8 @@ class ModelDatabase:
             "context": 131072,
             "special_flags": [],
             "system_prompt": "system-prompt-llama33-70b.txt",
-            "notes": "Largest model available. Excellent for complex tasks. Uncensored.",
+            "notes": ("Largest model available. "
+                      "Excellent for complex tasks. Uncensored."),
             "framework": "llama.cpp"
         },
         "dolphin-llama31-8b": {
@@ -158,7 +171,8 @@ class ModelDatabase:
             "path": "/mnt/d/models/organized/Dolphin3.0-Llama3.1-8B-Q6_K.gguf",
             "size": "6GB",
             "speed": "45-65 tok/sec",
-            "use_case": "Fast general tasks, uncensored chat, quick assistance",
+            "use_case": ("Fast general tasks, uncensored chat, "
+                         "quick assistance"),
             "temperature": 0.7,
             "top_p": 0.9,
             "top_k": 40,
@@ -170,7 +184,8 @@ class ModelDatabase:
         },
         "dolphin-mistral-24b": {
             "name": "Dolphin Mistral 24B Venice Q4_K_M",
-            "path": "/mnt/d/models/organized/cognitivecomputations_Dolphin-Mistral-24B-Venice-Edition-Q4_K_M.gguf",
+            "path": ("/mnt/d/models/organized/cognitivecomputations_"
+                     "Dolphin-Mistral-24B-Venice-Edition-Q4_K_M.gguf"),
             "size": "14GB",
             "speed": "25-40 tok/sec",
             "use_case": "Uncensored chat, creative tasks, roleplay",
@@ -180,12 +195,14 @@ class ModelDatabase:
             "context": 32768,
             "special_flags": [],
             "system_prompt": None,
-            "notes": "Venice Edition: Completely uncensored. No system prompt support.",
+            "notes": ("Venice Edition: Completely uncensored. "
+                      "No system prompt support."),
             "framework": "llama.cpp"
         },
         "wizard-vicuna-13b": {
             "name": "Wizard Vicuna 13B Uncensored Q4_0",
-            "path": "/mnt/d/models/organized/Wizard-Vicuna-13B-Uncensored-Q4_0.gguf",
+            "path": ("/mnt/d/models/organized/"
+                     "Wizard-Vicuna-13B-Uncensored-Q4_0.gguf"),
             "size": "7GB",
             "speed": "35-50 tok/sec",
             "use_case": "General uncensored chat, creative writing",
@@ -214,7 +231,8 @@ class ModelDatabase:
             "context": 32768,
             "special_flags": [],
             "system_prompt": "system-prompt-qwen25-14b.txt",
-            "notes": "Best daily driver for M4. Use MLX for 2-3x speedup vs llama.cpp.",
+            "notes": ("Best daily driver for M4. "
+                      "Use MLX for 2-3x speedup vs llama.cpp."),
             "framework": "mlx"
         },
         "qwen25-coder-14b-mlx": {
@@ -279,22 +297,30 @@ class ModelDatabase:
         prompt_lower = prompt_text.lower()
 
         # Coding keywords
-        coding_keywords = ['code', 'function', 'class', 'programming', 'debug', 'error',
-                          'python', 'javascript', 'java', 'c++', 'rust', 'implement',
-                          'refactor', 'algorithm', 'api', 'script', 'bug']
+        coding_keywords = [
+            'code', 'function', 'class', 'programming', 'debug', 'error',
+            'python', 'javascript', 'java', 'c++', 'rust', 'implement',
+            'refactor', 'algorithm', 'api', 'script', 'bug'
+        ]
 
         # Math/reasoning keywords
-        reasoning_keywords = ['calculate', 'prove', 'theorem', 'math', 'equation',
-                             'logic', 'reasoning', 'solve', 'problem', 'analyze',
-                             'deduce', 'infer', 'probability', 'statistics']
+        reasoning_keywords = [
+            'calculate', 'prove', 'theorem', 'math', 'equation',
+            'logic', 'reasoning', 'solve', 'problem', 'analyze',
+            'deduce', 'infer', 'probability', 'statistics'
+        ]
 
         # Creative keywords
-        creative_keywords = ['story', 'poem', 'creative', 'write', 'fiction',
-                            'narrative', 'character', 'plot', 'imagine']
+        creative_keywords = [
+            'story', 'poem', 'creative', 'write', 'fiction',
+            'narrative', 'character', 'plot', 'imagine'
+        ]
 
         # Research keywords
-        research_keywords = ['research', 'analyze', 'explain', 'summary', 'what is',
-                            'how does', 'why', 'compare', 'contrast']
+        research_keywords = [
+            'research', 'analyze', 'explain', 'summary', 'what is',
+            'how does', 'why', 'compare', 'contrast'
+        ]
 
         if any(kw in prompt_lower for kw in coding_keywords):
             return "coding"
@@ -354,7 +380,11 @@ class AIRouter:
             if model_data['framework'] == 'llama.cpp':
                 if self.platform == "Windows":
                     # Quick WSL check
-                    result = subprocess.run(['wsl', '--status'], capture_output=True, timeout=5)
+                    result = subprocess.run(
+                        ['wsl', '--status'],
+                        capture_output=True,
+                        timeout=5
+                    )
                     if result.returncode != 0:
                         self.logger.warning("WSL not available or not running")
                         return False
@@ -365,7 +395,8 @@ class AIRouter:
 
         except subprocess.TimeoutExpired:
             self.logger.warning("WSL status check timed out")
-            return True  # Assume OK if timeout (WSL might be slow but working)
+            # Assume OK if timeout (WSL might be slow but working)
+            return True
         except Exception as e:
             self.logger.warning(f"Resource validation error: {e}")
             return True  # Be permissive on validation errors
@@ -373,11 +404,11 @@ class AIRouter:
     def _get_fallback_model(self, model_id):
         """Get a smaller fallback model if primary model fails"""
         fallback_map = {
-            "qwen3-coder-30b": "dolphin-llama31-8b",      # 18GB -> 6GB
-            "llama33-70b": "ministral-3-14b",              # 21GB -> 9GB
-            "phi4-14b": "dolphin-llama31-8b",              # 12GB -> 6GB
-            "dolphin-mistral-24b": "wizard-vicuna-13b",    # 14GB -> 7GB
-            "gemma3-27b": "dolphin-llama31-8b",            # 10GB -> 6GB
+            "qwen3-coder-30b": "dolphin-llama31-8b",
+            "llama33-70b": "ministral-3-14b",
+            "phi4-14b": "dolphin-llama31-8b",
+            "dolphin-mistral-24b": "wizard-vicuna-13b",
+            "gemma3-27b": "dolphin-llama31-8b",
         }
 
         fallback_id = fallback_map.get(model_id)
@@ -390,51 +421,105 @@ class AIRouter:
         """Print colorful banner"""
         print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}")
         print("=" * 84)
-        print("                                                                                ")
-        print("                         AI ROUTER CLI v1.0                                    ")
-        print("                                                                                ")
-        print("           Intelligent Model Selection & Execution Framework                   ")
-        print("              Based on 2025 Research (Sep-Nov 2025)                            ")
-        print("                                                                                ")
+        print("                                     ")
+        print("            AI ROUTER CLI v1.0       ")
+        print("                                     ")
+        print("  Intelligent Model Selection & Execution Framework")
+        print("     Based on 2025 Research (Sep-Nov 2025)")
+        print("                                     ")
         print("=" * 84)
         print(Colors.RESET)
 
         # Platform info
         if self.platform == "Darwin":
-            platform_name = f"{Colors.BRIGHT_GREEN}MacBook M4 Pro (MLX Optimized){Colors.RESET}"
+            platform_name = (
+                f"{Colors.BRIGHT_GREEN}MacBook M4 Pro "
+                f"(MLX Optimized){Colors.RESET}"
+            )
         else:
-            platform_name = f"{Colors.BRIGHT_YELLOW}RTX 3090 (WSL Optimized){Colors.RESET}"
+            platform_name = (
+                f"{Colors.BRIGHT_YELLOW}RTX 3090 "
+                f"(WSL Optimized){Colors.RESET}"
+            )
 
         print(f"\n{Colors.BRIGHT_WHITE}Platform: {platform_name}")
-        print(f"{Colors.BRIGHT_WHITE}Available Models: {Colors.BRIGHT_CYAN}{len(self.models)}{Colors.RESET}")
+        print(
+            f"{Colors.BRIGHT_WHITE}Available Models: "
+            f"{Colors.BRIGHT_CYAN}{len(self.models)}{Colors.RESET}"
+        )
         print()
 
     def print_model_info(self, model_id, model_data):
         """Display detailed model information"""
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}{'=' * 64}{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}  MODEL INFORMATION{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}{'=' * 64}{Colors.RESET}\n")
+        sep = "=" * 64
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}{sep}{Colors.RESET}")
+        print(
+            f"{Colors.BRIGHT_CYAN}{Colors.BOLD}"
+            f"  MODEL INFORMATION{Colors.RESET}"
+        )
+        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}{sep}{Colors.RESET}\n")
 
-        print(f"{Colors.BRIGHT_WHITE}Name:          {Colors.BRIGHT_GREEN}{model_data['name']}{Colors.RESET}")
-        print(f"{Colors.BRIGHT_WHITE}Model ID:      {Colors.BRIGHT_YELLOW}{model_id}{Colors.RESET}")
-        print(f"{Colors.BRIGHT_WHITE}Size:          {Colors.BRIGHT_MAGENTA}{model_data['size']}{Colors.RESET}")
-        print(f"{Colors.BRIGHT_WHITE}Speed:         {Colors.BRIGHT_CYAN}{model_data['speed']}{Colors.RESET}")
-        print(f"{Colors.BRIGHT_WHITE}Framework:     {Colors.BRIGHT_BLUE}{model_data['framework'].upper()}{Colors.RESET}")
-        print(f"{Colors.BRIGHT_WHITE}Use Case:      {Colors.YELLOW}{model_data['use_case']}{Colors.RESET}")
-        print(f"{Colors.BRIGHT_WHITE}Context:       {Colors.CYAN}{model_data['context']:,} tokens{Colors.RESET}")
+        print(
+            f"{Colors.BRIGHT_WHITE}Name:          "
+            f"{Colors.BRIGHT_GREEN}{model_data['name']}{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_WHITE}Model ID:      "
+            f"{Colors.BRIGHT_YELLOW}{model_id}{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_WHITE}Size:          "
+            f"{Colors.BRIGHT_MAGENTA}{model_data['size']}{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_WHITE}Speed:         "
+            f"{Colors.BRIGHT_CYAN}{model_data['speed']}{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_WHITE}Framework:     "
+            f"{Colors.BRIGHT_BLUE}"
+            f"{model_data['framework'].upper()}{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_WHITE}Use Case:      "
+            f"{Colors.YELLOW}{model_data['use_case']}{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_WHITE}Context:       "
+            f"{Colors.CYAN}{model_data['context']:,} tokens{Colors.RESET}"
+        )
 
         print(f"\n{Colors.BRIGHT_WHITE}Optimal Parameters:{Colors.RESET}")
-        print(f"  {Colors.WHITE}Temperature:   {Colors.GREEN}{model_data['temperature']}{Colors.RESET}")
-        print(f"  {Colors.WHITE}Top-P:         {Colors.GREEN}{model_data['top_p']}{Colors.RESET}")
-        print(f"  {Colors.WHITE}Top-K:         {Colors.GREEN}{model_data['top_k']}{Colors.RESET}")
+        print(
+            f"  {Colors.WHITE}Temperature:   "
+            f"{Colors.GREEN}{model_data['temperature']}{Colors.RESET}"
+        )
+        print(
+            f"  {Colors.WHITE}Top-P:         "
+            f"{Colors.GREEN}{model_data['top_p']}{Colors.RESET}"
+        )
+        print(
+            f"  {Colors.WHITE}Top-K:         "
+            f"{Colors.GREEN}{model_data['top_k']}{Colors.RESET}"
+        )
 
         if model_data['special_flags']:
-            print(f"\n{Colors.BRIGHT_YELLOW}Special Flags: {Colors.YELLOW}{' '.join(model_data['special_flags'])}{Colors.RESET}")
+            flags = ' '.join(model_data['special_flags'])
+            print(
+                f"\n{Colors.BRIGHT_YELLOW}Special Flags: "
+                f"{Colors.YELLOW}{flags}{Colors.RESET}"
+            )
 
         if model_data['system_prompt']:
-            print(f"\n{Colors.BRIGHT_GREEN}System Prompt: {Colors.GREEN}{model_data['system_prompt']}{Colors.RESET}")
+            print(
+                f"\n{Colors.BRIGHT_GREEN}System Prompt: "
+                f"{Colors.GREEN}{model_data['system_prompt']}{Colors.RESET}"
+            )
         else:
-            print(f"\n{Colors.BRIGHT_RED}[!] NO system prompt support{Colors.RESET}")
+            print(
+                f"\n{Colors.BRIGHT_RED}"
+                f"[!] NO system prompt support{Colors.RESET}"
+            )
 
         if model_data['notes']:
             print(f"\n{Colors.BRIGHT_MAGENTA}Notes:{Colors.RESET}")
@@ -444,15 +529,35 @@ class AIRouter:
 
     def list_models(self):
         """List all available models"""
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  AVAILABLE MODELS{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+        sep1 = "╔" + "═" * 62 + "╗"
+        sep2 = "╚" + "═" * 62 + "╝"
+        print(
+            f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}{sep1}{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_CYAN}{Colors.BOLD}"
+            f"║  AVAILABLE MODELS{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_CYAN}{Colors.BOLD}{sep2}{Colors.RESET}\n"
+        )
 
-        for idx, (model_id, model_data) in enumerate(self.models.items(), 1):
-            print(f"{Colors.BRIGHT_YELLOW}[{idx}]{Colors.RESET} {Colors.BRIGHT_WHITE}{model_id}{Colors.RESET}")
+        for idx, (model_id, model_data) in enumerate(
+            self.models.items(), 1
+        ):
+            print(
+                f"{Colors.BRIGHT_YELLOW}[{idx}]{Colors.RESET} "
+                f"{Colors.BRIGHT_WHITE}{model_id}{Colors.RESET}"
+            )
             print(f"    {Colors.WHITE}{model_data['name']}{Colors.RESET}")
-            print(f"    {Colors.CYAN}Use case: {model_data['use_case']}{Colors.RESET}")
-            print(f"    {Colors.GREEN}{model_data['size']} | {model_data['speed']}{Colors.RESET}")
+            print(
+                f"    {Colors.CYAN}"
+                f"Use case: {model_data['use_case']}{Colors.RESET}"
+            )
+            print(
+                f"    {Colors.GREEN}{model_data['size']} | "
+                f"{model_data['speed']}{Colors.RESET}"
+            )
             print()
 
     def interactive_mode(self):
@@ -460,18 +565,47 @@ class AIRouter:
         self.print_banner()
 
         while True:
-            print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}{'=' * 63}{Colors.RESET}")
-            print(f"{Colors.BRIGHT_WHITE}What would you like to do?{Colors.RESET}\n")
-            print(f"{Colors.BRIGHT_GREEN}[1]{Colors.RESET} Auto-select model based on prompt")
-            print(f"{Colors.BRIGHT_GREEN}[2]{Colors.RESET} Manually select model")
-            print(f"{Colors.BRIGHT_GREEN}[3]{Colors.RESET} List all available models")
-            print(f"{Colors.BRIGHT_GREEN}[4]{Colors.RESET} View system prompt examples")
-            print(f"{Colors.BRIGHT_GREEN}[5]{Colors.RESET} View optimal parameters guide")
-            print(f"{Colors.BRIGHT_GREEN}[6]{Colors.RESET} View documentation guides")
+            sep = "=" * 63
+            print(
+                f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}{sep}{Colors.RESET}"
+            )
+            print(
+                f"{Colors.BRIGHT_WHITE}"
+                f"What would you like to do?{Colors.RESET}\n"
+            )
+            print(
+                f"{Colors.BRIGHT_GREEN}[1]{Colors.RESET} "
+                f"Auto-select model based on prompt"
+            )
+            print(
+                f"{Colors.BRIGHT_GREEN}[2]{Colors.RESET} "
+                f"Manually select model"
+            )
+            print(
+                f"{Colors.BRIGHT_GREEN}[3]{Colors.RESET} "
+                f"List all available models"
+            )
+            print(
+                f"{Colors.BRIGHT_GREEN}[4]{Colors.RESET} "
+                f"View system prompt examples"
+            )
+            print(
+                f"{Colors.BRIGHT_GREEN}[5]{Colors.RESET} "
+                f"View optimal parameters guide"
+            )
+            print(
+                f"{Colors.BRIGHT_GREEN}[6]{Colors.RESET} "
+                f"View documentation guides"
+            )
             print(f"{Colors.BRIGHT_GREEN}[7]{Colors.RESET} Exit")
-            print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}{'=' * 63}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_CYAN}{Colors.BOLD}{sep}{Colors.RESET}"
+            )
 
-            choice = input(f"\n{Colors.BRIGHT_YELLOW}Enter choice [1-7]: {Colors.RESET}").strip()
+            choice = input(
+                f"\n{Colors.BRIGHT_YELLOW}"
+                f"Enter choice [1-7]: {Colors.RESET}"
+            ).strip()
 
             if choice == "1":
                 self.auto_select_mode()
@@ -486,14 +620,22 @@ class AIRouter:
             elif choice == "6":
                 self.view_documentation()
             elif choice == "7":
-                print(f"\n{Colors.BRIGHT_GREEN}Goodbye!{Colors.RESET}\n")
+                print(
+                    f"\n{Colors.BRIGHT_GREEN}Goodbye!{Colors.RESET}\n"
+                )
                 sys.exit(0)
             else:
-                print(f"{Colors.BRIGHT_RED}Invalid choice. Please try again.{Colors.RESET}")
+                print(
+                    f"{Colors.BRIGHT_RED}"
+                    f"Invalid choice. Please try again.{Colors.RESET}"
+                )
 
     def auto_select_mode(self):
         """Auto-select model based on prompt"""
-        print(f"\n{Colors.BRIGHT_CYAN}Enter your prompt (or 'back' to return):{Colors.RESET}")
+        print(
+            f"\n{Colors.BRIGHT_CYAN}"
+            f"Enter your prompt (or 'back' to return):{Colors.RESET}"
+        )
         prompt = input(f"{Colors.YELLOW}> {Colors.RESET}").strip()
 
         if prompt.lower() == 'back':
@@ -501,17 +643,28 @@ class AIRouter:
 
         # Detect use case
         use_case = ModelDatabase.detect_use_case(prompt)
-        print(f"\n{Colors.BRIGHT_MAGENTA}Detected use case: {Colors.BRIGHT_WHITE}{use_case.upper()}{Colors.RESET}")
+        print(
+            f"\n{Colors.BRIGHT_MAGENTA}Detected use case: "
+            f"{Colors.BRIGHT_WHITE}{use_case.upper()}{Colors.RESET}"
+        )
 
         # Recommend model
-        model_id, model_data = ModelDatabase.recommend_model(use_case, self.models)
-        print(f"{Colors.BRIGHT_GREEN}Recommended model: {Colors.BRIGHT_WHITE}{model_data['name']}{Colors.RESET}")
+        model_id, model_data = ModelDatabase.recommend_model(
+            use_case, self.models
+        )
+        print(
+            f"{Colors.BRIGHT_GREEN}Recommended model: "
+            f"{Colors.BRIGHT_WHITE}{model_data['name']}{Colors.RESET}"
+        )
 
         # Show model info
         self.print_model_info(model_id, model_data)
 
         # Ask if user wants to run
-        confirm = input(f"\n{Colors.BRIGHT_YELLOW}Run this model? [Y/n]: {Colors.RESET}").strip().lower()
+        confirm = input(
+            f"\n{Colors.BRIGHT_YELLOW}"
+            f"Run this model? [Y/n]: {Colors.RESET}"
+        ).strip().lower()
         if confirm in ['', 'y', 'yes']:
             self.run_model(model_id, model_data, prompt)
 
@@ -520,7 +673,10 @@ class AIRouter:
         self.list_models()
 
         model_ids = list(self.models.keys())
-        choice = input(f"\n{Colors.BRIGHT_YELLOW}Select model number (or 'back'): {Colors.RESET}").strip()
+        choice = input(
+            f"\n{Colors.BRIGHT_YELLOW}"
+            f"Select model number (or 'back'): {Colors.RESET}"
+        ).strip()
 
         if choice.lower() == 'back':
             return
@@ -533,35 +689,79 @@ class AIRouter:
 
                 self.print_model_info(model_id, model_data)
 
-                prompt = input(f"\n{Colors.BRIGHT_CYAN}Enter your prompt: {Colors.RESET}").strip()
+                prompt = input(
+                    f"\n{Colors.BRIGHT_CYAN}"
+                    f"Enter your prompt: {Colors.RESET}"
+                ).strip()
                 self.run_model(model_id, model_data, prompt)
             else:
-                print(f"{Colors.BRIGHT_RED}[X] Invalid model number.{Colors.RESET}")
-                print(f"{Colors.BRIGHT_YELLOW}Please enter a valid number from the list above.{Colors.RESET}")
+                print(
+                    f"{Colors.BRIGHT_RED}"
+                    f"[X] Invalid model number.{Colors.RESET}"
+                )
+                print(
+                    f"{Colors.BRIGHT_YELLOW}"
+                    f"Please enter a valid number from the list above."
+                    f"{Colors.RESET}"
+                )
         except ValueError:
-            print(f"{Colors.BRIGHT_RED}[X] Invalid input.{Colors.RESET}")
-            print(f"{Colors.BRIGHT_YELLOW}Please enter a valid number.{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_RED}[X] Invalid input.{Colors.RESET}"
+            )
+            print(
+                f"{Colors.BRIGHT_YELLOW}"
+                f"Please enter a valid number.{Colors.RESET}"
+            )
 
-    def run_model(self, model_id, model_data, prompt, retry_count=0, max_retries=2):
+    def run_model(
+        self, model_id, model_data, prompt, retry_count=0, max_retries=2
+    ):
         """Execute the model with optimal parameters and retry logic"""
-        self.logger.info(f"Starting model execution: {model_id} ({model_data['name']})")
+        self.logger.info(
+            f"Starting model execution: {model_id} ({model_data['name']})"
+        )
 
         # Validate resources before execution
         if not self._validate_resources_for_model(model_data):
-            self.logger.error(f"Insufficient resources for model {model_id}")
-            print(f"\n{Colors.BRIGHT_RED}[X] Error: Insufficient system resources{Colors.RESET}")
-            print(f"{Colors.BRIGHT_YELLOW}Model {model_data['name']} requires:{Colors.RESET}")
-            print(f"{Colors.YELLOW}  - Available RAM: ~{model_data['size']} free{Colors.RESET}")
-            print(f"{Colors.YELLOW}  - WSL must be running (for llama.cpp models){Colors.RESET}\n")
+            self.logger.error(
+                f"Insufficient resources for model {model_id}"
+            )
+            print(
+                f"\n{Colors.BRIGHT_RED}[X] Error: "
+                f"Insufficient system resources{Colors.RESET}"
+            )
+            print(
+                f"{Colors.BRIGHT_YELLOW}Model {model_data['name']} "
+                f"requires:{Colors.RESET}"
+            )
+            print(
+                f"{Colors.YELLOW}  - Available RAM: "
+                f"~{model_data['size']} free{Colors.RESET}"
+            )
+            print(
+                f"{Colors.YELLOW}  - WSL must be running "
+                f"(for llama.cpp models){Colors.RESET}\n"
+            )
 
             # Try fallback to smaller model
             fallback_id = self._get_fallback_model(model_id)
             if fallback_id and retry_count == 0:
-                print(f"{Colors.BRIGHT_CYAN}→ Trying fallback model: {self.models[fallback_id]['name']}{Colors.RESET}\n")
-                return self.run_model(fallback_id, self.models[fallback_id], prompt, retry_count=1)
+                print(
+                    f"{Colors.BRIGHT_CYAN}→ Trying fallback model: "
+                    f"{self.models[fallback_id]['name']}{Colors.RESET}\n"
+                )
+                return self.run_model(
+                    fallback_id,
+                    self.models[fallback_id],
+                    prompt,
+                    retry_count=1
+                )
             return None
 
-        print(f"\n{Colors.BRIGHT_GREEN}{Colors.BOLD}Launching {model_data['name']}...{Colors.RESET}\n")
+        print(
+            f"\n{Colors.BRIGHT_GREEN}{Colors.BOLD}"
+            f"Launching {model_data['name']}...{Colors.RESET}\n"
+        )
 
         try:
             if model_data['framework'] == 'mlx':
@@ -577,13 +777,28 @@ class AIRouter:
             # Retry logic
             if retry_count < max_retries:
                 retry_count += 1
-                self.logger.warning(f"Retrying execution (attempt {retry_count + 1}/{max_retries + 1})...")
-                print(f"\n{Colors.BRIGHT_YELLOW}[!] Execution failed, retrying ({retry_count}/{max_retries})...{Colors.RESET}\n")
+                self.logger.warning(
+                    f"Retrying execution (attempt "
+                    f"{retry_count + 1}/{max_retries + 1})..."
+                )
+                print(
+                    f"\n{Colors.BRIGHT_YELLOW}[!] Execution failed, "
+                    f"retrying ({retry_count}/{max_retries})..."
+                    f"{Colors.RESET}\n"
+                )
                 time.sleep(2)  # Brief delay before retry
-                return self.run_model(model_id, model_data, prompt, retry_count, max_retries)
+                return self.run_model(
+                    model_id, model_data, prompt, retry_count, max_retries
+                )
             else:
-                self.logger.error(f"All retry attempts exhausted for {model_id}")
-                print(f"\n{Colors.BRIGHT_RED}[X] Error: Model execution failed after {max_retries + 1} attempts{Colors.RESET}\n")
+                self.logger.error(
+                    f"All retry attempts exhausted for {model_id}"
+                )
+                print(
+                    f"\n{Colors.BRIGHT_RED}[X] Error: "
+                    f"Model execution failed after "
+                    f"{max_retries + 1} attempts{Colors.RESET}\n"
+                )
                 return None
 
     def run_llamacpp_model(self, model_data, prompt):
@@ -601,8 +816,11 @@ class AIRouter:
         special_flags = ' '.join(model_data['special_flags'])
 
         # Detect if already running in WSL
-        is_wsl = os.path.exists('/proc/version') and 'microsoft' in open('/proc/version').read().lower()
-        wsl_prefix = "" if is_wsl else "wsl "
+        is_wsl_env = (
+            os.path.exists('/proc/version') and
+            'microsoft' in open('/proc/version').read().lower()
+        )
+        wsl_prefix = "" if is_wsl_env else "wsl "
 
         cmd = f"""{wsl_prefix}bash -c "~/llama.cpp/build/bin/llama-cli \\
   -m '{model_data['path']}' \\
@@ -614,7 +832,6 @@ class AIRouter:
   -fa 1 \\
   --cache-type-k q8_0 \\
   --cache-type-v q8_0 \\
-  --no-ppl \\
   --temp {model_data['temperature']} \\
   --top-p {model_data['top_p']} \\
   --top-k {model_data['top_k']} \\
@@ -624,16 +841,24 @@ class AIRouter:
 """
 
         if system_prompt:
-            cmd = cmd.replace(f"-p '{prompt}'", f"--system-prompt '{system_prompt}' -p '{prompt}'")
+            cmd = cmd.replace(
+                f"-p '{prompt}'",
+                f"--system-prompt '{system_prompt}' -p '{prompt}'"
+            )
 
         print(f"{Colors.BRIGHT_CYAN}Executing command:{Colors.RESET}")
         print(f"{Colors.DIM}{cmd}{Colors.RESET}\n")
 
         # Execute
         self.logger.debug("Executing llama.cpp command")
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        result = subprocess.run(
+            cmd, shell=True, capture_output=True, text=True
+        )
         if result.returncode != 0:
-            self.logger.error(f"Model execution failed with return code {result.returncode}")
+            self.logger.error(
+                f"Model execution failed with "
+                f"return code {result.returncode}"
+            )
         else:
             self.logger.info("Successfully executed llama.cpp model")
 
@@ -656,8 +881,10 @@ class AIRouter:
   --top-p {model_data['top_p']}"""
 
         if system_prompt:
-            cmd = cmd.replace(f'--prompt "{prompt}"',
-                            f'--system-prompt "{system_prompt}" --prompt "{prompt}"')
+            cmd = cmd.replace(
+                f'--prompt "{prompt}"',
+                f'--system-prompt "{system_prompt}" --prompt "{prompt}"'
+            )
 
         print(f"{Colors.BRIGHT_CYAN}Executing command:{Colors.RESET}")
         print(f"{Colors.DIM}{cmd}{Colors.RESET}\n")
@@ -667,66 +894,202 @@ class AIRouter:
 
     def view_system_prompts(self):
         """Display system prompt examples"""
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  SYSTEM PROMPT GUIDE{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+        sep1 = "╔" + "═" * 62 + "╗"
+        sep2 = "╚" + "═" * 62 + "╝"
+        print(
+            f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}{sep1}{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_CYAN}{Colors.BOLD}"
+            f"║  SYSTEM PROMPT GUIDE{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_CYAN}{Colors.BOLD}{sep2}{Colors.RESET}\n"
+        )
 
-        print(f"{Colors.BRIGHT_WHITE}System prompts are stored in:{Colors.RESET}")
+        print(
+            f"{Colors.BRIGHT_WHITE}"
+            f"System prompts are stored in:{Colors.RESET}"
+        )
         print(f"{Colors.CYAN}{self.system_prompts_dir}{Colors.RESET}\n")
 
-        print(f"{Colors.BRIGHT_WHITE}How to use system prompts:{Colors.RESET}\n")
-        print(f"{Colors.WHITE}1. System prompts are automatically loaded by AI Router{Colors.RESET}")
-        print(f"{Colors.WHITE}2. Each model has an optimized system prompt file{Colors.RESET}")
-        print(f"{Colors.WHITE}3. You can edit these files to customize behavior{Colors.RESET}\n")
+        print(
+            f"{Colors.BRIGHT_WHITE}"
+            f"How to use system prompts:{Colors.RESET}\n"
+        )
+        print(
+            f"{Colors.WHITE}1. System prompts are automatically "
+            f"loaded by AI Router{Colors.RESET}"
+        )
+        print(
+            f"{Colors.WHITE}2. Each model has an optimized "
+            f"system prompt file{Colors.RESET}"
+        )
+        print(
+            f"{Colors.WHITE}3. You can edit these files "
+            f"to customize behavior{Colors.RESET}\n"
+        )
 
-        print(f"{Colors.BRIGHT_YELLOW}Example system prompt structure:{Colors.RESET}\n")
-        print(f"{Colors.GREEN}You are an expert AI assistant specialized in [domain].{Colors.RESET}")
-        print(f"{Colors.GREEN}Your responses should be:{Colors.RESET}")
-        print(f"{Colors.GREEN}- Accurate and well-researched{Colors.RESET}")
+        print(
+            f"{Colors.BRIGHT_YELLOW}"
+            f"Example system prompt structure:{Colors.RESET}\n"
+        )
+        print(
+            f"{Colors.GREEN}You are an expert AI assistant "
+            f"specialized in [domain].{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}Your responses should be:{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}- Accurate and well-researched{Colors.RESET}"
+        )
         print(f"{Colors.GREEN}- Clear and concise{Colors.RESET}")
-        print(f"{Colors.GREEN}- Formatted with proper code blocks when relevant{Colors.RESET}\n")
+        print(
+            f"{Colors.GREEN}- Formatted with proper code blocks "
+            f"when relevant{Colors.RESET}\n"
+        )
 
-        print(f"{Colors.BRIGHT_MAGENTA}Available system prompt files:{Colors.RESET}\n")
+        print(
+            f"{Colors.BRIGHT_MAGENTA}"
+            f"Available system prompt files:{Colors.RESET}\n"
+        )
         for model_id, model_data in self.models.items():
             if model_data['system_prompt']:
-                print(f"  {Colors.GREEN}[OK]{Colors.RESET} {model_data['system_prompt']}")
+                print(
+                    f"  {Colors.GREEN}[OK]{Colors.RESET} "
+                    f"{model_data['system_prompt']}"
+                )
             else:
-                print(f"  {Colors.RED}[X]{Colors.RESET} {model_id} (no system prompt support)")
+                print(
+                    f"  {Colors.RED}[X]{Colors.RESET} "
+                    f"{model_id} (no system prompt support)"
+                )
         print()
 
     def view_parameters_guide(self):
         """Display optimal parameters guide"""
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  OPTIMAL PARAMETERS GUIDE (2025 Research){Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+        sep1 = "╔" + "═" * 62 + "╗"
+        sep2 = "╚" + "═" * 62 + "╝"
+        print(
+            f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}{sep1}{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_CYAN}{Colors.BOLD}"
+            f"║  OPTIMAL PARAMETERS GUIDE (2025 Research){Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_CYAN}{Colors.BOLD}{sep2}{Colors.RESET}\n"
+        )
 
-        print(f"{Colors.BRIGHT_WHITE}RTX 3090 (llama.cpp WSL):{Colors.RESET}\n")
-        print(f"{Colors.GREEN}-ngl 999{Colors.RESET}           {Colors.WHITE}Full GPU offload (Aug 2025 default){Colors.RESET}")
-        print(f"{Colors.GREEN}-t 24{Colors.RESET}             {Colors.WHITE}Use all CPU threads (Ryzen 9 5900X){Colors.RESET}")
-        print(f"{Colors.GREEN}-b 512{Colors.RESET}            {Colors.WHITE}Minimum batch size (2025 research){Colors.RESET}")
-        print(f"{Colors.GREEN}-ub 512{Colors.RESET}           {Colors.WHITE}Logical batch for prompt processing{Colors.RESET}")
-        print(f"{Colors.GREEN}-fa 1{Colors.RESET}             {Colors.WHITE}Flash Attention (+20% speed, 50% memory){Colors.RESET}")
-        print(f"{Colors.GREEN}--cache-type-k q8_0{Colors.RESET}  {Colors.WHITE}KV cache quantization (50% memory){Colors.RESET}")
-        print(f"{Colors.GREEN}--cache-type-v q8_0{Colors.RESET}  {Colors.WHITE}KV cache quantization{Colors.RESET}")
-        print(f"{Colors.GREEN}--no-ppl{Colors.RESET}          {Colors.WHITE}Skip perplexity (+15% speedup){Colors.RESET}")
-        print(f"{Colors.GREEN}--mlock{Colors.RESET}           {Colors.WHITE}Lock model in RAM{Colors.RESET}\n")
+        print(
+            f"{Colors.BRIGHT_WHITE}"
+            f"RTX 3090 (llama.cpp WSL):{Colors.RESET}\n"
+        )
+        print(
+            f"{Colors.GREEN}-ngl 999{Colors.RESET}           "
+            f"{Colors.WHITE}Full GPU offload (Aug 2025 default)"
+            f"{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}-t 24{Colors.RESET}             "
+            f"{Colors.WHITE}Use all CPU threads (Ryzen 9 5900X)"
+            f"{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}-b 512{Colors.RESET}            "
+            f"{Colors.WHITE}Minimum batch size (2025 research)"
+            f"{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}-ub 512{Colors.RESET}           "
+            f"{Colors.WHITE}Logical batch for prompt processing"
+            f"{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}-fa 1{Colors.RESET}             "
+            f"{Colors.WHITE}Flash Attention "
+            f"(+20% speed, 50% memory){Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}--cache-type-k q8_0{Colors.RESET}  "
+            f"{Colors.WHITE}KV cache quantization (50% memory)"
+            f"{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}--cache-type-v q8_0{Colors.RESET}  "
+            f"{Colors.WHITE}KV cache quantization{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}--no-ppl{Colors.RESET}          "
+            f"{Colors.WHITE}Skip perplexity (+15% speedup)"
+            f"{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}--mlock{Colors.RESET}           "
+            f"{Colors.WHITE}Lock model in RAM{Colors.RESET}\n"
+        )
 
-        print(f"{Colors.BRIGHT_WHITE}MacBook M4 Pro (MLX):{Colors.RESET}\n")
-        print(f"{Colors.GREEN}--max-tokens 2048{Colors.RESET}  {Colors.WHITE}Maximum generation length{Colors.RESET}")
-        print(f"{Colors.GREEN}--temp 0.7{Colors.RESET}        {Colors.WHITE}Temperature (creativity){Colors.RESET}")
-        print(f"{Colors.GREEN}--top-p 0.9{Colors.RESET}       {Colors.WHITE}Nucleus sampling{Colors.RESET}\n")
+        print(
+            f"{Colors.BRIGHT_WHITE}"
+            f"MacBook M4 Pro (MLX):{Colors.RESET}\n"
+        )
+        print(
+            f"{Colors.GREEN}--max-tokens 2048{Colors.RESET}  "
+            f"{Colors.WHITE}Maximum generation length{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}--temp 0.7{Colors.RESET}        "
+            f"{Colors.WHITE}Temperature (creativity){Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}--top-p 0.9{Colors.RESET}       "
+            f"{Colors.WHITE}Nucleus sampling{Colors.RESET}\n"
+        )
 
-        print(f"{Colors.BRIGHT_WHITE}Temperature Guide:{Colors.RESET}\n")
-        print(f"{Colors.CYAN}0.2-0.4{Colors.RESET}  {Colors.WHITE}Technical docs, code, Q&A (conservative){Colors.RESET}")
-        print(f"{Colors.CYAN}0.5-0.9{Colors.RESET}  {Colors.WHITE}Content creation, conversation (balanced){Colors.RESET}")
-        print(f"{Colors.CYAN}0.8-1.2+{Colors.RESET} {Colors.WHITE}Creative writing, brainstorming{Colors.RESET}\n")
+        print(
+            f"{Colors.BRIGHT_WHITE}Temperature Guide:{Colors.RESET}\n"
+        )
+        print(
+            f"{Colors.CYAN}0.2-0.4{Colors.RESET}  "
+            f"{Colors.WHITE}Technical docs, code, Q&A (conservative)"
+            f"{Colors.RESET}"
+        )
+        print(
+            f"{Colors.CYAN}0.5-0.9{Colors.RESET}  "
+            f"{Colors.WHITE}Content creation, conversation (balanced)"
+            f"{Colors.RESET}"
+        )
+        print(
+            f"{Colors.CYAN}0.8-1.2+{Colors.RESET} "
+            f"{Colors.WHITE}Creative writing, brainstorming"
+            f"{Colors.RESET}\n"
+        )
 
         print(f"{Colors.BRIGHT_YELLOW}CRITICAL Notes:{Colors.RESET}\n")
-        print(f"{Colors.RED}[X]{Colors.RESET} {Colors.WHITE}NEVER use temp 0 with Qwen models (causes loops){Colors.RESET}")
-        print(f"{Colors.RED}[X]{Colors.RESET} {Colors.WHITE}NEVER use 'think step-by-step' with reasoning models{Colors.RESET}")
-        print(f"{Colors.GREEN}[OK]{Colors.RESET} {Colors.WHITE}ALWAYS use --jinja flag with Phi-4{Colors.RESET}")
-        print(f"{Colors.GREEN}[OK]{Colors.RESET} {Colors.WHITE}ALWAYS use --jinja flag with Qwen3{Colors.RESET}")
-        print(f"{Colors.GREEN}[OK]{Colors.RESET} {Colors.WHITE}WSL provides near-native Linux performance (within 1%){Colors.RESET}\n")
+        print(
+            f"{Colors.RED}[X]{Colors.RESET} {Colors.WHITE}"
+            f"NEVER use temp 0 with Qwen models (causes loops)"
+            f"{Colors.RESET}"
+        )
+        print(
+            f"{Colors.RED}[X]{Colors.RESET} {Colors.WHITE}"
+            f"NEVER use 'think step-by-step' with reasoning models"
+            f"{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}[OK]{Colors.RESET} {Colors.WHITE}"
+            f"ALWAYS use --jinja flag with Phi-4{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}[OK]{Colors.RESET} {Colors.WHITE}"
+            f"ALWAYS use --jinja flag with Qwen3{Colors.RESET}"
+        )
+        print(
+            f"{Colors.GREEN}[OK]{Colors.RESET} {Colors.WHITE}"
+            f"WSL provides near-native Linux performance (within 1%)"
+            f"{Colors.RESET}\n"
+        )
 
     def view_documentation(self):
         """Display documentation guide menu"""
@@ -735,18 +1098,34 @@ class AIRouter:
         # Define documentation files with priority (ONLY FILES THAT EXIST)
         docs = [
             # Frequently needed (top priority)
-            ("HOW-TO-RUN-AI-ROUTER.md", "🚀 How to Run the AI Router", "Getting started, usage, troubleshooting"),
-            ("BOT-PROJECT-QUICK-START.md", "Bot & Project Management", "Create bots and projects with custom configs"),
-            ("SYSTEM-PROMPTS-QUICK-START.md", "📝 System Prompts Quick Start", "Using and customizing system prompts"),
+            ("HOW-TO-RUN-AI-ROUTER.md",
+             "🚀 How to Run the AI Router",
+             "Getting started, usage, troubleshooting"),
+            ("BOT-PROJECT-QUICK-START.md",
+             "Bot & Project Management",
+             "Create bots and projects with custom configs"),
+            ("SYSTEM-PROMPTS-QUICK-START.md",
+             "📝 System Prompts Quick Start",
+             "Using and customizing system prompts"),
 
             # Important reference
-            ("COMPREHENSIVE-EVALUATION-FRAMEWORK-PROMPT.md", "📊 Evaluation Framework", "Testing and comparing models"),
-            ("2025-RESEARCH-SUMMARY.md", "🔬 2025 Research Summary", "Latest research findings and best practices"),
-            ("MACBOOK-M4-OPTIMIZATION-GUIDE.md", "💻 MacBook M4 Optimization", "Optimizing for Apple M4 hardware"),
+            ("COMPREHENSIVE-EVALUATION-FRAMEWORK-PROMPT.md",
+             "📊 Evaluation Framework",
+             "Testing and comparing models"),
+            ("2025-RESEARCH-SUMMARY.md",
+             "🔬 2025 Research Summary",
+             "Latest research findings and best practices"),
+            ("MACBOOK-M4-OPTIMIZATION-GUIDE.md",
+             "💻 MacBook M4 Optimization",
+             "Optimizing for Apple M4 hardware"),
 
             # Additional resources
-            ("GITHUB-SETUP-GUIDE.md", "🐙 GitHub Setup Guide", "Setting up Git and GitHub"),
-            ("README.md", "📖 Project README", "Complete project overview and setup"),
+            ("GITHUB-SETUP-GUIDE.md",
+             "🐙 GitHub Setup Guide",
+             "Setting up Git and GitHub"),
+            ("README.md",
+             "📖 Project README",
+             "Complete project overview and setup"),
         ]
 
         # Filter to only files that actually exist
@@ -759,45 +1138,85 @@ class AIRouter:
         docs = existing_docs
 
         if not docs:
-            print(f"\n{Colors.BRIGHT_RED}No documentation files found!{Colors.RESET}\n")
-            input(f"{Colors.BRIGHT_YELLOW}Press Enter to return...{Colors.RESET}")
+            print(
+                f"\n{Colors.BRIGHT_RED}"
+                f"No documentation files found!{Colors.RESET}\n"
+            )
+            input(
+                f"{Colors.BRIGHT_YELLOW}"
+                f"Press Enter to return...{Colors.RESET}"
+            )
             return
 
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  📚 DOCUMENTATION GUIDES ({len(docs)} available){Colors.RESET}")
-        print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+        sep1 = "╔" + "═" * 62 + "╗"
+        sep2 = "╚" + "═" * 62 + "╝"
+        print(
+            f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}{sep1}{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_CYAN}{Colors.BOLD}"
+            f"║  📚 DOCUMENTATION GUIDES ({len(docs)} available)"
+            f"{Colors.RESET}"
+        )
+        print(
+            f"{Colors.BRIGHT_CYAN}{Colors.BOLD}{sep2}{Colors.RESET}\n"
+        )
 
         # Display docs organized by priority
         # Top 3 are most frequently needed
         if len(docs) >= 1:
-            print(f"{Colors.BRIGHT_WHITE}⭐ Most Frequently Needed:{Colors.RESET}\n")
+            print(
+                f"{Colors.BRIGHT_WHITE}"
+                f"⭐ Most Frequently Needed:{Colors.RESET}\n"
+            )
             for idx in range(min(3, len(docs))):
                 filename, title, desc = docs[idx]
-                print(f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} {Colors.BRIGHT_WHITE}{title}{Colors.RESET}")
+                print(
+                    f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} "
+                    f"{Colors.BRIGHT_WHITE}{title}{Colors.RESET}"
+                )
                 print(f"    {Colors.CYAN}{desc}{Colors.RESET}")
                 print()
 
         # Next 3 are important reference
         if len(docs) > 3:
-            print(f"{Colors.BRIGHT_WHITE}📚 Important Reference:{Colors.RESET}\n")
+            print(
+                f"{Colors.BRIGHT_WHITE}"
+                f"📚 Important Reference:{Colors.RESET}\n"
+            )
             for idx in range(3, min(6, len(docs))):
                 filename, title, desc = docs[idx]
-                print(f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} {Colors.WHITE}{title}{Colors.RESET}")
+                print(
+                    f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} "
+                    f"{Colors.WHITE}{title}{Colors.RESET}"
+                )
                 print(f"    {Colors.CYAN}{desc}{Colors.RESET}")
                 print()
 
         # Remaining are additional resources
         if len(docs) > 6:
-            print(f"{Colors.BRIGHT_WHITE}📖 Additional Resources:{Colors.RESET}\n")
+            print(
+                f"{Colors.BRIGHT_WHITE}"
+                f"📖 Additional Resources:{Colors.RESET}\n"
+            )
             for idx in range(6, len(docs)):
                 filename, title, desc = docs[idx]
-                print(f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} {Colors.WHITE}{title}{Colors.RESET}")
+                print(
+                    f"{Colors.BRIGHT_GREEN}[{idx+1}]{Colors.RESET} "
+                    f"{Colors.WHITE}{title}{Colors.RESET}"
+                )
                 print(f"    {Colors.CYAN}{desc}{Colors.RESET}")
                 print()
 
-        print(f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} {Colors.WHITE}Return to main menu{Colors.RESET}\n")
+        print(
+            f"{Colors.BRIGHT_GREEN}[0]{Colors.RESET} "
+            f"{Colors.WHITE}Return to main menu{Colors.RESET}\n"
+        )
 
-        choice = input(f"{Colors.BRIGHT_YELLOW}Select documentation [0-{len(docs)}]: {Colors.RESET}").strip()
+        choice = input(
+            f"{Colors.BRIGHT_YELLOW}"
+            f"Select documentation [0-{len(docs)}]: {Colors.RESET}"
+        ).strip()
 
         if choice == "0":
             return
@@ -813,9 +1232,20 @@ class AIRouter:
                     with open(doc_path, 'r', encoding='utf-8') as f:
                         content = f.read()
 
-                    print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-                    print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}║  {title}{Colors.RESET}")
-                    print(f"{Colors.BRIGHT_CYAN}{Colors.BOLD}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+                    sep1 = "╔" + "═" * 62 + "╗"
+                    sep2 = "╚" + "═" * 62 + "╝"
+                    print(
+                        f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}"
+                        f"{sep1}{Colors.RESET}"
+                    )
+                    print(
+                        f"{Colors.BRIGHT_CYAN}{Colors.BOLD}"
+                        f"║  {title}{Colors.RESET}"
+                    )
+                    print(
+                        f"{Colors.BRIGHT_CYAN}{Colors.BOLD}"
+                        f"{sep2}{Colors.RESET}\n"
+                    )
 
                     # Display content with pagination (first 50 lines)
                     lines = content.split('\n')
@@ -826,22 +1256,50 @@ class AIRouter:
                         print('\n'.join(page_lines))
 
                         if i + page_size < len(lines):
-                            cont = input(f"\n{Colors.BRIGHT_YELLOW}Press Enter to continue, 'q' to quit: {Colors.RESET}").strip().lower()
+                            cont = input(
+                                f"\n{Colors.BRIGHT_YELLOW}"
+                                f"Press Enter to continue, 'q' to quit: "
+                                f"{Colors.RESET}"
+                            ).strip().lower()
                             if cont == 'q':
                                 break
                         else:
-                            print(f"\n{Colors.BRIGHT_GREEN}[End of document]{Colors.RESET}")
+                            print(
+                                f"\n{Colors.BRIGHT_GREEN}"
+                                f"[End of document]{Colors.RESET}"
+                            )
 
-                    input(f"\n{Colors.BRIGHT_YELLOW}Press Enter to return to menu...{Colors.RESET}")
+                    input(
+                        f"\n{Colors.BRIGHT_YELLOW}"
+                        f"Press Enter to return to menu...{Colors.RESET}"
+                    )
                 else:
-                    print(f"{Colors.BRIGHT_RED}Documentation file not found: {filename}{Colors.RESET}")
-                    input(f"\n{Colors.BRIGHT_YELLOW}Press Enter to continue...{Colors.RESET}")
+                    print(
+                        f"{Colors.BRIGHT_RED}"
+                        f"Documentation file not found: {filename}"
+                        f"{Colors.RESET}"
+                    )
+                    input(
+                        f"\n{Colors.BRIGHT_YELLOW}"
+                        f"Press Enter to continue...{Colors.RESET}"
+                    )
             else:
-                print(f"{Colors.BRIGHT_RED}[X] Invalid selection.{Colors.RESET}")
-                print(f"{Colors.BRIGHT_YELLOW}Please enter a valid option number.{Colors.RESET}")
+                print(
+                    f"{Colors.BRIGHT_RED}"
+                    f"[X] Invalid selection.{Colors.RESET}"
+                )
+                print(
+                    f"{Colors.BRIGHT_YELLOW}"
+                    f"Please enter a valid option number.{Colors.RESET}"
+                )
         except ValueError:
-            print(f"{Colors.BRIGHT_RED}[X] Invalid input.{Colors.RESET}")
-            print(f"{Colors.BRIGHT_YELLOW}Please enter a valid number from the menu.{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_RED}[X] Invalid input.{Colors.RESET}"
+            )
+            print(
+                f"{Colors.BRIGHT_YELLOW}"
+                f"Please enter a valid number from the menu.{Colors.RESET}"
+            )
 
 
 def main():
@@ -857,31 +1315,55 @@ def main():
             elif sys.argv[1] == "--help":
                 router.print_banner()
                 print(f"{Colors.BRIGHT_WHITE}Usage:{Colors.RESET}\n")
-                print(f"  {Colors.GREEN}python ai-router.py{Colors.RESET}")
-                print(f"    {Colors.WHITE}Launch interactive mode{Colors.RESET}\n")
-                print(f"  {Colors.GREEN}python ai-router.py --list{Colors.RESET}")
-                print(f"    {Colors.WHITE}List all available models{Colors.RESET}\n")
-                print(f"  {Colors.GREEN}python ai-router.py --help{Colors.RESET}")
-                print(f"    {Colors.WHITE}Show this help message{Colors.RESET}\n")
+                print(
+                    f"  {Colors.GREEN}python ai-router.py{Colors.RESET}"
+                )
+                print(
+                    f"    {Colors.WHITE}"
+                    f"Launch interactive mode{Colors.RESET}\n"
+                )
+                print(
+                    f"  {Colors.GREEN}"
+                    f"python ai-router.py --list{Colors.RESET}"
+                )
+                print(
+                    f"    {Colors.WHITE}"
+                    f"List all available models{Colors.RESET}\n"
+                )
+                print(
+                    f"  {Colors.GREEN}"
+                    f"python ai-router.py --help{Colors.RESET}"
+                )
+                print(
+                    f"    {Colors.WHITE}"
+                    f"Show this help message{Colors.RESET}\n"
+                )
             else:
-                print(f"{Colors.BRIGHT_RED}Unknown argument. Use --help for usage.{Colors.RESET}")
+                print(
+                    f"{Colors.BRIGHT_RED}"
+                    f"Unknown argument. Use --help for usage."
+                    f"{Colors.RESET}"
+                )
         else:
             # Interactive mode
             router.interactive_mode()
 
     except KeyboardInterrupt:
-        print(f"\n\n{Colors.BRIGHT_YELLOW}Interrupted by user. Goodbye!{Colors.RESET}\n")
+        print(
+            f"\n\n{Colors.BRIGHT_YELLOW}"
+            f"Interrupted by user. Goodbye!{Colors.RESET}\n"
+        )
         sys.exit(0)
     except Exception as e:
         import traceback
         traceback.print_exc()
-        print(f"\n[X] Error: An unexpected error occurred")
+        print("\n[X] Error: An unexpected error occurred")
         print(f"Details: {str(e)[:200]}\n")
-        print(f"Troubleshooting Steps:")
-        print(f"  1. Check Python version: python --version")
-        print(f"  2. Verify dependencies: pip list")
-        print(f"  3. Check WSL status: wsl --status")
-        print(f"  4. Try reinstalling: pip install -r requirements.txt\n")
+        print("Troubleshooting Steps:")
+        print("  1. Check Python version: python --version")
+        print("  2. Verify dependencies: pip list")
+        print("  3. Check WSL status: wsl --status")
+        print("  4. Try reinstalling: pip install -r requirements.txt\n")
         sys.exit(1)
 
 

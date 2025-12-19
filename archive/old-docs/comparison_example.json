@@ -1,0 +1,33 @@
+{
+  "comparison_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "timestamp": "2025-12-08T14:30:45",
+  "prompt": "Write a Python function to calculate the factorial of a number",
+  "responses": [
+    {
+      "model_id": "qwen3-coder-30b",
+      "model_name": "Qwen3 Coder 30B Q4_K_M",
+      "response": "def factorial(n):\n    \"\"\"\n    Calculate the factorial of a number.\n    \n    Args:\n        n (int): Non-negative integer\n    \n    Returns:\n        int: Factorial of n\n    \"\"\"\n    if n < 0:\n        raise ValueError(\"Factorial is not defined for negative numbers\")\n    if n == 0 or n == 1:\n        return 1\n    return n * factorial(n - 1)",
+      "tokens_input": 45,
+      "tokens_output": 120,
+      "duration": 4.5
+    },
+    {
+      "model_id": "phi4-14b",
+      "model_name": "Phi-4 Reasoning Plus 14B Q6_K",
+      "response": "def factorial(n):\n    \"\"\"Calculate factorial using iteration for better performance.\"\"\"\n    if n < 0:\n        raise ValueError(\"Factorial undefined for negative numbers\")\n    result = 1\n    for i in range(2, n + 1):\n        result *= i\n    return result",
+      "tokens_input": 45,
+      "tokens_output": 85,
+      "duration": 2.1
+    },
+    {
+      "model_id": "dolphin-llama31-8b",
+      "model_name": "Dolphin 3.0 Llama 3.1 8B Q6_K",
+      "response": "import math\n\ndef factorial(n):\n    \"\"\"Calculate factorial using Python's built-in math module.\"\"\"\n    return math.factorial(n)",
+      "tokens_input": 45,
+      "tokens_output": 40,
+      "duration": 0.9
+    }
+  ],
+  "winner": "dolphin-llama31-8b",
+  "notes": "Dolphin provided the most concise solution using stdlib. Phi-4 had the best balance of performance and clarity. Qwen3 provided the most detailed documentation but used recursion which is less efficient."
+}

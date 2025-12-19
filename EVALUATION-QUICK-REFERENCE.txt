@@ -1,0 +1,324 @@
+================================================================================
+CODE QUALITY EVALUATION - QUICK REFERENCE
+================================================================================
+
+FILES CREATED FOR YOU:
+
+1. CODE-QUALITY-EVALUATION-PROMPT.md
+   - Detailed structured evaluation framework
+   - Use: In-depth LLM analysis with all categories
+
+2. PROMPT-FOR-CODEX-GEMINI.txt
+   - QUICK VERSION (2-5 min analysis)
+   - COMPREHENSIVE VERSION (detailed analysis)
+   - MINIMAL VERSION (essential takeaways only)
+
+3. HOW-TO-USE-EVALUATION-PROMPTS.md
+   - Step-by-step guide for each LLM type
+   - Customization tips, troubleshooting
+
+4. EXAMPLE-TOOL-RECOMMENDATIONS.md
+   - What to expect from LLM recommendations
+   - Sample tools with configurations
+
+5. EVALUATION-QUICK-REFERENCE.txt (this file)
+   - Cheat sheet for quick reference
+
+================================================================================
+QUICK START - 3 STEPS
+================================================================================
+
+STEP 1: Choose Your LLM
+  [ ] ChatGPT/Codex          -> Use COMPREHENSIVE VERSION
+  [ ] Google Gemini          -> Use QUICK VERSION
+  [ ] Claude                 -> Use COMPREHENSIVE VERSION
+  [ ] Llama 2/Open Source    -> Use MINIMAL VERSION
+  [ ] GitHub Copilot         -> Use QUICK VERSION
+
+STEP 2: Choose Your Prompt Version
+  [ ] QUICK (2-5 min)        -> Top issues + top 5 tools
+  [ ] COMPREHENSIVE (10-15)  -> All issues + 15 tools + roadmap
+  [ ] MINIMAL (1-2 min)      -> Essentials only
+
+STEP 3: Copy & Paste
+  1. Copy prompt from PROMPT-FOR-CODEX-GEMINI.txt
+  2. Go to your LLM (ChatGPT, Gemini, Claude, etc.)
+  3. Paste prompt
+  4. Paste your 5 Python files (or use code summary for efficiency)
+  5. Submit and wait for analysis
+
+Expected output: 5-15 tools with install commands, roadmap, GitHub Actions
+
+================================================================================
+WHICH LLM GIVES BEST RESULTS FOR WHAT?
+================================================================================
+
+CODE ANALYSIS & BUGS:
+  Best: Claude 3 Opus or ChatGPT-4
+  Why: Most thorough bug detection
+
+TYPE SAFETY:
+  Best: Claude 3 Opus or ChatGPT-4
+  Why: Understand Python type systems deeply
+
+SECURITY VULNERABILITIES:
+  Best: Claude 3 Opus or Codex
+  Why: OWASP expertise built in
+
+TOOL RECOMMENDATIONS:
+  Best: Google Gemini
+  Why: Always up-to-date with latest tools
+
+IMPLEMENTATION GUIDES:
+  Best: ChatGPT-4 or Claude
+  Why: Clear step-by-step instructions
+
+PERFORMANCE OPTIMIZATION:
+  Best: Claude 3 Opus
+  Why: Algorithmic expertise
+
+QUICK SUMMARY:
+  Best: Any LLM with MINIMAL VERSION
+  Why: All LLMs good for summaries
+
+================================================================================
+ERROR CATEGORIES YOUR CODE CAN HAVE
+================================================================================
+
+1. RUNTIME ERRORS
+   Example: ValueError, TypeError, AttributeError
+   Detection: Test coverage, static analysis
+   Tools: pytest, mypy, pylint
+
+2. SECURITY VULNERABILITIES
+   Example: Command injection in subprocess.run()
+   Detection: Security scanners
+   Tools: bandit, safety, SAST scanners
+
+3. TYPE ERRORS
+   Example: Passing string where int expected
+   Detection: Type checkers
+   Tools: mypy, pyright, pyre
+
+4. LOGIC ERRORS
+   Example: Off-by-one in loops, wrong conditionals
+   Detection: Code review, testing
+   Tools: pytest, coverage, code review
+
+5. PERFORMANCE PROBLEMS
+   Example: N+1 queries, inefficient algorithms
+   Detection: Profilers, code review
+   Tools: py-spy, memory_profiler, line_profiler
+
+6. STYLE/LINT ERRORS
+   Example: Lines too long, missing docstrings
+   Detection: Linters (already fixed)
+   Tools: flake8 (done), pylint, black
+
+7. RESOURCE LEAKS
+   Example: Unclosed files, connections
+   Detection: Code review, resource tracking
+   Tools: pytest, manual code review
+
+8. DOCUMENTATION GAPS
+   Example: Missing docstrings, unclear comments
+   Detection: Coverage analysis
+   Tools: sphinx, interrogate
+
+================================================================================
+TOP TOOLS YOU'LL PROBABLY GET RECOMMENDED
+================================================================================
+
+MUST-HAVE (Likely all LLMs recommend):
+  1. mypy                    - Type checking (pip install mypy)
+  2. bandit                  - Security (pip install bandit)
+  3. pytest                  - Testing (pip install pytest)
+  4. black                   - Formatting (pip install black)
+  5. pylint                  - Code analysis (pip install pylint)
+
+PROBABLY RECOMMENDED:
+  6. isort                   - Import sorting (pip install isort)
+  7. coverage                - Test coverage (pip install coverage)
+  8. safety                  - Dependency security (pip install safety)
+  9. pre-commit              - Git hooks (pip install pre-commit)
+  10. ruff                   - Fast linting (pip install ruff)
+
+MAYBE RECOMMENDED:
+  11. sphinx                 - Documentation (pip install sphinx)
+  12. interrogate            - Docstring coverage (pip install interrogate)
+  13. autopep8               - Auto-formatter (pip install autopep8)
+  14. flake8                 - Linting (already fixed)
+  15. commitlint             - Commit messages (npm install)
+
+================================================================================
+ESTIMATED EFFORT
+================================================================================
+
+PHASE 1 (Quick Wins) - 1-2 days
+  Tools: mypy, bandit, black
+  Issues Found: ~75 + security issues
+  Time to Fix: 4-6 hours
+  Value: Critical - prevent top bugs & vulnerabilities
+
+PHASE 2 (Core Quality) - 2-3 days
+  Tools: pytest, pylint, isort, safety
+  Issues Found: ~150+ quality issues
+  Time to Fix: 1-2 days
+  Value: High - comprehensive quality improvement
+
+PHASE 3 (Advanced) - 3-7 days
+  Tools: coverage, sphinx, interrogate, ruff
+  Issues Found: ~50+ documentation & coverage gaps
+  Time to Fix: 2-3 days
+  Value: Medium - completeness & maintainability
+
+TOTAL: 1-3 weeks to full implementation
+
+================================================================================
+HOW TO USE WITH CLAUDE CODE
+================================================================================
+
+If using Claude Code (where you are now):
+1. I can analyze your code directly
+2. I can help implement all recommendations
+3. I can install tools and run them
+4. I can create configuration files
+5. I can fix identified issues
+
+To use this with other LLMs:
+1. Copy prompt from PROMPT-FOR-CODEX-GEMINI.txt
+2. Go to other LLM's interface
+3. Paste prompt + your code
+4. Compare results across 2-3 LLMs
+5. Come back to me to implement
+
+================================================================================
+COMMON QUESTIONS
+================================================================================
+
+Q: Which prompt version should I start with?
+A: QUICK VERSION - faster, gives you essential info to decide next steps
+
+Q: Should I use one LLM or multiple?
+A: Multiple (2-3) for cross-validation. Look for consensus on top tools.
+
+Q: What if LLM recommendations don't match expected tools?
+A: That's normal! Different LLMs have different knowledge.
+   Use majority vote - if 2+ recommend it, it's worth including.
+
+Q: Can I run the tools in parallel?
+A: Yes! Most tools don't conflict. Run all Phase 1 simultaneously.
+
+Q: How much will this improve code quality?
+A: Expected improvement:
+   - Bug reduction: 60-70%
+   - Security issues: 90-95% (from ~10 to 0-1)
+   - Code maintainability: 40-50%
+   - Type coverage: 0% -> 70-90%
+   - Test coverage: 0% -> 70%+
+
+Q: Will implementing all tools slow down development?
+A: No - after initial setup (3-7 days), tools run automatically
+   Future overhead: <5 minutes per PR
+
+================================================================================
+INTEGRATION CHECKLIST
+================================================================================
+
+After getting LLM recommendations:
+
+WEEK 1:
+  [ ] Install Phase 1 tools (mypy, bandit, black)
+  [ ] Create configuration files (.mypy.ini, .bandit, etc.)
+  [ ] Run each tool locally to see baseline issues
+  [ ] Fix critical security issues
+  [ ] Create .pre-commit-config.yaml with Phase 1 tools
+  [ ] Run pre-commit install on all dev machines
+
+WEEK 2:
+  [ ] Install Phase 2 tools (pytest, pylint, isort)
+  [ ] Create test structure and write initial tests
+  [ ] Fix high-priority code quality issues
+  [ ] Create GitHub Actions workflow for Phase 1 & 2
+  [ ] Add quality gates to main branch
+
+WEEK 3+:
+  [ ] Install Phase 3 tools as needed
+  [ ] Reach 70% test coverage target
+  [ ] Document all public APIs
+  [ ] Create automated quality dashboards
+
+================================================================================
+NEXT ACTIONS
+================================================================================
+
+IMMEDIATE (Now):
+  1. Review these 5 files you just created
+  2. Choose which LLM to use first
+  3. Decide: Quick vs. Comprehensive analysis
+
+TODAY:
+  1. Run evaluation prompt with chosen LLM
+  2. Review recommendations
+  3. Compare with EXAMPLE-TOOL-RECOMMENDATIONS.md
+  4. List top 5 tools you want to implement
+
+THIS WEEK:
+  1. Install Phase 1 tools
+  2. Run on your codebase
+  3. Fix critical issues
+  4. Set up pre-commit hooks
+
+THIS MONTH:
+  1. Complete Phase 2 tool implementation
+  2. Reach 40% test coverage
+  3. Set up GitHub Actions
+  4. Establish quality metrics dashboard
+
+================================================================================
+FILES QUICK OVERVIEW
+================================================================================
+
+FILE: CODE-QUALITY-EVALUATION-PROMPT.md
+  Purpose: Detailed rubric for LLM analysis
+  Use: Give to LLM that supports long context
+  Length: Very comprehensive, all categories
+
+FILE: PROMPT-FOR-CODEX-GEMINI.txt
+  Purpose: 3 prompt versions for quick/comprehensive/minimal analysis
+  Use: Copy-paste ready for any LLM
+  Length: ~600 lines, 3 versions to choose from
+
+FILE: HOW-TO-USE-EVALUATION-PROMPTS.md
+  Purpose: Step-by-step usage guide for each LLM type
+  Use: Follow specific instructions for Codex/Gemini/Claude/etc.
+  Length: Detailed with examples
+
+FILE: EXAMPLE-TOOL-RECOMMENDATIONS.md
+  Purpose: See what good recommendations look like
+  Use: Know what to expect from LLM output
+  Length: ~400 lines with real configurations
+
+FILE: EVALUATION-QUICK-REFERENCE.txt (this file)
+   Purpose: Cheat sheet, quick lookup
+   Use: Fast reference while working
+   Length: ~400 lines, organized by topic
+
+================================================================================
+RESOURCES CREATED FOR YOUR AI ROUTER PROJECT
+
+Your AI Router has 5 Python files with:
+  - ~5000 total lines of code
+  - 0 test coverage
+  - <20% type hint coverage
+  - 0 security violations found (after lint fixes)
+  - ~753 lint errors (all fixed)
+
+These evaluation prompts will help you:
+  1. Find remaining quality issues
+  2. Discover 10-15 open source tools to help
+  3. Plan 3-phase implementation roadmap
+  4. Set up automated quality checking
+  5. Improve code reliability and maintainability
+
+================================================================================

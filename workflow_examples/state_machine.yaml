@@ -1,0 +1,429 @@
+# State Machine Workflow Example
+# Demonstrates state-driven workflow execution
+
+workflow:
+  name: "DocumentApprovalStateMachine"
+  version: "1.0"
+  description: "Document review and approval process using state machine"
+  type: "state_machine"
+
+  variables:
+    document_id: ""
+    document_content: ""
+    required_approvers: 2
+    approval_timeout: 172800000  # 48 hours in milliseconds
+
+  state_management:
+    persistence:
+      enabled: true
+      storage: "database"
+      checkpoint_frequency: "on_state_change"
+
+  states:
+    SUBMITTED:
+      description: "Document has been submitted for review"
+      entry_action: "log_submission"
+      on_entry:
+        - type: "action"
+          action: "create_approval_record"
+          params:
+            document_id: "{{document_id}}"
+            status: "submitted"
+            timestamp: "{{now}}"
+
+        - type: "action"
+          action: "notify_reviewers"
+          params:
+            message: "New document submitted for review"
+
+      transitions:
+        - to: "INITIAL_REVIEW"
+          trigger: "auto"
+          delay: 0
+
+    INITIAL_REVIEW:
+      description: "Document is being reviewed for basic requirements"
+      entry_action: "start_initial_review"
+      on_entry:
+        - type: "llm_call"
+          id: "check_formatting"
+          model: "gpt-4"
+          temperature: 0.1
+          prompt: |
+            Check if this document meets basic formatting requirements:
+            {{document_content}}
+
+            Requirements:
+            - Has title
+            - Has clear sections
+            - Proper grammar
+            - Minimum 500 words
+
+            Return JSON: {"compliant": true/false, "issues": []}
+          outputs:
+            - name: "formatting_check"
+
+        - type: "llm_call"
+          id: "check_completeness"
+          model: "gpt-4"
+          temperature: 0.2
+          prompt: |
+            Check document completeness:
+            {{document_content}}
+
+            Required sections:
+            - Executive Summary
+            - Main Content
+            - Conclusion
+
+            Return JSON: {"complete": true/false, "missing_sections": []}
+          outputs:
+            - name: "completeness_check"
+
+      transitions:
+        - to: "REJECTED"
+          condition: |
+            {{formatting_check.compliant == false OR
+              completeness_check.complete == false}}
+
+        - to: "AWAITING_APPROVAL"
+          condition: |
+            {{formatting_check.compliant == true AND
+              completeness_check.complete == true}}
+
+    REJECTED:
+      description: "Document rejected due to issues"
+      entry_action: "log_rejection"
+      on_entry:
+        - type: "action"
+          action: "update_status"
+          params:
+            document_id: "{{document_id}}"
+            status: "rejected"
+            reason: |
+              Formatting issues: {{formatting_check.issues}}
+              Missing sections: {{completeness_check.missing_sections}}
+
+        - type: "action"
+          action: "notify_submitter"
+          params:
+            message: |
+              Your document has been rejected.
+              Please address the following issues and resubmit.
+
+              Formatting: {{formatting_check.issues}}
+              Completeness: {{completeness_check.missing_sections}}
+
+      transitions:
+        - to: "RESUBMITTED"
+          trigger: "resubmit"
+          action: "update_document_content"
+
+        - to: "CANCELLED"
+          trigger: "cancel"
+
+      terminal: false
+
+    RESUBMITTED:
+      description: "Document has been resubmitted after revisions"
+      entry_action: "log_resubmission"
+      on_entry:
+        - type: "action"
+          action: "increment_resubmission_count"
+
+        - type: "llm_call"
+          id: "compare_versions"
+          model: "gpt-4"
+          temperature: 0.3
+          prompt: |
+            Compare the resubmitted document with previous version:
+
+            Original issues:
+            {{previous_rejection_reason}}
+
+            New version:
+            {{document_content}}
+
+            Have all issues been addressed?
+            Return JSON: {"issues_resolved": true/false, "remaining_issues": []}
+          outputs:
+            - name: "revision_check"
+
+      transitions:
+        - to: "INITIAL_REVIEW"
+          condition: "{{revision_check.issues_resolved == true}}"
+
+        - to: "REJECTED"
+          condition: "{{revision_check.issues_resolved == false}}"
+          max_resubmissions: 3
+
+        - to: "ESCALATED"
+          condition: "{{resubmission_count >= 3}}"
+
+    AWAITING_APPROVAL:
+      description: "Document awaiting approval from designated approvers"
+      entry_action: "request_approvals"
+      timeout: 172800000  # 48 hours
+      on_timeout: "ESCALATED"
+
+      on_entry:
+        - type: "action"
+          action: "assign_approvers"
+          params:
+            document_id: "{{document_id}}"
+            required_count: "{{required_approvers}}"
+
+        - type: "action"
+          action: "send_approval_requests"
+          params:
+            approvers: "{{assigned_approvers}}"
+            deadline: "{{now + approval_timeout}}"
+
+      on_state_actions:
+        - type: "monitor"
+          check_interval: 3600000  # Check every hour
+          action: "check_approval_status"
+          outputs:
+            - name: "approval_count"
+            - name: "rejection_count"
+
+      transitions:
+        - to: "APPROVED"
+          condition: "{{approval_count >= required_approvers}}"
+
+        - to: "CHANGES_REQUESTED"
+          condition: "{{rejection_count > 0}}"
+
+        - to: "ESCALATED"
+          trigger: "timeout"
+
+    CHANGES_REQUESTED:
+      description: "Approvers have requested changes"
+      entry_action: "collect_feedback"
+      on_entry:
+        - type: "action"
+          action: "aggregate_feedback"
+          params:
+            document_id: "{{document_id}}"
+          outputs:
+            - name: "consolidated_feedback"
+
+        - type: "llm_call"
+          id: "prioritize_feedback"
+          model: "gpt-4"
+          temperature: 0.3
+          prompt: |
+            Analyze and prioritize this feedback:
+            {{consolidated_feedback}}
+
+            Categorize as:
+            - Critical (must fix)
+            - Important (should fix)
+            - Optional (nice to have)
+
+            Return JSON with categorized feedback.
+          outputs:
+            - name: "prioritized_feedback"
+
+        - type: "action"
+          action: "notify_submitter"
+          params:
+            message: |
+              Changes requested for your document.
+
+              Critical changes:
+              {{prioritized_feedback.critical}}
+
+              Important changes:
+              {{prioritized_feedback.important}}
+
+              Optional suggestions:
+              {{prioritized_feedback.optional}}
+
+      transitions:
+        - to: "REVISION_IN_PROGRESS"
+          trigger: "start_revision"
+
+        - to: "REJECTED"
+          trigger: "decline_changes"
+
+    REVISION_IN_PROGRESS:
+      description: "Author is making requested changes"
+      entry_action: "start_revision_timer"
+      timeout: 259200000  # 72 hours
+      on_timeout: "ESCALATED"
+
+      transitions:
+        - to: "AWAITING_APPROVAL"
+          trigger: "submit_revisions"
+          action: "update_document_content"
+
+        - to: "CHANGES_REQUESTED"
+          trigger: "request_clarification"
+
+    ESCALATED:
+      description: "Document requires management review"
+      entry_action: "notify_management"
+      on_entry:
+        - type: "action"
+          action: "create_escalation_ticket"
+          params:
+            document_id: "{{document_id}}"
+            reason: "{{escalation_reason}}"
+            history: "{{state_history}}"
+
+        - type: "action"
+          action: "notify_managers"
+          params:
+            priority: "high"
+            message: |
+              Document approval escalated.
+              Document ID: {{document_id}}
+              Reason: {{escalation_reason}}
+              Time in workflow: {{workflow_duration}}
+
+        - type: "user_input"
+          id: "management_review"
+          prompt: "Management decision required for escalated document"
+          inputs:
+            - name: "decision"
+              type: "select"
+              options:
+                - "Approve"
+                - "Reject"
+                - "Request Changes"
+                - "Assign Specialist"
+              required: true
+            - name: "comments"
+              type: "text"
+          outputs:
+            - name: "management_decision"
+
+      transitions:
+        - to: "APPROVED"
+          condition: "{{management_decision.decision == 'Approve'}}"
+
+        - to: "REJECTED"
+          condition: "{{management_decision.decision == 'Reject'}}"
+
+        - to: "CHANGES_REQUESTED"
+          condition: "{{management_decision.decision == 'Request Changes'}}"
+
+        - to: "SPECIALIST_REVIEW"
+          condition: "{{management_decision.decision == 'Assign Specialist'}}"
+
+    SPECIALIST_REVIEW:
+      description: "Document assigned to specialist for expert review"
+      entry_action: "assign_specialist"
+      on_entry:
+        - type: "action"
+          action: "identify_specialist"
+          params:
+            document_type: "{{document_metadata.type}}"
+            expertise_required: "{{document_metadata.domain}}"
+          outputs:
+            - name: "assigned_specialist"
+
+        - type: "action"
+          action: "notify_specialist"
+          params:
+            specialist: "{{assigned_specialist}}"
+            document: "{{document_content}}"
+            context: "{{state_history}}"
+
+      transitions:
+        - to: "APPROVED"
+          trigger: "specialist_approve"
+
+        - to: "CHANGES_REQUESTED"
+          trigger: "specialist_request_changes"
+
+        - to: "REJECTED"
+          trigger: "specialist_reject"
+
+    APPROVED:
+      description: "Document has been approved"
+      entry_action: "finalize_approval"
+      terminal: true
+      on_entry:
+        - type: "action"
+          action: "update_status"
+          params:
+            document_id: "{{document_id}}"
+            status: "approved"
+            approved_by: "{{approvers}}"
+            approved_at: "{{now}}"
+
+        - type: "action"
+          action: "publish_document"
+          params:
+            document_id: "{{document_id}}"
+            destination: "{{publish_destination}}"
+
+        - type: "action"
+          action: "notify_stakeholders"
+          params:
+            message: |
+              Document approved and published.
+              Document ID: {{document_id}}
+              Approvers: {{approvers}}
+              Total time: {{workflow_duration}}
+
+        - type: "llm_call"
+          id: "generate_approval_summary"
+          model: "gpt-4"
+          temperature: 0.4
+          prompt: |
+            Generate an approval summary for this document:
+
+            Document: {{document_content}}
+            Approvers: {{approvers}}
+            Workflow path: {{state_history}}
+            Total time: {{workflow_duration}}
+
+            Include:
+            - Key approval points
+            - Any changes made during process
+            - Final approval statement
+          outputs:
+            - name: "approval_summary"
+
+    CANCELLED:
+      description: "Document submission cancelled"
+      entry_action: "cleanup"
+      terminal: true
+      on_entry:
+        - type: "action"
+          action: "update_status"
+          params:
+            document_id: "{{document_id}}"
+            status: "cancelled"
+
+        - type: "action"
+          action: "archive_document"
+
+        - type: "action"
+          action: "notify_submitter"
+          params:
+            message: "Your document submission has been cancelled."
+
+  # Global state machine configuration
+  initial_state: "SUBMITTED"
+
+  # Hooks that run on every state transition
+  on_transition:
+    - type: "action"
+      action: "log_state_change"
+      params:
+        from_state: "{{previous_state}}"
+        to_state: "{{current_state}}"
+        timestamp: "{{now}}"
+
+    - type: "action"
+      action: "update_audit_trail"
+
+  # Error handling for state machine
+  on_error:
+    - action: "save_state"
+    - action: "notify_admin"
+    - transition_to: "ESCALATED"

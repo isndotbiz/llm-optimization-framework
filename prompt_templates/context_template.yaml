@@ -1,0 +1,8 @@
+
+metadata:
+  name: Context Test
+  variables:
+    - name: context_data
+
+user_prompt: |
+  Use this context: {{ context_data }}

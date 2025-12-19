@@ -1,0 +1,8 @@
+# AI Router Requirements
+
+# Core Dependencies
+PyYAML>=6.0      # Required for: Prompt Templates Library, Workflow Automation
+Jinja2>=3.1.0    # Required for: Prompt Templates Library
+
+# Optional dependencies
+pyperclip  # Optional: Enables clipboard copy functionality in response post-processing

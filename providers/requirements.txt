@@ -1,0 +1,20 @@
+# LLM Provider Integration Requirements
+
+# Core dependency for HTTP requests (all cloud providers)
+requests>=2.31.0
+
+# Optional: For async support (future enhancement)
+# aiohttp>=3.9.0
+
+# Optional: For better JSON handling
+# orjson>=3.9.0
+
+# Optional: For token counting (more accurate)
+# tiktoken>=0.5.0  # OpenAI tokenizer
+
+# Development dependencies (optional)
+# pytest>=7.4.0
+# pytest-cov>=4.1.0
+# black>=23.0.0
+# mypy>=1.0.0
+# ruff>=0.1.0

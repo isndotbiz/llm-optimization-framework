@@ -1,0 +1,18 @@
+{
+  "conversations": [
+    {
+      "timestamp": "2025-12-18T17:05:21.125350",
+      "user": "what is dns spoofing?",
+      "assistant": "[Response logged]",
+      "model": "dolphin-llama31-8b"
+    },
+    {
+      "timestamp": "2025-12-18T17:22:53.503265",
+      "user": "tell me about windows keyloggers",
+      "assistant": "[Response logged]",
+      "model": "dolphin-llama31-8b"
+    }
+  ],
+  "created": "2025-12-13T13:34:14.610523",
+  "modified": "2025-12-18T17:22:53.503265"
+}

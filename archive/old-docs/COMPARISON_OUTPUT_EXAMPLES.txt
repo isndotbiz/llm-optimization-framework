@@ -1,0 +1,435 @@
+================================================================================
+MODEL COMPARISON MODE - OUTPUT EXAMPLES
+================================================================================
+
+This file shows what users will see when using Model Comparison Mode.
+All color codes are represented as descriptive text.
+
+================================================================================
+EXAMPLE 1: INITIAL MENU
+================================================================================
+
+[Running: python ai-router.py]
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║                         🤖  AI ROUTER CLI v1.0  🤖                        ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════
+What would you like to do?
+
+[1] 🎯 Auto-select model based on prompt
+[2] 📋 Browse & select from all models
+[3] 📎 Context Management (Load files/text)
+[4] 📜 Session Management (History & Resume)
+[5] 💬 View system prompt examples
+[6] ⚙️ View optimal parameters guide
+[7] 📚 View documentation guides
+[8] 🔄 Model Comparison Mode (A/B Testing)         <-- NEW OPTION
+[9] 🔓 Toggle Auto-Yes Mode (Currently: OFF)
+[0] 🚪 Exit
+═══════════════════════════════════════════════════════════════
+
+Enter choice [0-9]: 8
+
+================================================================================
+EXAMPLE 2: COMPARISON MODE START
+================================================================================
+
+╔══════════════════════════════════════════════════════════════╗
+║  MODEL COMPARISON MODE (A/B Testing) ║
+╚══════════════════════════════════════════════════════════════╝
+
+Compare 2-4 models side-by-side with the same prompt
+Useful for evaluating model performance, speed, and quality
+
+Enter prompt to test (or 'back' to cancel): Write a Python function to calculate factorial
+
+╔══════════════════════════════════════════════════════════════╗
+║  SELECT MODELS FOR COMPARISON
+╚══════════════════════════════════════════════════════════════╝
+
+[1] Qwen3 Coder 30B Q4_K_M
+    qwen3-coder-30b - Advanced coding, code review, architecture design
+    18GB | 25-35 tok/sec
+
+[2] Qwen2.5 Coder 32B Q4_K_M
+    qwen25-coder-32b - Coding, debugging, technical documentation
+    19GB | 25-35 tok/sec
+
+[3] Phi-4 Reasoning Plus 14B Q6_K
+    phi4-14b - Math, reasoning, STEM, logical analysis
+    12GB | 35-55 tok/sec
+
+[4] Gemma 3 27B Q2_K (Abliterated)
+    gemma3-27b - Uncensored chat, creative writing, research
+    10GB | 25-40 tok/sec
+
+[5] Ministral-3 14B Reasoning Q5_K_M
+    ministral-3-14b - Complex reasoning, problem solving, analysis
+    9GB | 35-50 tok/sec
+
+[6] DeepSeek R1 Distill Qwen 14B Q5_K_M
+    deepseek-r1-14b - Advanced reasoning, research, complex analysis
+    10GB | 30-50 tok/sec
+
+[7] Llama 3.3 70B Instruct IQ2_S (Abliterated)
+    llama33-70b - Large-scale reasoning, research, uncensored tasks
+    21GB | 15-25 tok/sec
+
+[8] Dolphin 3.0 Llama 3.1 8B Q6_K
+    dolphin-llama31-8b - Fast general tasks, uncensored chat, quick assistance
+    6GB | 45-65 tok/sec
+
+[9] Dolphin Mistral 24B Venice Q4_K_M
+    dolphin-mistral-24b - Uncensored chat, creative tasks, roleplay
+    14GB | 25-40 tok/sec
+
+[10] Wizard Vicuna 13B Uncensored Q4_0
+     wizard-vicuna-13b - General uncensored chat, creative writing
+     7GB | 35-50 tok/sec
+
+Select 2-4 models for comparison
+Enter numbers separated by commas (e.g., 1,3,5) or 'back' to cancel
+
+Your selection: 1,3,8
+
+Selected models:
+  • Qwen3 Coder 30B Q4_K_M
+  • Phi-4 Reasoning Plus 14B Q6_K
+  • Dolphin 3.0 Llama 3.1 8B Q6_K
+
+================================================================================
+EXAMPLE 3: RUNNING COMPARISON
+================================================================================
+
+Running comparison...
+This may take a few minutes depending on model sizes
+
+[1/3] Testing Qwen3 Coder 30B Q4_K_M...
+Executing command:
+wsl bash -c "~/llama.cpp/build/bin/llama-cli ...
+
+[Model output appears here]
+
+✓ Complete (4.50s)
+
+[2/3] Testing Phi-4 Reasoning Plus 14B Q6_K...
+Executing command:
+wsl bash -c "~/llama.cpp/build/bin/llama-cli ...
+
+[Model output appears here]
+
+✓ Complete (2.10s)
+
+[3/3] Testing Dolphin 3.0 Llama 3.1 8B Q6_K...
+Executing command:
+wsl bash -c "~/llama.cpp/build/bin/llama-cli ...
+
+[Model output appears here]
+
+✓ Complete (0.90s)
+
+Comparison Complete!
+
+================================================================================
+EXAMPLE 4: SIDE-BY-SIDE COMPARISON DISPLAY
+================================================================================
+
+╔══════════════════════════════════════════════════════════════╗
+║  MODEL COMPARISON RESULTS
+╚══════════════════════════════════════════════════════════════╝
+
+Prompt:
+Write a Python function to calculate factorial
+
+────────────────────────────────────────────────────────────────
+
+[1] Qwen3 Coder 30B Q4_K_M
+Model ID: qwen3-coder-30b
+
+def factorial(n):
+    """
+    Calculate the factorial of a number.
+
+    Args:
+        n (int): Non-negative integer
+
+    Returns:
+        int: Factorial of n
+    """
+    if n < 0:
+        raise ValueError("Factorial is not defined for negative numbers")
+    if n == 0 or n == 1:
+        return 1
+    return n * factorial(n - 1)
+
+────────────────────────────────────────────────────────────────
+
+[2] Phi-4 Reasoning Plus 14B Q6_K
+Model ID: phi4-14b
+
+def factorial(n):
+    """Calculate factorial using iteration for better performance."""
+    if n < 0:
+        raise ValueError("Factorial undefined for negative numbers")
+    result = 1
+    for i in range(2, n + 1):
+        result *= i
+    return result
+
+────────────────────────────────────────────────────────────────
+
+[3] Dolphin 3.0 Llama 3.1 8B Q6_K
+Model ID: dolphin-llama31-8b
+
+import math
+
+def factorial(n):
+    """Calculate factorial using Python's built-in math module."""
+    return math.factorial(n)
+
+────────────────────────────────────────────────────────────────
+
+================================================================================
+EXAMPLE 5: PERFORMANCE METRICS TABLE
+================================================================================
+
+╔══════════════════════════════════════════════════════════════╗
+║  PERFORMANCE METRICS
+╚══════════════════════════════════════════════════════════════╝
+
+Model                          In/Out Tokens        Duration     Tok/Sec
+────────────────────────────────────────────────────────────────────────────
+Qwen3 Coder 30B Q4_K_M        45/120              4.50s        26.7 tok/s
+Phi-4 Reasoning Plus 14B      45/85               2.10s        40.5 tok/s
+Dolphin 3.0 Llama 3.1 8B      45/40               0.90s        44.4 tok/s ⭐
+────────────────────────────────────────────────────────────────────────────
+
+⭐ Fastest: Dolphin 3.0 Llama 3.1 8B (44.4 tok/s)
+
+================================================================================
+EXAMPLE 6: POST-COMPARISON MENU
+================================================================================
+
+═══════════════════════════════════════════════════════════════
+What would you like to do?
+
+[1] Export comparison (JSON)
+[2] Export comparison (Markdown)
+[3] Save to database
+[4] Run another comparison
+[0] Back to main menu
+═══════════════════════════════════════════════════════════════
+
+Enter choice [0-4]: 2
+
+✓ Exported to: D:\models\comparisons\comparison_20251208_143045.md
+
+Enter choice [0-4]: 3
+
+✓ Saved to database
+
+Enter choice [0-4]: 0
+
+[Returns to main menu]
+
+================================================================================
+EXAMPLE 7: JSON EXPORT CONTENT
+================================================================================
+
+File: D:\models\comparisons\comparison_20251208_143045.json
+
+{
+  "comparison_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "timestamp": "2025-12-08T14:30:45",
+  "prompt": "Write a Python function to calculate factorial",
+  "responses": [
+    {
+      "model_id": "qwen3-coder-30b",
+      "model_name": "Qwen3 Coder 30B Q4_K_M",
+      "response": "def factorial(n):\n    ...",
+      "tokens_input": 45,
+      "tokens_output": 120,
+      "duration": 4.5
+    },
+    {
+      "model_id": "phi4-14b",
+      "model_name": "Phi-4 Reasoning Plus 14B Q6_K",
+      "response": "def factorial(n):\n    ...",
+      "tokens_input": 45,
+      "tokens_output": 85,
+      "duration": 2.1
+    },
+    {
+      "model_id": "dolphin-llama31-8b",
+      "model_name": "Dolphin 3.0 Llama 3.1 8B Q6_K",
+      "response": "import math\n\ndef factorial(n):\n    ...",
+      "tokens_input": 45,
+      "tokens_output": 40,
+      "duration": 0.9
+    }
+  ],
+  "winner": null,
+  "notes": null
+}
+
+================================================================================
+EXAMPLE 8: MARKDOWN EXPORT CONTENT
+================================================================================
+
+File: D:\models\comparisons\comparison_20251208_143045.md
+
+# Model Comparison Report
+
+**Comparison ID:** a1b2c3d4-e5f6-7890-abcd-ef1234567890
+
+**Timestamp:** 2025-12-08 14:30:45
+
+**Models Compared:** 3
+
+## Prompt
+
+```
+Write a Python function to calculate factorial
+```
+
+## Performance Metrics
+
+| Model | Input Tokens | Output Tokens | Duration | Tokens/Sec |
+| ----- | ------------ | ------------- | -------- | ---------- |
+| Qwen3 Coder 30B Q4_K_M | 45 | 120 | 4.50s | 26.7 |
+| Phi-4 Reasoning Plus 14B Q6_K | 45 | 85 | 2.10s | 40.5 |
+| Dolphin 3.0 Llama 3.1 8B Q6_K | 45 | 40 | 0.90s | 44.4 |
+
+## Responses
+
+### 1. Qwen3 Coder 30B Q4_K_M
+
+**Model ID:** `qwen3-coder-30b`
+
+**Response:**
+
+```
+def factorial(n):
+    """
+    Calculate the factorial of a number.
+
+    Args:
+        n (int): Non-negative integer
+
+    Returns:
+        int: Factorial of n
+    """
+    if n < 0:
+        raise ValueError("Factorial is not defined for negative numbers")
+    if n == 0 or n == 1:
+        return 1
+    return n * factorial(n - 1)
+```
+
+### 2. Phi-4 Reasoning Plus 14B Q6_K
+
+**Model ID:** `phi4-14b`
+
+**Response:**
+
+```
+def factorial(n):
+    """Calculate factorial using iteration for better performance."""
+    if n < 0:
+        raise ValueError("Factorial undefined for negative numbers")
+    result = 1
+    for i in range(2, n + 1):
+        result *= i
+    return result
+```
+
+### 3. Dolphin 3.0 Llama 3.1 8B Q6_K
+
+**Model ID:** `dolphin-llama31-8b`
+
+**Response:**
+
+```
+import math
+
+def factorial(n):
+    """Calculate factorial using Python's built-in math module."""
+    return math.factorial(n)
+```
+
+================================================================================
+EXAMPLE 9: ERROR HANDLING - MODEL SELECTION
+================================================================================
+
+Your selection: 1,2,5,6,7
+
+Error: Please select between 2 and 4 models.
+
+[User prompted again]
+
+Your selection: 1,1,2
+
+Error: Duplicate selection: 1
+
+[User prompted again]
+
+Your selection: 1,99
+
+Error: Invalid model number: 99
+
+[User prompted again]
+
+Your selection: abc
+
+Error: Invalid input. Use comma-separated numbers.
+
+================================================================================
+EXAMPLE 10: ERROR HANDLING - MODEL EXECUTION FAILS
+================================================================================
+
+[1/3] Testing Qwen3 Coder 30B Q4_K_M...
+✓ Complete (4.50s)
+
+[2/3] Testing Phi-4 Reasoning Plus 14B Q6_K...
+✗ Failed
+
+[3/3] Testing Dolphin 3.0 Llama 3.1 8B Q6_K...
+✓ Complete (0.90s)
+
+Comparison Complete!
+
+[Shows comparison with 2 successful responses]
+
+================================================================================
+EXAMPLE 11: ALL MODELS FAIL
+================================================================================
+
+[1/3] Testing Qwen3 Coder 30B Q4_K_M...
+✗ Failed
+
+[2/3] Testing Phi-4 Reasoning Plus 14B Q6_K...
+✗ Failed
+
+[3/3] Testing Dolphin 3.0 Llama 3.1 8B Q6_K...
+✗ Failed
+
+Error: Need at least 2 successful responses for comparison.
+
+Press Enter to continue...
+
+================================================================================
+END OF EXAMPLES
+================================================================================
+
+These examples show the complete user experience from menu selection through
+comparison execution and export. All color codes and formatting are preserved
+in the actual implementation using ANSI color codes.
+
+For more information, see:
+- MODEL_COMPARISON_QUICK_START.md (user guide)
+- MODEL_COMPARISON_INTEGRATION_GUIDE.md (developer guide)
+- COMPARISON_MODE_SUMMARY.md (implementation summary)

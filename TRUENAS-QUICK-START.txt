@@ -1,0 +1,209 @@
+================================================================================
+TrueNAS AI ROUTER v3.0 - QUICK START GUIDE
+RTX 4060 Ti Edition (16GB VRAM)
+================================================================================
+
+FILES PROVIDED:
+- ai-router-truenas.py        : Main application (3.0 TrueNAS Edition)
+- TRUENAS-DEPLOYMENT-GUIDE.md : Complete setup instructions
+- truenas-requirements.txt     : Python dependencies
+- truenas-setup.sh            : Automated setup script
+
+PREREQUISITES:
+✓ TrueNAS server with RTX 4060 Ti GPU installed
+✓ NVIDIA drivers 550+ installed
+✓ CUDA 12.3+ installed
+✓ llama.cpp built with CUDA support
+✓ Python 3.9+ available
+✓ Network access to 10.0.0.89
+
+QUICK SETUP (5 MINUTES):
+
+1. SSH into TrueNAS:
+   ssh root@10.0.0.89
+
+2. Run automated setup:
+   bash truenas-setup.sh
+
+3. Download a model:
+   cd /mnt/models/organized
+   wget https://huggingface.co/cognitivecomputations/dolphin-3.0-llama3.1-8b-gguf/resolve/main/Dolphin3.0-Llama3.1-8B-Q6_K.gguf
+
+4. Start the router:
+   cd /mnt/models
+   python3 ai-router-truenas.py
+
+5. Create a project and start chatting!
+
+================================================================================
+RECOMMENDED MODELS FOR 16GB RTX 4060 Ti
+================================================================================
+
+BEST FOR SPEED:
+→ Dolphin Llama 3.1 8B Q6_K (6GB)
+  - Uncensored, very fast, general purpose
+  - Perfect for quick responses and high throughput
+
+BEST FOR REASONING:
+→ Phi-4 14B Q5_K_M (9GB)
+  - Mathematical reasoning, step-by-step thinking
+  - Excellent for STEM and logic problems
+
+BEST FOR CODING:
+→ Qwen2.5 Coder 14B Q5_K_M (9GB)
+  - Code generation, debugging, technical help
+  - Great instruction following and context understanding
+
+BEST FOR LONG CONTEXT:
+→ Ministral-3 14B Q5_K_M (9GB, 256K context)
+  - Document analysis, long document processing
+  - Complex reasoning with extended context
+
+CREATIVE/UNCENSORED:
+→ Dolphin Mistral 24B Q4_K_M (14GB)
+  - Completely uncensored, excellent for creative writing
+  - Tight fit on 4060 Ti but works well
+
+================================================================================
+VRAM MANAGEMENT
+================================================================================
+
+Real-time monitoring command:
+watch -n 1 nvidia-smi
+
+When running a model:
+- Dolphin 8B Q6_K:      ~6-7GB used
+- Phi-4 14B Q5_K_M:    ~9-10GB used
+- Ministral 14B:        ~9-10GB used
+- Dolphin Mistral 24B: ~14-15GB used
+
+Safety margin: Always keep 1GB free for system operations
+
+If you get OOM (Out of Memory):
+1. Kill other GPU processes
+2. Use smaller model or lower quantization
+3. Check nvidia-smi for memory leaks
+
+================================================================================
+API ENDPOINTS
+================================================================================
+
+Base URL: http://10.0.0.89:5000
+
+Health Check:
+  GET /api/health
+  Returns: GPU VRAM usage, status
+
+List Models:
+  GET /api/models
+  Returns: Available models and their specs
+
+Run Inference:
+  POST /api/infer
+  Body: {"model_id": "dolphin-llama31-8b", "prompt": "..."}
+  Returns: Execution status
+
+Example using curl:
+curl http://10.0.0.89:5000/api/health | python3 -m json.tool
+
+================================================================================
+PERFORMANCE TUNING
+================================================================================
+
+For faster inference on 4060 Ti:
+→ Use Q6_K or Q5_K_M quantization (better than Q4)
+→ Set -t flag to 12 (CPU threads) - adjust for your CPU
+→ Use Flash Attention (-fa 1) for speed boost
+→ Batch size -b 512 for single requests, reduce for concurrent
+
+Temperature management:
+→ Ideal: 60-75°C
+→ Warning: >80°C
+→ Throttle: 83°C
+→ Shutdown: 93°C
+
+If running hot:
+1. Check room ventilation
+2. Reduce batch size (-b 256)
+3. Use lower quantization
+4. Check thermal paste quality
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+GPU not detected:
+→ Check: nvidia-smi
+→ Install: NVIDIA drivers
+
+VRAM errors (OutOfMemory):
+→ Monitor: nvidia-smi
+→ Solution: Use smaller model or quantization
+
+Model won't load:
+→ Check file: ls -lh /mnt/models/organized/*.gguf
+→ Test: /root/llama.cpp/build/bin/llama-cli -m model.gguf -p test -n 1
+→ Verify: Model must be GGUF format
+
+API not responding:
+→ Check Flask: python3 -c "import flask"
+→ Install: pip3 install flask
+→ Check port: netstat -tlnp | grep 5000
+
+Slow performance:
+→ Check GPU usage: nvidia-smi
+→ Look for: "ggml_cuda_init" in output = GPU being used
+→ Benchmark: Run with -ngl 999 -t 12
+
+================================================================================
+FILE LOCATIONS
+================================================================================
+
+Main directory:       /mnt/models/
+Models (GGUF files): /mnt/models/organized/
+Projects:            /mnt/models/projects/
+System prompts:      /mnt/models/system-prompts/
+Logs:                /mnt/models/logs/
+Config files:        /mnt/models/ai-router-truenas.py
+Startup script:      /mnt/models/start-router.sh
+
+================================================================================
+NEXT STEPS AFTER SETUP
+================================================================================
+
+1. Download more models (see TRUENAS-DEPLOYMENT-GUIDE.md)
+2. Customize system prompts for your use case
+3. Create projects for different use cases
+4. Set up monitoring/alerting in TrueNAS
+5. Consider wrapping API with nginx + SSL for remote access
+6. Configure regular backups of /mnt/models/projects
+
+================================================================================
+SUPPORT & RESOURCES
+================================================================================
+
+Documentation:
+→ Full guide: TRUENAS-DEPLOYMENT-GUIDE.md
+→ Logs: tail -f /mnt/models/logs/ai-router-*.log
+
+HuggingFace models:
+→ Search: https://huggingface.co/models?library=gguf
+
+llama.cpp documentation:
+→ GitHub: https://github.com/ggerganov/llama.cpp
+
+TrueNAS help:
+→ Official: https://www.truenas.com/docs/
+
+================================================================================
+VERSION INFO
+================================================================================
+
+System: TrueNAS AI Router v3.0
+GPU: NVIDIA RTX 4060 Ti (16GB)
+Framework: llama.cpp (CUDA 12.x)
+Python: 3.9+
+Date Created: 2025-12-14
+Ready for Deployment: Yes ✓
+
+================================================================================
