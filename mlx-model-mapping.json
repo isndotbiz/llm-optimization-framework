@@ -1,0 +1,219 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "created": "2025-12-19",
+    "description": "Mapping of Ollama GGUF models to MLX replacements with HuggingFace download URLs",
+    "total_space_freed_gb": 65,
+    "total_ollama_size_gb": 130,
+    "total_mlx_size_gb": 65
+  },
+  "models_to_delete": [
+    {
+      "ollama_name": "qwen-coder-32b-uncensored:latest",
+      "ollama_id": "00606d710f57",
+      "size_gb": 19,
+      "reason": "Redundant variant - replace with Qwen2.5-Coder-32B MLX",
+      "replacement": "qwen25-coder-32b",
+      "action": "DELETE"
+    },
+    {
+      "ollama_name": "deepseek-r1-32b-uncensored:latest",
+      "ollama_id": "9c6ce7315719",
+      "size_gb": 19,
+      "reason": "Replace with DeepSeek-R1-8B MLX (4x smaller, 2x faster, same capability)",
+      "replacement": "deepseek-r1-8b",
+      "action": "DELETE"
+    },
+    {
+      "ollama_name": "qwen2.5-survival:latest",
+      "ollama_id": "ce2ff4130f7b",
+      "size_gb": 19,
+      "reason": "Redundant variant - not needed",
+      "replacement": "qwen25-coder-7b",
+      "action": "DELETE"
+    },
+    {
+      "ollama_name": "qwen2.5-undercover:latest",
+      "ollama_id": "ddc099575c05",
+      "size_gb": 19,
+      "reason": "Redundant variant - not needed",
+      "replacement": "qwen25-coder-7b",
+      "action": "DELETE"
+    },
+    {
+      "ollama_name": "qwen2.5-uncensored:latest",
+      "ollama_id": "f3a7b2358e08",
+      "size_gb": 19,
+      "reason": "Redundant variant - not needed",
+      "replacement": "qwen25-coder-7b",
+      "action": "DELETE"
+    },
+    {
+      "ollama_name": "nous-hermes2:latest",
+      "ollama_id": "d50977d0b36a",
+      "size_gb": 6.1,
+      "reason": "Outdated model",
+      "replacement": "qwen3-7b",
+      "action": "DELETE"
+    },
+    {
+      "ollama_name": "dolphin-mistral:latest",
+      "ollama_id": "5dc8c5a2be65",
+      "size_gb": 4.1,
+      "reason": "Replace with Dolphin 3.0 MLX or Mistral-7B MLX",
+      "replacement": "mistral-7b",
+      "action": "DELETE"
+    }
+  ],
+  "models_to_convert": [
+    {
+      "ollama_name": "qwen2.5-max:latest",
+      "ollama_id": "04546adb184a",
+      "size_gb": 9.0,
+      "reason": "Good model, but MLX version will be 2-3x faster",
+      "replacement": "qwen3-14b",
+      "action": "CONVERT"
+    },
+    {
+      "ollama_name": "qwen2.5:14b",
+      "ollama_id": "7cdf5a0187d5",
+      "size_gb": 9.0,
+      "reason": "Good model, but MLX version will be 2-3x faster",
+      "replacement": "qwen3-14b",
+      "action": "CONVERT"
+    },
+    {
+      "ollama_name": "llama3.1:8b",
+      "ollama_id": "46e0c10c039e",
+      "size_gb": 4.9,
+      "reason": "Keep as fallback, or replace with Dolphin-3.0-Llama3.1-8B MLX",
+      "replacement": null,
+      "action": "KEEP"
+    },
+    {
+      "ollama_name": "phi3:mini",
+      "ollama_id": "4f2222927938",
+      "size_gb": 2.2,
+      "reason": "Ultra-lightweight, keep for now or replace with Phi-4-14B MLX",
+      "replacement": "phi-4",
+      "action": "OPTIONAL_CONVERT"
+    },
+    {
+      "ollama_name": "gemma2:2b",
+      "ollama_id": "8ccf136fdd52",
+      "size_gb": 1.6,
+      "reason": "Edge cases only, can delete when MLX models ready",
+      "replacement": null,
+      "action": "KEEP"
+    }
+  ],
+  "mlx_models": {
+    "qwen25-coder-7b": {
+      "status": "DOWNLOADED",
+      "local_path": "mlx/qwen25-coder-7b",
+      "size_gb": 4.5,
+      "huggingface_repo": "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit",
+      "use_case": "Fast coding (60-80 tok/sec), daily code fixes",
+      "replaces": ["qwen2.5-survival:latest", "qwen2.5-undercover:latest", "qwen2.5-uncensored:latest"],
+      "command": "mlx_lm.chat --model mlx-community/Qwen2.5-Coder-7B-Instruct-4bit",
+      "speed_tokens_per_sec": "60-80"
+    },
+    "qwen25-coder-32b": {
+      "status": "DOWNLOADED",
+      "local_path": "mlx/qwen25-coder-32b",
+      "size_gb": 18,
+      "huggingface_repo": "mlx-community/Qwen2.5-Coder-32B-Instruct-4bit",
+      "use_case": "Complex coding, architecture (11-22 tok/sec), requires 32GB+ RAM",
+      "replaces": ["qwen-coder-32b-uncensored:latest"],
+      "command": "mlx_lm.chat --model mlx-community/Qwen2.5-Coder-32B-Instruct-4bit",
+      "speed_tokens_per_sec": "11-22"
+    },
+    "qwen3-7b": {
+      "status": "DOWNLOADED",
+      "local_path": "mlx/qwen3-7b",
+      "size_gb": 4.5,
+      "huggingface_repo": "mlx-community/Qwen3-7B-Instruct-4bit",
+      "use_case": "Lightweight general use, faster than phi3:mini",
+      "replaces": ["nous-hermes2:latest"],
+      "command": "mlx_lm.chat --model mlx-community/Qwen3-7B-Instruct-4bit",
+      "speed_tokens_per_sec": "60-80"
+    },
+    "qwen3-14b": {
+      "status": "PENDING",
+      "local_path": "mlx/qwen3-14b",
+      "size_gb": 9,
+      "huggingface_repo": "mlx-community/Qwen3-14B-Instruct-4bit",
+      "use_case": "General questions, research, balanced (40-60 tok/sec)",
+      "replaces": ["qwen2.5-max:latest", "qwen2.5:14b"],
+      "command": "mlx_lm.chat --model mlx-community/Qwen3-14B-Instruct-4bit",
+      "speed_tokens_per_sec": "40-60"
+    },
+    "deepseek-r1-8b": {
+      "status": "DOWNLOADED",
+      "local_path": "mlx/deepseek-r1-8b",
+      "size_gb": 4.5,
+      "huggingface_repo": "mlx-community/DeepSeek-R1-Distill-Llama-8B",
+      "use_case": "Math, reasoning, problem-solving (50-70 tok/sec), 4x smaller than 32B",
+      "replaces": ["deepseek-r1-32b-uncensored:latest"],
+      "command": "mlx_lm.chat --model mlx-community/DeepSeek-R1-Distill-Llama-8B",
+      "speed_tokens_per_sec": "50-70"
+    },
+    "phi-4": {
+      "status": "DOWNLOADED",
+      "local_path": "mlx/phi-4",
+      "size_gb": 9,
+      "huggingface_repo": "mlx-community/phi-4-4bit",
+      "use_case": "Math/STEM specialist",
+      "replaces": ["phi3:mini"],
+      "command": "mlx_lm.chat --model mlx-community/phi-4-4bit",
+      "speed_tokens_per_sec": "40-60"
+    },
+    "mistral-7b": {
+      "status": "DOWNLOADED",
+      "local_path": "mlx/mistral-7b",
+      "size_gb": 4,
+      "huggingface_repo": "mlx-community/Mistral-7B-Instruct-v0.3-4bit",
+      "use_case": "Ultra-fast general use (70-100 tok/sec)",
+      "replaces": ["dolphin-mistral:latest"],
+      "command": "mlx_lm.chat --model mlx-community/Mistral-7B-Instruct-v0.3-4bit",
+      "speed_tokens_per_sec": "70-100"
+    },
+    "dolphin-3-llama-8b": {
+      "status": "PENDING",
+      "local_path": "mlx/dolphin-3-llama-8b",
+      "size_gb": 4.5,
+      "huggingface_repo": "mlx-community/Dolphin-3.0-Llama3.1-8B-4bit",
+      "use_case": "Fast uncensored (60-80 tok/sec)",
+      "replaces": ["dolphin-mistral:latest"],
+      "command": "mlx_lm.chat --model mlx-community/Dolphin-3.0-Llama3.1-8B-4bit",
+      "speed_tokens_per_sec": "60-80"
+    }
+  },
+  "download_urls": {
+    "qwen3-14b": "https://huggingface.co/mlx-community/Qwen3-14B-Instruct-4bit",
+    "dolphin-3-llama-8b": "https://huggingface.co/mlx-community/Dolphin-3.0-Llama3.1-8B-4bit"
+  },
+  "performance_comparison": {
+    "qwen-coder-7b": {
+      "ollama_gguf_speed": "20-30 tok/sec",
+      "mlx_speed": "60-80 tok/sec",
+      "improvement_percent": "200-300%"
+    },
+    "qwen-coder-32b": {
+      "ollama_gguf_speed": "8-12 tok/sec",
+      "mlx_speed": "11-22 tok/sec",
+      "improvement_percent": "85-175%"
+    },
+    "deepseek-r1": {
+      "ollama_gguf_32b_speed": "10-15 tok/sec",
+      "mlx_8b_speed": "50-70 tok/sec",
+      "improvement_percent": "400-600%",
+      "note": "8B model same capability as 32B, 4-6x faster"
+    },
+    "qwen3-14b": {
+      "ollama_gguf_speed": "20-30 tok/sec",
+      "mlx_speed": "40-60 tok/sec",
+      "improvement_percent": "100-200%"
+    }
+  }
+}

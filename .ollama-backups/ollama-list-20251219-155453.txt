@@ -1,0 +1,13 @@
+NAME                                 ID              SIZE      MODIFIED    
+qwen-coder-32b-uncensored:latest     00606d710f57    19 GB     5 weeks ago    
+deepseek-r1-32b-uncensored:latest    9c6ce7315719    19 GB     5 weeks ago    
+qwen2.5-max:latest                   04546adb184a    9.0 GB    5 weeks ago    
+qwen2.5-survival:latest              ce2ff4130f7b    19 GB     5 weeks ago    
+qwen2.5-undercover:latest            ddc099575c05    19 GB     5 weeks ago    
+qwen2.5-uncensored:latest            f3a7b2358e08    19 GB     5 weeks ago    
+gemma2:2b                            8ccf136fdd52    1.6 GB    5 weeks ago    
+phi3:mini                            4f2222927938    2.2 GB    5 weeks ago    
+llama3.1:8b                          46e0c10c039e    4.9 GB    5 weeks ago    
+qwen2.5:14b                          7cdf5a0187d5    9.0 GB    5 weeks ago    
+dolphin-mistral:latest               5dc8c5a2be65    4.1 GB    5 weeks ago    
+nous-hermes2:latest                  d50977d0b36a    6.1 GB    7 weeks ago    

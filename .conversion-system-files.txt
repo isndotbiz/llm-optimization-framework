@@ -1,0 +1,43 @@
+# Ollama to MLX Conversion System Files
+# Created: 2025-12-19
+
+## Core System Files (Required)
+mlx-model-mapping.json              # Master configuration (7.4KB)
+ollama-model-analysis.py            # Analysis tool (13KB, executable)
+convert-ollama-to-mlx.sh            # Interactive orchestrator (19KB, executable)
+migrate-to-mlx.sh                   # Automated migration (21KB, executable)
+
+## Documentation Files
+OLLAMA-TO-MLX-CONVERSION.md         # Comprehensive guide (16KB)
+README-CONVERSION-SYSTEM.md         # Quick reference (10KB)
+QUICK-START-MLX.md                  # Daily use guide (3.3KB)
+CONVERSION-SYSTEM-SUMMARY.md        # System overview (this created)
+
+## Reference Files
+MACBOOK-DELETE-KEEP-LIST.md         # Original planning document (existing)
+
+## Generated During Use (Created automatically)
+conversion-TIMESTAMP.log            # Conversion script logs
+migration-TIMESTAMP.log             # Migration script logs
+.ollama-backups/                    # Backup directory
+  ├── ollama-backup-*.json          # Model backups
+  ├── ollama-list-*.txt             # List backups
+  ├── analysis-*.json               # Analysis snapshots
+  └── migration-state.json          # Current state
+
+## Quick Commands
+
+# Analysis
+python3 ollama-model-analysis.py
+
+# Preview
+./convert-ollama-to-mlx.sh --dry-run
+
+# Execute
+./convert-ollama-to-mlx.sh
+
+# Or automated
+./migrate-to-mlx.sh --execute
+
+# Verify
+./migrate-to-mlx.sh --verify-only
