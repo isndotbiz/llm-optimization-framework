@@ -1,0 +1,51 @@
+{
+  "machine": {
+    "id": "xeon-4060ti",
+    "name": "Xeon E5-2676v3 + RTX 4060 Ti",
+    "specs": "12-core 24-thread CPU, 96GB DDR3 RAM, 16GB VRAM GPU, Chinese motherboard",
+    "platform": "Linux"
+  },
+  "models": {
+    "primary": "qwen25-coder-7b",
+    "alternatives": ["mistral-7b", "phi-3-mini"],
+    "enabled": true,
+    "quantization": "q4_k_m"
+  },
+  "performance": {
+    "max_tokens": 2048,
+    "batch_size": 2,
+    "temperature": 0.7,
+    "top_p": 0.95
+  },
+  "inference": {
+    "backend": "ollama",
+    "device": "cuda",
+    "dtype": "int4",
+    "attention": "mps",
+    "gpu_memory_utilization": 0.85
+  },
+  "venv": {
+    "path": "configs/xeon-4060ti/venv",
+    "python_version": "3.11"
+  },
+  "model_paths": {
+    "base": "configs/xeon-4060ti/models",
+    "cache": "configs/xeon-4060ti/cache"
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "configs/xeon-4060ti/logs/ai-router.log"
+  },
+  "notes": [
+    "SERVER-CLASS MACHINE - excellent for data-heavy workloads",
+    "Intel Xeon E5-2676v3: 12 cores / 24 threads @ 2.4-3.5 GHz",
+    "MASSIVE 96GB DDR3 RAM - exceptional for caching, preprocessing, batch jobs",
+    "RTX 4060 Ti: 16GB VRAM (limited, requires quantization)",
+    "Chinese motherboard - may need driver adjustments",
+    "Best for: batch processing, data preprocessing, multiple sequential inferences",
+    "Use quantized models (Q4) on GPU, full-size models on CPU with CPU offloading",
+    "Q4 quantization recommended for GPU model loading",
+    "Conservative batch size due to GPU VRAM constraints",
+    "System RAM allows for large dataset preprocessing and model caching"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "machine_id": "xeon-4060ti",
+  "machine_name": "Xeon E5-2676v3 + RTX 4060 Ti",
+  "last_updated": "2025-12-21",
+  "models": [
+    {
+      "name": "qwen25-coder-7b",
+      "size": "2.8GB",
+      "format": "GGUF",
+      "quantization": "q4_k_m",
+      "status": "ready",
+      "installed": false,
+      "path": "configs/xeon-4060ti/models/qwen25-coder-7b",
+      "notes": "Fits easily on 16GB VRAM with room for batching"
+    },
+    {
+      "name": "mistral-7b",
+      "size": "2.9GB",
+      "format": "GGUF",
+      "quantization": "q4_k_m",
+      "status": "ready",
+      "installed": false,
+      "path": "configs/xeon-4060ti/models/mistral-7b",
+      "notes": "Good alternative to Qwen for testing"
+    },
+    {
+      "name": "neural-chat-7b",
+      "size": "2.7GB",
+      "format": "GGUF",
+      "quantization": "q4_k_m",
+      "status": "ready",
+      "installed": false,
+      "path": "configs/xeon-4060ti/models/neural-chat-7b",
+      "notes": "Smaller model, great for batch inference"
+    }
+  ],
+  "storage": {
+    "total_gb": 96,
+    "system_ram": "96GB DDR3",
+    "vram_gpu": "16GB VRAM",
+    "models_location": "configs/xeon-4060ti/models",
+    "cache_location": "configs/xeon-4060ti/cache"
+  },
+  "vram": {
+    "total_gb": 16,
+    "available_for_models": 15,
+    "system_ram_gb": 96,
+    "available_system_ram": 85,
+    "notes": "Q4 quantized models on GPU. Can use CPU offloading for larger models. 96GB RAM excellent for preprocessing and caching."
+  },
+  "recommended_use": [
+    "Batch processing of large datasets",
+    "Model evaluation and testing",
+    "Data preprocessing pipeline",
+    "Quantized model inference",
+    "Multiple sequential inference jobs"
+  ]
+}

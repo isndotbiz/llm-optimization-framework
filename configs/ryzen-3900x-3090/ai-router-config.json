@@ -1,0 +1,49 @@
+{
+  "machine": {
+    "id": "ryzen-3900x-3090",
+    "name": "Ryzen 3900X + RTX 3090",
+    "specs": "12-core 24-thread CPU, 64GB DDR4 RAM, 24GB VRAM GPU",
+    "platform": "Linux"
+  },
+  "models": {
+    "primary": "qwen25-coder-32b",
+    "alternatives": ["dolphin-3-14b", "llama2-70b"],
+    "enabled": true
+  },
+  "performance": {
+    "max_tokens": 4096,
+    "batch_size": 4,
+    "temperature": 0.7,
+    "top_p": 0.95
+  },
+  "inference": {
+    "backend": "vllm",
+    "device": "cuda",
+    "dtype": "float16",
+    "attention": "flash_attention_v2",
+    "gpu_memory_utilization": 0.95
+  },
+  "venv": {
+    "path": "configs/ryzen-3900x-3090/venv",
+    "python_version": "3.11"
+  },
+  "model_paths": {
+    "base": "configs/ryzen-3900x-3090/models",
+    "cache": "configs/ryzen-3900x-3090/cache",
+    "huggingface_cache": "/home/user/.cache/huggingface"
+  },
+  "logging": {
+    "level": "DEBUG",
+    "file": "configs/ryzen-3900x-3090/logs/ai-router.log"
+  },
+  "notes": [
+    "PRIMARY PRODUCTION MACHINE - highest performance",
+    "AMD Ryzen 3900X: 12 cores / 24 threads @ 3.8-4.6 GHz",
+    "64GB DDR4 RAM - excellent for data processing",
+    "RTX 3090: 24GB VRAM - largest GPU in cluster",
+    "Supports large batch processing (batch_size=4)",
+    "Full precision fp16 with flash attention v2",
+    "Best for: production inference, large models (up to 70B params)",
+    "CUDA Toolkit 12.1+ required"
+  ]
+}
