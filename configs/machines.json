@@ -1,0 +1,49 @@
+{
+  "machines": [
+    {
+      "id": "m4-macbook-pro",
+      "name": "M4 MacBook Pro",
+      "cpu": "Apple M4 (12-core CPU, 16-core GPU)",
+      "gpu": "Apple GPU (16-core integrated)",
+      "ram": "24GB unified memory",
+      "platform": "Darwin (macOS)",
+      "primary_use": "Development, Portability, Code Review",
+      "config_path": "configs/m4-macbook-pro/",
+      "recommended_models": ["qwen25-coder-7b-mlx", "mistral-7b-mlx", "phi-3-mini-mlx"],
+      "max_model_size": "13B",
+      "precision": "fp16, int8",
+      "venv_location": "configs/m4-macbook-pro/venv",
+      "notes": "MLX optimized, excellent for development, thermal aware"
+    },
+    {
+      "id": "ryzen-3900x-3090",
+      "name": "Ryzen 3900X + RTX 3090",
+      "cpu": "AMD Ryzen 3900X (12-core, 24-thread)",
+      "gpu": "NVIDIA RTX 3090 (24GB VRAM)",
+      "ram": "64GB DDR4",
+      "platform": "Linux",
+      "primary_use": "Production, Heavy Workloads, Primary Workstation",
+      "config_path": "configs/ryzen-3900x-3090/",
+      "recommended_models": ["qwen25-coder-32b", "llama2-70b", "mistral-34b"],
+      "max_model_size": "70B",
+      "precision": "fp16, int8, fp32",
+      "venv_location": "configs/ryzen-3900x-3090/venv",
+      "notes": "Primary production machine, highest performance, best for large models"
+    },
+    {
+      "id": "xeon-4060ti",
+      "name": "Xeon E5-2676v3 + RTX 4060 Ti",
+      "cpu": "Intel Xeon E5-2676v3 (12-core, 24-thread)",
+      "gpu": "NVIDIA RTX 4060 Ti (16GB VRAM)",
+      "ram": "96GB DDR3 (Chinese motherboard)",
+      "platform": "Linux",
+      "primary_use": "Server, Data Processing, Batch Testing",
+      "config_path": "configs/xeon-4060ti/",
+      "recommended_models": ["qwen25-coder-7b", "mistral-7b", "neural-chat-7b"],
+      "max_model_size": "14B",
+      "precision": "int8, int4",
+      "venv_location": "configs/xeon-4060ti/venv",
+      "notes": "High memory server (96GB), great for batch processing, quantized models work best"
+    }
+  ]
+}

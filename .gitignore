@@ -67,5 +67,23 @@ huggingface/
 .ai-router-sessions.db
 .test-preferences.json
 
+# Machine-specific local files
+.machine-id
+.local-config
+
+# Machine-specific virtual environments and caches
+configs/*/venv/
+configs/*/cache/
+configs/*/logs/
+configs/*/.local/
+
+# Model files (store locally, don't commit)
+configs/*/models/
+configs/*/model_cache/
+
+# Machine-specific runtime files
+configs/*/.machine-id
+configs/*/*.log
+
 # Personal notes (if you want to keep them local)
 # personal-notes.md

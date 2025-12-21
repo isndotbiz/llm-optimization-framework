@@ -10,8 +10,49 @@ import sys
 import subprocess
 import platform
 import time
+import json
 from pathlib import Path
 from logging_config import setup_logging
+
+
+def detect_machine():
+    """
+    Auto-detect which machine we're running on based on hardware
+    Returns: machine_id string (m4-macbook-pro, ryzen-3900x-3090, or xeon-4060ti)
+    """
+    # First check if .machine-id file exists (manual override)
+    machine_id_file = Path(".machine-id")
+    if machine_id_file.exists():
+        return machine_id_file.read_text().strip()
+
+    # Auto-detect based on platform and CPU info
+    system = platform.system()
+
+    if system == "Darwin":  # macOS
+        return "m4-macbook-pro"
+
+    if system == "Linux":
+        try:
+            with open('/proc/cpuinfo', 'r') as f:
+                cpuinfo = f.read()
+                if 'Ryzen' in cpuinfo:
+                    return "ryzen-3900x-3090"
+                elif 'Xeon' in cpuinfo or 'Intel' in cpuinfo:
+                    return "xeon-4060ti"
+        except Exception:
+            pass
+
+    # Default fallback
+    return "ryzen-3900x-3090"
+
+
+def load_machine_config(machine_id):
+    """Load the machine-specific configuration file"""
+    config_path = Path(f"configs/{machine_id}/ai-router-config.json")
+    if config_path.exists():
+        with open(config_path) as f:
+            return json.load(f)
+    return None
 
 
 def is_wsl():

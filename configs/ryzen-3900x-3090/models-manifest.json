@@ -1,0 +1,46 @@
+{
+  "machine_id": "ryzen-3900x-3090",
+  "machine_name": "Ryzen 3900X + RTX 3090",
+  "last_updated": "2025-12-21",
+  "models": [
+    {
+      "name": "qwen25-coder-32b",
+      "size": "16.4GB",
+      "format": "GGUF",
+      "quantization": "fp16",
+      "status": "ready",
+      "installed": false,
+      "path": "configs/ryzen-3900x-3090/models/qwen25-coder-32b"
+    },
+    {
+      "name": "mistral-34b",
+      "size": "19.5GB",
+      "format": "GGUF",
+      "quantization": "fp16",
+      "status": "ready",
+      "installed": false,
+      "path": "configs/ryzen-3900x-3090/models/mistral-34b"
+    },
+    {
+      "name": "llama2-70b",
+      "size": "35.5GB",
+      "format": "GGUF",
+      "quantization": "q4_k_m",
+      "status": "ready",
+      "installed": false,
+      "path": "configs/ryzen-3900x-3090/models/llama2-70b"
+    }
+  ],
+  "storage": {
+    "total_gb": 64,
+    "system_ram": "64GB DDR4",
+    "models_location": "configs/ryzen-3900x-3090/models",
+    "cache_location": "configs/ryzen-3900x-3090/cache",
+    "huggingface_cache": "/home/user/.cache/huggingface"
+  },
+  "vram": {
+    "total_gb": 24,
+    "available_for_models": 23,
+    "notes": "Can run up to 70B params with quantization. System RAM allows for large batch processing."
+  }
+}

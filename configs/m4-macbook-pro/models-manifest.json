@@ -1,0 +1,27 @@
+{
+  "machine_id": "m4-macbook-pro",
+  "last_updated": "2025-12-21",
+  "models": [
+    {
+      "name": "qwen25-coder-7b-mlx",
+      "size": "3.2GB",
+      "format": "MLX SafeTensors",
+      "status": "ready",
+      "installed": false,
+      "path": "configs/m4-macbook-pro/models/qwen25-coder-7b-mlx"
+    },
+    {
+      "name": "mistral-7b-mlx",
+      "size": "3.1GB",
+      "format": "MLX SafeTensors",
+      "status": "not_installed",
+      "installed": false,
+      "path": "configs/m4-macbook-pro/models/mistral-7b-mlx"
+    }
+  ],
+  "storage": {
+    "total_gb": 24,
+    "models_location": "configs/m4-macbook-pro/models",
+    "cache_location": "configs/m4-macbook-pro/cache"
+  }
+}
