@@ -71,6 +71,7 @@ class SessionManager:
         """Context manager for database connections"""
         conn = sqlite3.connect(str(self.db_path))
         conn.row_factory = sqlite3.Row  # Enable dict-like access
+        conn.execute("PRAGMA foreign_keys = ON")  # Enable foreign key constraints
         try:
             yield conn
         finally:
@@ -414,6 +415,22 @@ class SessionManager:
 
         else:
             raise ValueError(f"Unsupported format: {format}")
+
+    def fix_orphaned_records(self) -> int:
+        """
+        Clean up orphaned message records (messages without corresponding sessions)
+        
+        Returns:
+            Number of orphaned records deleted
+        """
+        with self._get_connection() as conn:
+            cursor = conn.execute(
+                "DELETE FROM messages WHERE session_id NOT IN (SELECT session_id FROM sessions)"
+            )
+            conn.commit()
+            deleted_count = cursor.rowcount
+            
+        return deleted_count
 
     def get_statistics(self) -> Dict[str, Any]:
         """

@@ -214,6 +214,34 @@ class LLMProvider(ABC):
         logger.error(error_msg)
         return error_msg
 
+    def validate_parameters(self, parameters: Dict[str, Any], known_parameters: set = None) -> bool:
+        """
+        Validate request parameters against known parameters.
+
+        Args:
+            parameters: Parameters to validate
+            known_parameters: Set of known valid parameter names
+
+        Returns:
+            True if all parameters are valid
+
+        Raises:
+            ValueError: If unknown parameters are provided
+        """
+        if not parameters or known_parameters is None:
+            return True
+
+        unknown_params = set(parameters.keys()) - known_parameters
+        if unknown_params:
+            error_msg = (
+                f"Unknown parameters: {', '.join(unknown_params)}. "
+                f"Valid parameters: {', '.join(sorted(known_parameters))}"
+            )
+            logger.warning(error_msg)
+            raise ValueError(error_msg)
+
+        return True
+
     def __repr__(self) -> str:
         """String representation of provider."""
         return f"{self.name}(config={self._safe_config()})"

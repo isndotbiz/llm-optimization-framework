@@ -34,6 +34,23 @@ from .ollama_provider import OllamaProvider
 from .openrouter_provider import OpenRouterProvider
 from .openai_provider import OpenAIProvider
 from .claude_provider import ClaudeProvider
+from .openrouter_provider_enhanced import OpenRouterProviderEnhanced
+from .fallback_provider import FallbackProvider
+
+# Import error classes
+from .provider_errors import (
+    ProviderError,
+    AuthenticationError,
+    TimeoutError,
+    RateLimitError,
+    InvalidParameterError,
+    ServerError,
+    ConnectionError,
+    NotFoundError,
+    ModelError,
+    QuotaExceededError,
+    classify_error
+)
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -434,6 +451,19 @@ __all__ = [
     'OpenRouterProvider',
     'OpenAIProvider',
     'ClaudeProvider',
+    'OpenRouterProviderEnhanced',
+    'FallbackProvider',
+    'ProviderError',
+    'AuthenticationError',
+    'TimeoutError',
+    'RateLimitError',
+    'InvalidParameterError',
+    'ServerError',
+    'ConnectionError',
+    'NotFoundError',
+    'ModelError',
+    'QuotaExceededError',
+    'classify_error',
     'create_provider',
     'list_providers',
     'get_provider_info',

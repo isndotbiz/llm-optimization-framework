@@ -1,0 +1,164 @@
+id: advanced-with-retries
+name: "Advanced Workflow with All Features"
+description: |
+  Demonstrates all workflow enhancements:
+  - Retry logic with exponential backoff
+  - Configurable timeouts
+  - Advanced condition evaluation (>, <, >=, <=, and, or, not)
+  - Structured logging and execution traces
+
+variables:
+  topic: "Machine Learning in Healthcare"
+  quality_threshold: 8
+  max_retries: 3
+  api_timeout: 30
+
+steps:
+  # Step 1: Research with retry and timeout
+  - name: fetch_research
+    type: prompt
+    model: llama33-70b
+    timeout: 30
+    retry:
+      max_attempts: 3
+      backoff: exponential
+      initial_delay: 1.0
+      max_delay: 10.0
+    prompt: |
+      Research the topic: {{topic}}
+
+      Provide:
+      1. Current state of the field
+      2. Recent breakthroughs (2023-2024)
+      3. Key players and organizations
+      4. Emerging trends
+
+      Be comprehensive and cite specific examples.
+    output_var: research_data
+    on_error: continue
+
+  # Step 2: Quality check with advanced conditions
+  - name: quality_check
+    type: conditional
+    depends_on: [fetch_research]
+    condition: "(quality_threshold > 7) and (quality_threshold <= 10)"
+    then:
+      type: prompt
+      model: qwen3-coder-30b
+      prompt: |
+        The research quality threshold is set to {{quality_threshold}} (1-10 scale).
+        This is good quality. Proceed with analysis.
+    else:
+      type: prompt
+      model: qwen3-coder-30b
+      prompt: |
+        The research quality threshold is {{quality_threshold}}.
+        This may need revision. Note: threshold must be between 1-10.
+
+  # Step 3: Analyze with retry
+  - name: deep_analysis
+    type: prompt
+    model: phi4-14b
+    depends_on: [fetch_research]
+    timeout: 45
+    retry:
+      max_attempts: 2
+      backoff: exponential
+      initial_delay: 2.0
+      max_delay: 15.0
+    prompt: |
+      Based on this research:
+
+      {{research_data}}
+
+      Provide deep analysis of {{topic}} covering:
+
+      1. Technical Fundamentals
+         - Key algorithms and methodologies
+         - Technology stack
+         - Implementation challenges
+
+      2. Clinical Applications
+         - Current use cases
+         - Success metrics
+         - Regulatory considerations
+
+      3. Future Outlook
+         - Next 2-3 year predictions
+         - Potential breakthroughs
+         - Investment opportunities
+
+      Include specific examples and citations.
+    output_var: analysis
+    on_error: continue
+
+  # Step 4: Extract key findings
+  - name: extract_key_points
+    type: extract
+    depends_on: [deep_analysis]
+    from_step: deep_analysis
+    pattern: "^\\d+\\..+$"
+    output_var: key_findings
+
+  # Step 5: Complex conditional with multiple operators
+  - name: decision_logic
+    type: conditional
+    depends_on: [deep_analysis, fetch_research]
+    condition: "not (quality_threshold < 5) and (max_retries >= 2)"
+    then:
+      type: prompt
+      model: qwen3-coder-30b
+      prompt: |
+        Quality threshold {{quality_threshold}} is good and retry limit {{max_retries}} is sufficient.
+        Proceeding to final summary.
+    else:
+      type: prompt
+      model: qwen3-coder-30b
+      prompt: |
+        Warning: Quality or retry settings may need adjustment.
+
+  # Step 6: Generate final summary with timeout
+  - name: create_summary
+    type: prompt
+    model: qwen3-coder-30b
+    depends_on: [deep_analysis, fetch_research]
+    timeout: 60
+    retry:
+      max_attempts: 1
+      backoff: fixed
+      initial_delay: 5.0
+    prompt: |
+      Create a professional summary document for: {{topic}}
+
+      Incorporate:
+
+      Research Overview:
+      {{research_data}}
+
+      Deep Analysis:
+      {{analysis}}
+
+      Format as:
+      - Executive Summary
+      - Key Findings ({{quality_threshold}} quality threshold applied)
+      - Technical Deep Dive
+      - Clinical Applications
+      - Future Outlook & Recommendations
+      - References
+
+      Make it publication-ready and suitable for presentation to stakeholders.
+    output_var: final_summary
+
+  # Step 7: Validate output quality
+  - name: validate_quality
+    type: conditional
+    depends_on: [create_summary]
+    condition: "topic contains 'Machine' or topic contains 'Healthcare'"
+    then:
+      type: extract
+      from_step: create_summary
+      output_var: validated_summary
+    else:
+      type: prompt
+      model: qwen3-coder-30b
+      prompt: "Topic validation failed. Please check the input topic."

@@ -11,8 +11,19 @@ import subprocess
 import platform
 import time
 import json
+import argparse
 from pathlib import Path
-from logging_config import setup_logging
+from logging_config_v2 import setup_structured_logging, set_trace_id
+
+# Import centralized model configuration (single source of truth)
+from config.models import ModelDatabase
+
+# Import config validator for validation commands
+sys.path.insert(0, str(Path(__file__).parent))
+try:
+    from utils.config_validator import ConfigValidator
+except ImportError:
+    ConfigValidator = None
 
 
 def detect_machine():
@@ -100,299 +111,6 @@ class Colors:
     BG_WHITE = '\033[47m'
 
 
-class ModelDatabase:
-    """Comprehensive model database with 2025 research-optimized settings"""
-
-    # RTX 3090 Models (WSL)
-    RTX3090_MODELS = {
-        "qwen3-coder-30b": {
-            "name": "Qwen3 Coder 30B Q4_K_M",
-            "path": ("/mnt/d/models/organized/"
-                     "Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"),
-            "size": "18GB",
-            "speed": "25-35 tok/sec",
-            "use_case": "Advanced coding, code review, architecture design",
-            "temperature": 0.7,
-            "top_p": 0.8,
-            "top_k": 20,
-            "context": 32768,
-            "special_flags": ["--jinja"],
-            "system_prompt": "system-prompt-qwen3-coder-30b.txt",
-            "notes": ("CRITICAL: Never use temp 0 (causes endless loops). "
-                      "Use enable_thinking for reasoning."),
-            "framework": "llama.cpp"
-        },
-        "phi4-14b": {
-            "name": "Phi-4 Reasoning Plus 14B Q6_K",
-            "path": ("/mnt/d/models/organized/"
-                     "microsoft_Phi-4-reasoning-plus-Q6_K.gguf"),
-            "size": "12GB",
-            "speed": "35-55 tok/sec",
-            "use_case": "Math, reasoning, STEM, logical analysis",
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "top_k": 40,
-            "context": 16384,
-            "special_flags": ["--jinja"],
-            "system_prompt": "system-prompt-phi4-14b.txt",
-            "notes": ("CRITICAL: Requires --jinja flag. "
-                      "DO NOT use 'think step-by-step' prompts."),
-            "framework": "llama.cpp"
-        },
-        "gemma3-27b": {
-            "name": "Gemma 3 27B Q2_K (Abliterated)",
-            "path": ("/mnt/d/models/organized/"
-                     "mlabonne_gemma-3-27b-it-abliterated-Q2_K.gguf"),
-            "size": "10GB",
-            "speed": "25-40 tok/sec",
-            "use_case": "Uncensored chat, creative writing, research",
-            "temperature": 0.9,
-            "top_p": 0.9,
-            "top_k": 40,
-            "context": 128000,
-            "special_flags": [],
-            "system_prompt": None,
-            "notes": ("NO system prompt support. 128K context. "
-                      "Uncensored/abliterated variant."),
-            "framework": "llama.cpp"
-        },
-        "ministral-3-14b": {
-            "name": "Ministral-3 14B Reasoning Q5_K_M",
-            "path": ("/mnt/d/models/organized/"
-                     "Ministral-3-14B-Reasoning-2512-Q5_K_M.gguf"),
-            "size": "9GB",
-            "speed": "35-50 tok/sec",
-            "use_case": "Complex reasoning, problem solving, analysis",
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "top_k": 40,
-            "context": 262144,
-            "special_flags": [],
-            "system_prompt": "system-prompt-ministral-3-14b.txt",
-            "notes": ("256K context window. "
-                      "Excellent for long-context reasoning."),
-            "framework": "llama.cpp"
-        },
-        "deepseek-r1-14b": {
-            "name": "DeepSeek R1 Distill Qwen 14B Q5_K_M",
-            "path": ("/mnt/d/models/organized/"
-                     "DeepSeek-R1-Distill-Qwen-14B-Q5_K_M.gguf"),
-            "size": "10GB",
-            "speed": "30-50 tok/sec",
-            "use_case": "Advanced reasoning, research, complex analysis",
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "top_k": 40,
-            "context": 32768,
-            "special_flags": [],
-            "system_prompt": "system-prompt-deepseek-r1.txt",
-            "notes": ("DeepSeek R1 distilled to Qwen. "
-                      "Excellent reasoning capabilities."),
-            "framework": "llama.cpp"
-        },
-        "llama33-70b": {
-            "name": "Llama 3.3 70B Instruct IQ2_S (Abliterated)",
-            "path": ("/mnt/d/models/organized/"
-                     "Llama-3.3-70B-Instruct-abliterated-IQ2_S.gguf"),
-            "size": "21GB",
-            "speed": "15-25 tok/sec",
-            "use_case": "Large-scale reasoning, research, uncensored tasks",
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "top_k": 40,
-            "context": 131072,
-            "special_flags": [],
-            "system_prompt": "system-prompt-llama33-70b.txt",
-            "notes": ("Largest model available. "
-                      "Excellent for complex tasks. Uncensored."),
-            "framework": "llama.cpp"
-        },
-        "dolphin-llama31-8b": {
-            "name": "Dolphin 3.0 Llama 3.1 8B Q6_K",
-            "path": "/mnt/d/models/organized/Dolphin3.0-Llama3.1-8B-Q6_K.gguf",
-            "size": "6GB",
-            "speed": "45-65 tok/sec",
-            "use_case": ("Fast general tasks, uncensored chat, "
-                         "quick assistance"),
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "top_k": 40,
-            "context": 32768,
-            "special_flags": [],
-            "system_prompt": "system-prompt-dolphin-8b.txt",
-            "notes": "Fastest model. Uncensored variant of Llama 3.1 8B.",
-            "framework": "llama.cpp"
-        },
-        "dolphin-mistral-24b": {
-            "name": "Dolphin Mistral 24B Venice Q4_K_M",
-            "path": ("/mnt/d/models/organized/cognitivecomputations_"
-                     "Dolphin-Mistral-24B-Venice-Edition-Q4_K_M.gguf"),
-            "size": "14GB",
-            "speed": "25-40 tok/sec",
-            "use_case": "Uncensored chat, creative tasks, roleplay",
-            "temperature": 0.8,
-            "top_p": 0.9,
-            "top_k": 40,
-            "context": 32768,
-            "special_flags": [],
-            "system_prompt": None,
-            "notes": ("Venice Edition: Completely uncensored. "
-                      "No system prompt support."),
-            "framework": "llama.cpp"
-        },
-        "wizard-vicuna-13b": {
-            "name": "Wizard Vicuna 13B Uncensored Q4_0",
-            "path": ("/mnt/d/models/organized/"
-                     "Wizard-Vicuna-13B-Uncensored-Q4_0.gguf"),
-            "size": "7GB",
-            "speed": "35-50 tok/sec",
-            "use_case": "General uncensored chat, creative writing",
-            "temperature": 0.8,
-            "top_p": 0.9,
-            "top_k": 40,
-            "context": 8192,
-            "special_flags": [],
-            "system_prompt": "system-prompt-wizard-vicuna.txt",
-            "notes": "Classic uncensored model. Smaller context window.",
-            "framework": "llama.cpp"
-        }
-    }
-
-    # MacBook M4 Pro Models (MLX)
-    M4_MODELS = {
-        "qwen25-14b-mlx": {
-            "name": "Qwen2.5 14B Instruct Q5_K_M (MLX)",
-            "path": "~/models/qwen25-14b",
-            "size": "11GB",
-            "speed": "50-70 tok/sec",
-            "use_case": "General purpose, research, chat",
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "top_k": 40,
-            "context": 32768,
-            "special_flags": [],
-            "system_prompt": "system-prompt-qwen25-14b.txt",
-            "notes": ("Best daily driver for M4. "
-                      "Use MLX for 2-3x speedup vs llama.cpp."),
-            "framework": "mlx"
-        },
-        "qwen25-coder-14b-mlx": {
-            "name": "Qwen2.5 Coder 14B Q4_K_M (MLX)",
-            "path": "~/models/qwen25-coder-14b",
-            "size": "8GB",
-            "speed": "50-75 tok/sec",
-            "use_case": "Coding, debugging, technical tasks",
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "top_k": 40,
-            "context": 32768,
-            "special_flags": [],
-            "system_prompt": "system-prompt-qwen25-coder-14b.txt",
-            "notes": "Best coding model for M4.",
-            "framework": "mlx"
-        },
-        "phi4-14b-mlx": {
-            "name": "Phi-4 14B Q6_K (MLX)",
-            "path": "~/models/phi4-14b",
-            "size": "12GB",
-            "speed": "60-75 tok/sec",
-            "use_case": "Math, reasoning, STEM tasks",
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "top_k": 40,
-            "context": 16384,
-            "special_flags": [],
-            "system_prompt": "system-prompt-phi4-14b.txt",
-            "notes": "Excellent for reasoning on M4.",
-            "framework": "mlx"
-        },
-        "gemma3-9b-mlx": {
-            "name": "Gemma-3 9B Q6_K (MLX)",
-            "path": "~/models/gemma3-9b",
-            "size": "8GB",
-            "speed": "85-110 tok/sec",
-            "use_case": "Fast responses, chat, general queries",
-            "temperature": 0.9,
-            "top_p": 0.9,
-            "top_k": 40,
-            "context": 128000,
-            "special_flags": [],
-            "system_prompt": None,
-            "notes": "Speed champion on M4. NO system prompt support.",
-            "framework": "mlx"
-        }
-    }
-
-    @classmethod
-    def get_platform_models(cls):
-        """Return models appropriate for current platform"""
-        system = platform.system()
-        if system == "Darwin":  # macOS
-            return cls.M4_MODELS
-        else:  # Windows/WSL - RTX 3090
-            return cls.RTX3090_MODELS
-
-    @classmethod
-    def detect_use_case(cls, prompt_text):
-        """Intelligently detect use case from prompt"""
-        prompt_lower = prompt_text.lower()
-
-        # Coding keywords
-        coding_keywords = [
-            'code', 'function', 'class', 'programming', 'debug', 'error',
-            'python', 'javascript', 'java', 'c++', 'rust', 'implement',
-            'refactor', 'algorithm', 'api', 'script', 'bug'
-        ]
-
-        # Math/reasoning keywords
-        reasoning_keywords = [
-            'calculate', 'prove', 'theorem', 'math', 'equation',
-            'logic', 'reasoning', 'solve', 'problem', 'analyze',
-            'deduce', 'infer', 'probability', 'statistics'
-        ]
-
-        # Creative keywords
-        creative_keywords = [
-            'story', 'poem', 'creative', 'write', 'fiction',
-            'narrative', 'character', 'plot', 'imagine'
-        ]
-
-        # Research keywords
-        research_keywords = [
-            'research', 'analyze', 'explain', 'summary', 'what is',
-            'how does', 'why', 'compare', 'contrast'
-        ]
-
-        if any(kw in prompt_lower for kw in coding_keywords):
-            return "coding"
-        elif any(kw in prompt_lower for kw in reasoning_keywords):
-            return "reasoning"
-        elif any(kw in prompt_lower for kw in creative_keywords):
-            return "creative"
-        elif any(kw in prompt_lower for kw in research_keywords):
-            return "research"
-        else:
-            return "general"
-
-    @classmethod
-    def recommend_model(cls, use_case, platform_models):
-        """Recommend best model for use case"""
-        recommendations = {
-            "coding": ["qwen3-coder-30b", "qwen25-coder-14b-mlx"],
-            "reasoning": ["phi4-14b", "ministral-3-14b", "phi4-14b-mlx"],
-            "creative": ["gemma3-27b", "gemma3-9b-mlx"],
-            "research": ["qwen3-14b", "qwen25-14b", "qwen25-14b-mlx"],
-            "general": ["qwen25-14b", "qwen3-14b", "qwen25-14b-mlx"]
-        }
-
-        for model_id in recommendations.get(use_case, []):
-            if model_id in platform_models:
-                return model_id, platform_models[model_id]
-
-        # Fallback to first available model
-        return list(platform_models.items())[0]
-
-
 class AIRouter:
     """Main AI Router application"""
 
@@ -410,8 +128,8 @@ class AIRouter:
 
         self.system_prompts_dir = self.models_dir
 
-        # Initialize logging
-        self.logger = setup_logging(self.models_dir)
+        # Initialize structured logging
+        self.logger = setup_structured_logging(self.models_dir)
         self.logger.info(f"AI Router initialized on {self.platform}")
 
     def _validate_resources_for_model(self, model_data):
@@ -1342,52 +1060,397 @@ class AIRouter:
                 f"Please enter a valid number from the menu.{Colors.RESET}"
             )
 
+    def show_machine_info(self):
+        """Display detected machine information"""
+        machine_id = detect_machine()
+        config_path = Path(f"configs/{machine_id}/ai-router-config.json")
+
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}")
+        print("=" * 64)
+        print("                    MACHINE DETECTION INFO")
+        print("=" * 64)
+        print(Colors.RESET)
+
+        print(
+            f"\n{Colors.BRIGHT_WHITE}Detected Machine:{Colors.RESET}"
+        )
+        print(f"  {Colors.BRIGHT_GREEN}{machine_id}{Colors.RESET}")
+
+        print(
+            f"\n{Colors.BRIGHT_WHITE}Configuration File:{Colors.RESET}"
+        )
+        if config_path.exists():
+            print(
+                f"  {Colors.GREEN}{config_path.absolute()}{Colors.RESET}"
+            )
+        else:
+            print(
+                f"  {Colors.RED}[NOT FOUND] {config_path.absolute()}"
+                f"{Colors.RESET}"
+            )
+
+        print(f"\n{Colors.BRIGHT_WHITE}Platform:{Colors.RESET}")
+        print(f"  {Colors.CYAN}{self.platform}{Colors.RESET}")
+
+        print(f"\n{Colors.BRIGHT_WHITE}Available Models:{Colors.RESET}")
+        print(f"  {Colors.CYAN}{len(self.models)} models{Colors.RESET}")
+
+        print()
+
+    def validate_config_cmd(self):
+        """Validate the configuration for current machine"""
+        if ConfigValidator is None:
+            print(
+                f"{Colors.BRIGHT_RED}[ERROR] Config validator not "
+                f"available{Colors.RESET}"
+            )
+            return False
+
+        machine_id = detect_machine()
+        config_path = Path(f"configs/{machine_id}/ai-router-config.json")
+
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}")
+        print("=" * 64)
+        print("                 CONFIGURATION VALIDATION")
+        print("=" * 64)
+        print(Colors.RESET)
+
+        validator = ConfigValidator()
+        is_valid, errors = validator.validate_config(config_path)
+
+        if is_valid:
+            print(
+                f"{Colors.GREEN}[OK] Configuration is valid!{Colors.RESET}"
+            )
+        else:
+            print(
+                f"{Colors.RED}[ERROR] Configuration has issues:"
+                f"{Colors.RESET}\n"
+            )
+            for idx, error in enumerate(errors, 1):
+                print(f"{Colors.RED}  [{idx}] {error}{Colors.RESET}")
+
+        print()
+        return is_valid
+
+    def search_models(self, query: str):
+        """Search models by keyword"""
+        query_lower = query.lower()
+        results = []
+
+        for model_id, model_data in self.models.items():
+            name_match = query_lower in model_data['name'].lower()
+            use_case_match = query_lower in model_data['use_case'].lower()
+            notes_match = (
+                model_data.get('notes')
+                and query_lower in model_data['notes'].lower()
+            )
+
+            if name_match or use_case_match or notes_match:
+                results.append((model_id, model_data))
+
+        return results
+
+    def show_search_results(self, query: str):
+        """Display search results for models"""
+        results = self.search_models(query)
+
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}")
+        print("=" * 64)
+        print(f"                 SEARCH RESULTS FOR: {query.upper()}")
+        print("=" * 64)
+        print(Colors.RESET)
+
+        if not results:
+            print(
+                f"{Colors.YELLOW}No models found matching '{query}'"
+                f"{Colors.RESET}\n"
+            )
+            return
+
+        print(
+            f"{Colors.BRIGHT_WHITE}Found {len(results)} matching model(s):"
+            f"{Colors.RESET}\n"
+        )
+
+        for model_id, model_data in results:
+            print(
+                f"{Colors.BRIGHT_GREEN}[{model_id}]{Colors.RESET}"
+            )
+            print(
+                f"  {Colors.WHITE}Name: {model_data['name']}{Colors.RESET}"
+            )
+            print(
+                f"  {Colors.CYAN}Use case: {model_data['use_case']}"
+                f"{Colors.RESET}"
+            )
+            print(
+                f"  {Colors.GREEN}{model_data['size']} | "
+                f"{model_data['speed']}{Colors.RESET}\n"
+            )
+
+    def show_config(self):
+        """Display current machine configuration"""
+        machine_id = detect_machine()
+        config_path = Path(f"configs/{machine_id}/ai-router-config.json")
+
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}")
+        print("=" * 64)
+        print("              MACHINE CONFIGURATION")
+        print("=" * 64)
+        print(Colors.RESET)
+
+        if not config_path.exists():
+            print(
+                f"{Colors.BRIGHT_RED}[ERROR] Configuration file not "
+                f"found:{Colors.RESET}"
+            )
+            print(f"  {config_path.absolute()}\n")
+            return
+
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+
+            print(
+                f"\n{Colors.BRIGHT_WHITE}Machine:{Colors.RESET}"
+            )
+            machine = config.get('machine', {})
+            print(f"  ID: {Colors.CYAN}{machine.get('id')}{Colors.RESET}")
+            print(
+                f"  Name: {Colors.CYAN}{machine.get('name')}{Colors.RESET}"
+            )
+            print(
+                f"  Specs: {Colors.CYAN}{machine.get('specs')}{Colors.RESET}"
+            )
+
+            print(
+                f"\n{Colors.BRIGHT_WHITE}Performance Settings:{Colors.RESET}"
+            )
+            perf = config.get('performance', {})
+            print(
+                f"  Temperature: {Colors.GREEN}{perf.get('temperature')}"
+                f"{Colors.RESET}"
+            )
+            print(
+                f"  Top-P: {Colors.GREEN}{perf.get('top_p')}{Colors.RESET}"
+            )
+            print(
+                f"  Batch Size: {Colors.GREEN}{perf.get('batch_size')}"
+                f"{Colors.RESET}"
+            )
+
+            print(
+                f"\n{Colors.BRIGHT_WHITE}Inference Settings:{Colors.RESET}"
+            )
+            infer = config.get('inference', {})
+            print(
+                f"  Backend: {Colors.BLUE}{infer.get('backend')}"
+                f"{Colors.RESET}"
+            )
+            print(
+                f"  Device: {Colors.BLUE}{infer.get('device')}{Colors.RESET}"
+            )
+            print(
+                f"  Data Type: {Colors.BLUE}{infer.get('dtype')}"
+                f"{Colors.RESET}"
+            )
+
+            print()
+
+        except Exception as e:
+            print(
+                f"{Colors.BRIGHT_RED}[ERROR] Failed to read config: "
+                f"{e}{Colors.RESET}\n"
+            )
+
+
+def create_parser():
+    """Create and configure argument parser"""
+    parser = argparse.ArgumentParser(
+        prog='ai-router',
+        description='AI Router - Intelligent Model Selection and Execution CLI',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python ai-router.py                              Launch interactive mode
+  python ai-router.py run --model qwen3-coder-30b  Run model non-interactively
+  python ai-router.py models search coding         Search for coding models
+  python ai-router.py config show                  Display machine config
+  python ai-router.py machine detect               Show detected machine info
+  python ai-router.py validate                     Validate configuration
+
+For more information, visit the documentation guides in interactive mode."""
+    )
+
+    subparsers = parser.add_subparsers(
+        dest='command',
+        help='Available commands'
+    )
+
+    # Run command
+    run_parser = subparsers.add_parser(
+        'run',
+        help='Run a model with given prompt'
+    )
+    run_parser.add_argument(
+        '--model',
+        required=True,
+        help='Model ID to run (e.g., qwen3-coder-30b)'
+    )
+    run_parser.add_argument(
+        '--prompt',
+        help='Prompt text (interactive if not provided)'
+    )
+
+    # Models subcommand
+    models_parser = subparsers.add_parser(
+        'models',
+        help='Model management commands'
+    )
+    models_subparsers = models_parser.add_subparsers(
+        dest='models_cmd',
+        help='Models commands'
+    )
+
+    # models list
+    models_subparsers.add_parser(
+        'list',
+        help='List all available models'
+    )
+
+    # models search
+    search_parser = models_subparsers.add_parser(
+        'search',
+        help='Search models by keyword'
+    )
+    search_parser.add_argument(
+        'query',
+        help='Search query (e.g., "coding", "reasoning")'
+    )
+
+    # Config command
+    config_parser = subparsers.add_parser(
+        'config',
+        help='Configuration management'
+    )
+    config_subparsers = config_parser.add_subparsers(
+        dest='config_cmd',
+        help='Config commands'
+    )
+    config_subparsers.add_parser(
+        'show',
+        help='Show current machine configuration'
+    )
+
+    # Machine command
+    machine_parser = subparsers.add_parser(
+        'machine',
+        help='Machine information'
+    )
+    machine_subparsers = machine_parser.add_subparsers(
+        dest='machine_cmd',
+        help='Machine commands'
+    )
+    machine_subparsers.add_parser(
+        'detect',
+        help='Show detected machine and config location'
+    )
+
+    # Validate command
+    subparsers.add_parser(
+        'validate',
+        help='Validate current machine configuration'
+    )
+
+    return parser
+
 
 def main():
-    """Main entry point"""
+    """Main entry point with argparse-based CLI"""
     try:
-        router = AIRouter()
+        # Initialize trace ID for this session
+        set_trace_id()
 
-        # Check if arguments provided (non-interactive mode)
-        if len(sys.argv) > 1:
-            if sys.argv[1] == "--list":
-                router.print_banner()
-                router.list_models()
-            elif sys.argv[1] == "--help":
-                router.print_banner()
-                print(f"{Colors.BRIGHT_WHITE}Usage:{Colors.RESET}\n")
-                print(
-                    f"  {Colors.GREEN}python ai-router.py{Colors.RESET}"
-                )
-                print(
-                    f"    {Colors.WHITE}"
-                    f"Launch interactive mode{Colors.RESET}\n"
-                )
-                print(
-                    f"  {Colors.GREEN}"
-                    f"python ai-router.py --list{Colors.RESET}"
-                )
-                print(
-                    f"    {Colors.WHITE}"
-                    f"List all available models{Colors.RESET}\n"
-                )
-                print(
-                    f"  {Colors.GREEN}"
-                    f"python ai-router.py --help{Colors.RESET}"
-                )
-                print(
-                    f"    {Colors.WHITE}"
-                    f"Show this help message{Colors.RESET}\n"
-                )
-            else:
-                print(
-                    f"{Colors.BRIGHT_RED}"
-                    f"Unknown argument. Use --help for usage."
-                    f"{Colors.RESET}"
-                )
-        else:
-            # Interactive mode
+        # Initialize router
+        router = AIRouter()
+        machine_id = detect_machine()
+
+        # Parse arguments
+        parser = create_parser()
+        args = parser.parse_args()
+
+        # Handle commands
+        if args.command is None:
+            # No command specified - show banner and machine info,
+            # then launch interactive mode
+            router.print_banner()
+            print(f"{Colors.BRIGHT_GREEN}Detected: {machine_id}{Colors.RESET}")
+            print(
+                f"{Colors.BRIGHT_GREEN}Config: "
+                f"configs/{machine_id}/ai-router-config.json{Colors.RESET}\n"
+            )
             router.interactive_mode()
+
+        elif args.command == 'run':
+            # Run a model
+            router.print_banner()
+            if args.model not in router.models:
+                print(
+                    f"{Colors.BRIGHT_RED}[ERROR] Unknown model: "
+                    f"{args.model}{Colors.RESET}"
+                )
+                print(
+                    f"{Colors.YELLOW}Use 'python ai-router.py models list' "
+                    f"to see available models.{Colors.RESET}\n"
+                )
+                sys.exit(1)
+
+            model_data = router.models[args.model]
+
+            if args.prompt:
+                prompt = args.prompt
+            else:
+                prompt = input(
+                    f"\n{Colors.BRIGHT_CYAN}Enter your prompt: "
+                    f"{Colors.RESET}"
+                ).strip()
+
+            router.run_model(args.model, model_data, prompt)
+
+        elif args.command == 'models':
+            router.print_banner()
+            if args.models_cmd == 'list':
+                router.list_models()
+            elif args.models_cmd == 'search':
+                router.show_search_results(args.query)
+            else:
+                print(f"{Colors.YELLOW}Use 'python ai-router.py models "
+                      f"--help' for usage.{Colors.RESET}\n")
+
+        elif args.command == 'config':
+            router.print_banner()
+            if args.config_cmd == 'show':
+                router.show_config()
+            else:
+                print(f"{Colors.YELLOW}Use 'python ai-router.py config "
+                      f"--help' for usage.{Colors.RESET}\n")
+
+        elif args.command == 'machine':
+            router.print_banner()
+            if args.machine_cmd == 'detect':
+                router.show_machine_info()
+            else:
+                print(f"{Colors.YELLOW}Use 'python ai-router.py machine "
+                      f"--help' for usage.{Colors.RESET}\n")
+
+        elif args.command == 'validate':
+            router.print_banner()
+            is_valid = router.validate_config_cmd()
+            sys.exit(0 if is_valid else 1)
+
+        else:
+            parser.print_help()
 
     except KeyboardInterrupt:
         print(

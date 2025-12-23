@@ -14,6 +14,9 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any, Union
 import shutil
 
+# Import security validator
+from security_validator import SecurityValidator
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -49,6 +52,7 @@ class MCPServer:
             'store_pdf': self.store_pdf
         }
         self.base_projects_dir = Path(r'D:\models\projects')
+        self.validator = SecurityValidator(str(self.base_projects_dir))
         logger.info("MCP Server initialized")
 
     def read_pdf(self, file_path: str) -> Dict[str, Any]:
@@ -67,12 +71,25 @@ class MCPServer:
             - error: Error message if failed
         """
         try:
-            pdf_path = Path(file_path)
-
-            if not pdf_path.exists():
+            # Validate file path input
+            valid, error = self.validator.validate_file_path(file_path)
+            if not valid:
+                logger.warning(f"Invalid file path provided: {error}")
                 return {
                     'success': False,
-                    'error': f'PDF file not found: {file_path}',
+                    'error': 'Unable to read the requested file',
+                    'text': '',
+                    'page_count': 0,
+                    'metadata': {}
+                }
+
+            pdf_path = Path(file_path).resolve()
+
+            if not pdf_path.exists():
+                logger.warning(f"PDF file not found: {pdf_path}")
+                return {
+                    'success': False,
+                    'error': 'Unable to read the requested file',
                     'text': '',
                     'page_count': 0,
                     'metadata': {}
@@ -83,19 +100,20 @@ class MCPServer:
             elif PDF_LIBRARY == 'PyPDF2':
                 return self._read_pdf_pypdf2(pdf_path)
             else:
+                logger.error("No PDF library installed")
                 return {
                     'success': False,
-                    'error': 'No PDF library installed. Install pdfplumber or PyPDF2',
+                    'error': 'Operation failed',
                     'text': '',
                     'page_count': 0,
                     'metadata': {}
                 }
 
         except Exception as e:
-            logger.error(f"Error reading PDF {file_path}: {str(e)}", exc_info=True)
+            logger.error(f"Error reading PDF: {str(e)}", exc_info=True)
             return {
                 'success': False,
-                'error': str(e),
+                'error': 'Operation failed',
                 'text': '',
                 'page_count': 0,
                 'metadata': {}
@@ -173,8 +191,48 @@ class MCPServer:
             - error: Error message if failed
         """
         try:
-            # Create project directory structure
-            project_dir = self.base_projects_dir / project_name
+            # Validate inputs
+            valid, error = self.validator.validate_query(query)
+            if not valid:
+                logger.warning(f"Invalid query: {error}")
+                return {
+                    'success': False,
+                    'error': 'Invalid input provided',
+                    'storage_path': '',
+                    'timestamp': ''
+                }
+
+            valid, error = self.validator.validate_results_size(results)
+            if not valid:
+                logger.warning(f"Invalid results: {error}")
+                return {
+                    'success': False,
+                    'error': 'Invalid input provided',
+                    'storage_path': '',
+                    'timestamp': ''
+                }
+
+            valid, error = self.validator.validate_project_name(project_name)
+            if not valid:
+                logger.warning(f"Invalid project name: {error}")
+                return {
+                    'success': False,
+                    'error': 'Invalid project name',
+                    'storage_path': '',
+                    'timestamp': ''
+                }
+
+            # Get safe project path
+            project_dir = self.validator.get_safe_project_path(project_name)
+            if not project_dir:
+                logger.warning(f"Could not create safe path for project: {project_name}")
+                return {
+                    'success': False,
+                    'error': 'Invalid project name',
+                    'storage_path': '',
+                    'timestamp': ''
+                }
+
             data_dir = project_dir / 'data' / 'web_search'
 
             # Organize by date
@@ -204,7 +262,7 @@ class MCPServer:
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(data_to_store, f, indent=2, ensure_ascii=False)
 
-            logger.info(f"Stored web data for query '{query}' in project '{project_name}'")
+            logger.info(f"Stored web data in project '{project_name}'")
 
             return {
                 'success': True,
@@ -218,7 +276,7 @@ class MCPServer:
             logger.error(f"Error storing web data: {str(e)}", exc_info=True)
             return {
                 'success': False,
-                'error': str(e),
+                'error': 'Operation failed',
                 'storage_path': '',
                 'timestamp': ''
             }
@@ -242,7 +300,50 @@ class MCPServer:
             - error: Error message if failed
         """
         try:
-            project_dir = self.base_projects_dir / project_name
+            # Validate inputs
+            valid, error = self.validator.validate_project_name(project_name)
+            if not valid:
+                logger.warning(f"Invalid project name: {error}")
+                return {
+                    'success': False,
+                    'error': 'Invalid project name',
+                    'data': [],
+                    'count': 0
+                }
+
+            if query is not None:
+                valid, error = self.validator.validate_query(query)
+                if not valid:
+                    logger.warning(f"Invalid query: {error}")
+                    return {
+                        'success': False,
+                        'error': 'Invalid input provided',
+                        'data': [],
+                        'count': 0
+                    }
+
+            if date_range is not None:
+                valid, error = self.validator.validate_date_range(date_range)
+                if not valid:
+                    logger.warning(f"Invalid date range: {error}")
+                    return {
+                        'success': False,
+                        'error': 'Invalid input provided',
+                        'data': [],
+                        'count': 0
+                    }
+
+            # Get safe project path
+            project_dir = self.validator.get_safe_project_path(project_name)
+            if not project_dir:
+                logger.warning(f"Could not create safe path for project: {project_name}")
+                return {
+                    'success': True,
+                    'data': [],
+                    'count': 0,
+                    'message': 'No data found'
+                }
+
             data_dir = project_dir / 'data' / 'web_search'
 
             if not data_dir.exists():
@@ -250,7 +351,7 @@ class MCPServer:
                     'success': True,
                     'data': [],
                     'count': 0,
-                    'message': f'No web search data found for project {project_name}'
+                    'message': 'No data found'
                 }
 
             # Collect all JSON files
@@ -287,13 +388,13 @@ class MCPServer:
                     matching_data.append(data)
 
                 except Exception as e:
-                    logger.warning(f"Error reading file {json_file}: {str(e)}")
+                    logger.warning(f"Error reading file: {str(e)}")
                     continue
 
             # Sort by timestamp (newest first)
             matching_data.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
 
-            logger.info(f"Retrieved {len(matching_data)} data entries for project '{project_name}'")
+            logger.info(f"Retrieved {len(matching_data)} data entries")
 
             return {
                 'success': True,
@@ -306,7 +407,7 @@ class MCPServer:
             logger.error(f"Error retrieving stored data: {str(e)}", exc_info=True)
             return {
                 'success': False,
-                'error': str(e),
+                'error': 'Operation failed',
                 'data': [],
                 'count': 0
             }
@@ -329,18 +430,60 @@ class MCPServer:
             - error: Error message if failed
         """
         try:
-            source_path = Path(pdf_path)
-
-            if not source_path.exists():
+            # Validate inputs
+            valid, error = self.validator.validate_file_path(pdf_path)
+            if not valid:
+                logger.warning(f"Invalid file path: {error}")
                 return {
                     'success': False,
-                    'error': f'PDF file not found: {pdf_path}',
+                    'error': 'Unable to process the requested file',
                     'storage_path': '',
                     'index_path': ''
                 }
 
-            # Create project directory structure
-            project_dir = self.base_projects_dir / project_name
+            valid, error = self.validator.validate_project_name(project_name)
+            if not valid:
+                logger.warning(f"Invalid project name: {error}")
+                return {
+                    'success': False,
+                    'error': 'Invalid project name',
+                    'storage_path': '',
+                    'index_path': ''
+                }
+
+            if tags is not None:
+                valid, error = self.validator.validate_tags(tags)
+                if not valid:
+                    logger.warning(f"Invalid tags: {error}")
+                    return {
+                        'success': False,
+                        'error': 'Invalid input provided',
+                        'storage_path': '',
+                        'index_path': ''
+                    }
+
+            source_path = Path(pdf_path).resolve()
+
+            if not source_path.exists():
+                logger.warning(f"PDF file not found: {pdf_path}")
+                return {
+                    'success': False,
+                    'error': 'Unable to process the requested file',
+                    'storage_path': '',
+                    'index_path': ''
+                }
+
+            # Get safe project path
+            project_dir = self.validator.get_safe_project_path(project_name)
+            if not project_dir:
+                logger.warning(f"Could not create safe path for project: {project_name}")
+                return {
+                    'success': False,
+                    'error': 'Invalid project name',
+                    'storage_path': '',
+                    'index_path': ''
+                }
+
             pdfs_dir = project_dir / 'data' / 'pdfs'
             pdfs_dir.mkdir(parents=True, exist_ok=True)
 
@@ -383,7 +526,7 @@ class MCPServer:
             with open(index_path, 'w', encoding='utf-8') as f:
                 json.dump(index, f, indent=2, ensure_ascii=False)
 
-            logger.info(f"Stored PDF '{pdf_filename}' in project '{project_name}'")
+            logger.info(f"Stored PDF in project '{project_name}'")
 
             return {
                 'success': True,
@@ -398,7 +541,7 @@ class MCPServer:
             logger.error(f"Error storing PDF: {str(e)}", exc_info=True)
             return {
                 'success': False,
-                'error': str(e),
+                'error': 'Operation failed',
                 'storage_path': '',
                 'index_path': ''
             }
@@ -411,11 +554,12 @@ class MCPServer:
             request_id = request.get('id')
 
             if method not in self.tools:
+                logger.warning(f"Unknown method requested: {method}")
                 return {
                     'jsonrpc': '2.0',
                     'error': {
                         'code': -32601,
-                        'message': f'Method not found: {method}'
+                        'message': 'Method not found'
                     },
                     'id': request_id
                 }
@@ -435,7 +579,7 @@ class MCPServer:
                 'jsonrpc': '2.0',
                 'error': {
                     'code': -32603,
-                    'message': f'Internal error: {str(e)}'
+                    'message': 'Internal error'
                 },
                 'id': request.get('id')
             }
@@ -457,7 +601,7 @@ class MCPServer:
                     print(json.dumps(response), flush=True)
 
                 except json.JSONDecodeError as e:
-                    logger.error(f"Invalid JSON: {str(e)}")
+                    logger.error(f"Invalid JSON received")
                     error_response = {
                         'jsonrpc': '2.0',
                         'error': {

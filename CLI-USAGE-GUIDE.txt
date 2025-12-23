@@ -1,0 +1,362 @@
+================================================================================
+                      CLI IMPROVEMENTS - USAGE GUIDE
+                           Quick Reference
+================================================================================
+
+BEFORE (Interactive Only):
+  python ai-router.py
+  > [menu] 1  [menu] 2  [menu] 1  [Enter prompt]
+  (7+ menu clicks required)
+
+AFTER (Multiple Options):
+  python ai-router.py              (interactive - same as before)
+  python ai-router.py --help       (show help)
+  python ai-router.py machine detect     (show machine detection)
+  python ai-router.py config show        (show configuration)
+  python ai-router.py validate           (validate config)
+  python ai-router.py models list        (list models)
+  python ai-router.py models search coding  (search models)
+  python ai-router.py run --model qwen3-coder-30b  (run model directly)
+
+================================================================================
+                           COMMAND REFERENCE
+================================================================================
+
+1. LAUNCH INTERACTIVE MODE (unchanged)
+   ────────────────────────────────────────────────────────────────────────
+   $ python ai-router.py
+
+   Shows:
+     - Banner
+     - Detected machine: ryzen-3900x-3090
+     - Config path: configs/ryzen-3900x-3090/ai-router-config.json
+     - Interactive menu
+
+   Use when: You want the full interactive experience
+
+2. SHOW HELP
+   ────────────────────────────────────────────────────────────────────────
+   $ python ai-router.py --help
+
+   Shows:
+     - All available commands
+     - Subcommands
+     - Usage examples
+     - Description of each command
+
+   Use when: You need to remember commands
+
+3. DETECT MACHINE
+   ────────────────────────────────────────────────────────────────────────
+   $ python ai-router.py machine detect
+
+   Shows:
+     - Detected machine ID: ryzen-3900x-3090
+     - Config file path: D:\models\configs\ryzen-3900x-3090\ai-router-config.json
+     - Platform: Windows/Linux/Darwin
+     - Available models count: 9
+
+   Use when: You need to verify which machine is detected
+
+4. SHOW MACHINE CONFIGURATION
+   ────────────────────────────────────────────────────────────────────────
+   $ python ai-router.py config show
+
+   Shows:
+     - Machine ID, name, specs
+     - Performance settings (temperature, top_p, batch_size)
+     - Inference settings (backend, device, dtype)
+
+   Use when: You want to see current configuration settings
+
+5. VALIDATE CONFIGURATION
+   ────────────────────────────────────────────────────────────────────────
+   $ python ai-router.py validate
+
+   Shows:
+     - [OK] Configuration is valid!
+     - Or detailed errors if config is invalid
+
+   Exit codes:
+     - 0 = Configuration is valid (success)
+     - 1 = Configuration has errors (failure)
+
+   Use when: You want to check if config is valid
+   Use in: CI/CD pipelines, automated checks
+
+6. LIST ALL MODELS
+   ────────────────────────────────────────────────────────────────────────
+   $ python ai-router.py models list
+
+   Shows:
+     - All available models with:
+       * Model ID
+       * Full name
+       * Use case
+       * Size and speed
+
+   Use when: You want to see all available models
+
+7. SEARCH MODELS
+   ────────────────────────────────────────────────────────────────────────
+   $ python ai-router.py models search <keyword>
+
+   Examples:
+     $ python ai-router.py models search coding
+     $ python ai-router.py models search reasoning
+     $ python ai-router.py models search phi4
+
+   Shows:
+     - Matching models (searches name, use case, notes)
+     - Full details for each match
+
+   Use when: You want to find models matching your needs
+
+8. RUN MODEL (Non-interactive)
+   ────────────────────────────────────────────────────────────────────────
+   $ python ai-router.py run --model <model_id> [--prompt <text>]
+
+   Examples:
+     $ python ai-router.py run --model qwen3-coder-30b --prompt "write a function"
+     $ python ai-router.py run --model phi4-14b --prompt "solve: 2+2"
+     $ python ai-router.py run --model qwen3-coder-30b
+       (prompts for input)
+
+   Use when:
+     - Running from scripts
+     - Automated processing
+     - CI/CD pipelines
+     - Batch processing
+
+================================================================================
+                          USAGE EXAMPLES
+================================================================================
+
+EXAMPLE 1: Quick Model Search
+──────────────────────────────────────────────────────────────────────────
+
+$ python ai-router.py models search coding
+
+Output:
+  Found 1 matching model(s):
+
+  [qwen3-coder-30b]
+    Name: Qwen3 Coder 30B Q4_K_M
+    Use case: Advanced coding, code review, architecture design
+    18GB | 25-35 tok/sec
+
+EXAMPLE 2: Verify Machine Configuration
+──────────────────────────────────────────────────────────────────────────
+
+$ python ai-router.py machine detect && python ai-router.py validate
+
+Output:
+  Detected Machine: ryzen-3900x-3090
+  Configuration File: D:\models\configs\ryzen-3900x-3090\ai-router-config.json
+  Platform: Windows
+  Available Models: 9 models
+
+  [OK] Configuration is valid!
+
+EXAMPLE 3: Run Model from Script
+──────────────────────────────────────────────────────────────────────────
+
+#!/bin/bash
+# Find a coding model and run it
+MODEL=$(python ai-router.py models search coding | grep '\[' | head -1 | tr -d '[]')
+python ai-router.py run --model "$MODEL" --prompt "write factorial function"
+
+EXAMPLE 4: Batch Process Multiple Models
+──────────────────────────────────────────────────────────────────────────
+
+#!/bin/bash
+# Run the same prompt on multiple models
+PROMPT="What is AI?"
+
+echo "Running on Qwen3..."
+python ai-router.py run --model qwen3-coder-30b --prompt "$PROMPT"
+
+echo "Running on Phi4..."
+python ai-router.py run --model phi4-14b --prompt "$PROMPT"
+
+echo "Running on Llama33..."
+python ai-router.py run --model llama33-70b --prompt "$PROMPT"
+
+EXAMPLE 5: CI/CD Pipeline Integration
+──────────────────────────────────────────────────────────────────────────
+
+#!/bin/bash
+# GitHub Actions / GitLab CI example
+
+echo "Checking AI Router setup..."
+python ai-router.py machine detect || exit 1
+python ai-router.py validate || exit 1
+
+echo "Configuration verified!"
+echo "Ready to deploy"
+
+EXAMPLE 6: Check Config Details
+──────────────────────────────────────────────────────────────────────────
+
+$ python ai-router.py config show
+
+Output:
+  Machine:
+    ID: ryzen-3900x-3090
+    Name: Ryzen 3900X + RTX 3090
+    Specs: 12-core 24-thread CPU, 64GB DDR4 RAM, 24GB VRAM GPU
+
+  Performance Settings:
+    Temperature: 0.7
+    Top-P: 0.95
+    Batch Size: 4
+
+  Inference Settings:
+    Backend: vllm
+    Device: cuda
+    Data Type: float16
+
+================================================================================
+                          SCRIPTING PATTERNS
+================================================================================
+
+PATTERN 1: Command Substitution
+──────────────────────────────────────────────────────────────────────────
+
+# Get detected machine
+MACHINE=$(python ai-router.py machine detect 2>/dev/null | grep "Detected" | cut -d' ' -f2)
+echo "Running on: $MACHINE"
+
+PATTERN 2: Exit Code Checking
+──────────────────────────────────────────────────────────────────────────
+
+# Validate config before proceeding
+if python ai-router.py validate > /dev/null 2>&1; then
+    echo "Config is valid, proceeding..."
+    python ai-router.py run --model qwen3-coder-30b --prompt "hello"
+else
+    echo "Config is invalid, aborting!"
+    exit 1
+fi
+
+PATTERN 3: Pipeline Safety
+──────────────────────────────────────────────────────────────────────────
+
+#!/bin/bash
+set -e  # Exit on any error
+
+echo "1. Detecting machine..."
+python ai-router.py machine detect
+
+echo "2. Validating configuration..."
+python ai-router.py validate
+
+echo "3. Searching for models..."
+python ai-router.py models search reasoning
+
+echo "4. Ready to process models"
+echo "Run: python ai-router.py run --model <model_id> --prompt <text>"
+
+PATTERN 4: Model Iteration
+──────────────────────────────────────────────────────────────────────────
+
+#!/bin/bash
+
+MODELS=("qwen3-coder-30b" "phi4-14b" "ministral-3-14b")
+PROMPT="Explain machine learning"
+
+for model in "${MODELS[@]}"; do
+    echo "Testing: $model"
+    python ai-router.py run --model "$model" --prompt "$PROMPT"
+    echo "---"
+done
+
+================================================================================
+                          TROUBLESHOOTING
+================================================================================
+
+ISSUE: Command not found
+──────────────────────────────────────────────────────────────────────────
+$ python ai-router.py machine detect
+Error: 'machine' is not recognized
+
+Solution: Use full command syntax
+$ python ai-router.py machine detect  # Note: 'detect' is required
+
+ISSUE: Wrong machine detected
+──────────────────────────────────────────────────────────────────────────
+$ python ai-router.py machine detect
+Detected Machine: m4-macbook-pro
+(But I'm on Windows!)
+
+Solution:
+1. Create .machine-id file with correct machine name
+   $ echo "ryzen-3900x-3090" > .machine-id
+2. Run again
+   $ python ai-router.py machine detect
+
+ISSUE: Configuration validation fails
+──────────────────────────────────────────────────────────────────────────
+$ python ai-router.py validate
+[ERROR] Configuration has issues:
+  [1] Missing required field in 'models': 'primary'
+
+Solution:
+1. Check the config file
+   $ python ai-router.py config show
+2. Edit the missing/invalid field
+3. Validate again
+   $ python ai-router.py validate
+
+ISSUE: Model not found in search
+──────────────────────────────────────────────────────────────────────────
+$ python ai-router.py models search xyz
+No models found matching 'xyz'
+
+Solution:
+1. List all models to see available options
+   $ python ai-router.py models list
+2. Try different search term
+   $ python ai-router.py models search coding
+
+ISSUE: Run command fails
+──────────────────────────────────────────────────────────────────────────
+$ python ai-router.py run --model unknown-model
+[ERROR] Unknown model: unknown-model
+
+Solution:
+1. List available models
+   $ python ai-router.py models list
+2. Use correct model ID
+   $ python ai-router.py run --model qwen3-coder-30b
+
+================================================================================
+                          QUICK REFERENCE CARD
+================================================================================
+
+Command                              What it does
+────────────────────────────────────────────────────────────────────────
+python ai-router.py                 Launch interactive menu
+python ai-router.py --help           Show help with examples
+python ai-router.py machine detect   Show detected machine + config path
+python ai-router.py config show      Show machine configuration details
+python ai-router.py validate         Validate configuration (exit code)
+python ai-router.py models list      List all available models
+python ai-router.py models search X  Search for models matching "X"
+python ai-router.py run --model M    Run model M (prompts for text)
+python ai-router.py run --model M    Run model M with prompt
+  --prompt "text"
+
+========================================================================
+                   VERSION INFORMATION
+========================================================================
+
+CLI Version: 1.0
+Python: 3.8+
+Dependencies: None additional (uses stdlib argparse)
+Compatibility: 100% backward compatible with previous version
+
+Last Updated: 2025-12-22
+Status: Production Ready
+
+========================================================================

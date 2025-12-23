@@ -328,6 +328,39 @@ class DatabaseMaintenance:
             conn.execute("VACUUM")
         print("VACUUM completed")
 
+    def create_message_count_triggers(self):
+        """
+        Create triggers to automatically update message count on insert/delete
+        
+        This ensures message_count in sessions table stays accurate
+        """
+        print("Creating message count triggers...")
+        
+        with self.get_connection() as conn:
+            # Trigger for INSERT on messages table
+            conn.execute("""
+                CREATE TRIGGER IF NOT EXISTS update_message_count_insert
+                AFTER INSERT ON messages
+                BEGIN
+                    UPDATE sessions 
+                    SET total_messages = total_messages + 1
+                    WHERE session_id = NEW.session_id;
+                END;
+            """)
+            
+            # Trigger for DELETE on messages table
+            conn.execute("""
+                CREATE TRIGGER IF NOT EXISTS update_message_count_delete
+                AFTER DELETE ON messages
+                BEGIN
+                    UPDATE sessions 
+                    SET total_messages = MAX(0, total_messages - 1)
+                    WHERE session_id = OLD.session_id;
+                END;
+            """)
+            
+        print("Message count triggers created successfully")
+
     def analyze(self):
         """Update query planner statistics"""
         print("Running ANALYZE...")

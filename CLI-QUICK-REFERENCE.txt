@@ -1,0 +1,274 @@
+================================================================================
+                        CLI QUICK REFERENCE CARD
+                    AI Router - Phase 1 Improvements
+================================================================================
+
+BASIC USAGE
+────────────────────────────────────────────────────────────────────────────
+
+No arguments (interactive):
+  $ python ai-router.py
+
+With subcommands (non-interactive):
+  $ python ai-router.py <subcommand> [options]
+
+Get help:
+  $ python ai-router.py --help
+  $ python ai-router.py <subcommand> --help
+
+================================================================================
+                          ALL COMMANDS
+================================================================================
+
+MACHINE DETECTION
+  $ python ai-router.py machine detect
+  Shows: detected machine ID, config path, platform, model count
+
+CONFIGURATION
+  $ python ai-router.py config show
+  Shows: machine specs, performance settings, inference settings
+
+  $ python ai-router.py validate
+  Shows: configuration validation result (exit code 0 or 1)
+
+MODELS
+  $ python ai-router.py models list
+  Shows: all available models with details
+
+  $ python ai-router.py models search <keyword>
+  Shows: models matching keyword (name, use case, or notes)
+
+MODEL EXECUTION
+  $ python ai-router.py run --model <model_id>
+  Runs: specified model, prompts for text
+
+  $ python ai-router.py run --model <model_id> --prompt "text"
+  Runs: specified model with provided text
+
+================================================================================
+                       COMMON SCENARIOS
+================================================================================
+
+1. VERIFY SETUP
+   $ python ai-router.py machine detect
+   $ python ai-router.py validate
+
+2. FIND A MODEL
+   $ python ai-router.py models search coding
+
+3. RUN A MODEL
+   $ python ai-router.py run --model qwen3-coder-30b --prompt "..."
+
+4. CHECK CONFIG
+   $ python ai-router.py config show
+
+5. VALIDATE CONFIG
+   $ python ai-router.py validate && echo "OK" || echo "ERROR"
+
+================================================================================
+                       SCRIPTING PATTERNS
+================================================================================
+
+BASH SCRIPT:
+  #!/bin/bash
+  python ai-router.py machine detect
+  python ai-router.py validate
+  python ai-router.py run --model qwen3-coder-30b --prompt "hello"
+
+CONDITIONAL:
+  if python ai-router.py validate; then
+      python ai-router.py run --model phi4-14b --prompt "test"
+  fi
+
+LOOP:
+  for model in qwen3-coder-30b phi4-14b ministral-3-14b; do
+      python ai-router.py run --model $model --prompt "test"
+  done
+
+CI/CD (GitHub Actions):
+  - name: Validate AI Router
+    run: python ai-router.py validate
+  - name: Run model
+    run: python ai-router.py run --model qwen3-coder-30b --prompt "..."
+
+================================================================================
+                        AVAILABLE MODELS (Sample)
+================================================================================
+
+CODING:
+  qwen3-coder-30b     - Advanced coding, code review
+  qwen25-coder-14b    - Coding and technical tasks
+
+REASONING:
+  phi4-14b            - Math, reasoning, STEM
+  ministral-3-14b     - Complex reasoning, problem solving
+  deepseek-r1-14b     - Advanced reasoning, research
+
+GENERAL:
+  dolphin-llama31-8b  - Fast general purpose
+  llama33-70b         - Large-scale reasoning
+
+Use: python ai-router.py models list (for full list)
+
+================================================================================
+                      MODEL SEARCH EXAMPLES
+================================================================================
+
+Search for coding models:
+  $ python ai-router.py models search coding
+
+Search for reasoning models:
+  $ python ai-router.py models search reasoning
+
+Search for fast models:
+  $ python ai-router.py models search fast
+
+Search for uncensored models:
+  $ python ai-router.py models search uncensored
+
+Search by model name:
+  $ python ai-router.py models search qwen
+  $ python ai-router.py models search phi
+  $ python ai-router.py models search llama
+
+================================================================================
+                        EXIT CODES
+================================================================================
+
+Exit Code 0 = Success
+  python ai-router.py validate   (config is valid)
+  python ai-router.py machine detect  (works)
+  python ai-router.py run ...    (ran successfully)
+
+Exit Code 1 = Failure
+  python ai-router.py validate   (config invalid)
+  python ai-router.py run --model unknown  (model not found)
+
+Use in scripts:
+  if [ $? -eq 0 ]; then echo "Success"; else echo "Failed"; fi
+
+================================================================================
+                        TROUBLESHOOTING
+================================================================================
+
+Command not recognized:
+  Use full syntax: python ai-router.py machine detect
+  (Note the subcommand "detect" is required)
+
+Wrong machine detected:
+  Create .machine-id file:
+  $ echo "ryzen-3900x-3090" > .machine-id
+
+Config validation fails:
+  Check what's wrong:
+  $ python ai-router.py config show
+  Edit the config file to fix the issue
+
+Model not found:
+  See what models exist:
+  $ python ai-router.py models list
+  Or search:
+  $ python ai-router.py models search <keyword>
+
+================================================================================
+                       HELP FOR EACH COMMAND
+================================================================================
+
+Main help:
+  $ python ai-router.py --help
+
+Machine help:
+  $ python ai-router.py machine --help
+
+Config help:
+  $ python ai-router.py config --help
+
+Models help:
+  $ python ai-router.py models --help
+
+Run help:
+  $ python ai-router.py run --help
+
+================================================================================
+                      COMPLETE COMMAND SYNTAX
+================================================================================
+
+Interactive mode:
+  python ai-router.py
+
+Machine commands:
+  python ai-router.py machine detect
+
+Config commands:
+  python ai-router.py config show
+  python ai-router.py validate
+
+Models commands:
+  python ai-router.py models list
+  python ai-router.py models search <keyword>
+
+Run command:
+  python ai-router.py run --model <model_id>
+  python ai-router.py run --model <model_id> --prompt "<text>"
+
+Help:
+  python ai-router.py --help
+  python ai-router.py <subcommand> --help
+
+================================================================================
+                        TIPS & TRICKS
+================================================================================
+
+1. Chain commands:
+   python ai-router.py machine detect && python ai-router.py validate
+
+2. Search with pipes:
+   python ai-router.py models search reasoning | head -10
+
+3. Use in variables:
+   MODEL=$(python ai-router.py models search coding | grep -o '\[.*\]' | head -1)
+
+4. Verify before running:
+   python ai-router.py validate && python ai-router.py run --model qwen3 --prompt "..."
+
+5. Quick machine check:
+   python ai-router.py machine detect | head -3
+
+6. See all configs:
+   python ai-router.py config show
+
+7. Batch validate:
+   for machine in ryzen-3900x-3090 m4-macbook-pro; do
+       echo "Checking $machine..."
+       python ai-router.py machine detect
+   done
+
+================================================================================
+                    KEY FEATURES IN ONE PAGE
+================================================================================
+
+✓ 8 new commands
+✓ Non-interactive execution
+✓ Machine auto-detection
+✓ Config validation
+✓ Model search
+✓ CI/CD ready
+✓ Script-friendly
+✓ 100% backward compatible
+✓ No new dependencies
+✓ Production-ready
+
+================================================================================
+                        DOCUMENTATION
+================================================================================
+
+For more information:
+  - CLI-IMPROVEMENTS-PHASE1-COMPLETE.txt   (full details)
+  - CLI-USAGE-GUIDE.txt                    (usage examples)
+  - CLI-TESTING-SUMMARY.txt                (test results)
+  - EXECUTIVE-SUMMARY-CLI-PHASE1.txt       (business value)
+
+Quick help:
+  python ai-router.py --help
+
+================================================================================
