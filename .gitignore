@@ -11,6 +11,7 @@ organized/
 rtx4060ti-16gb/
 rtx3090-24gb/
 organized-old/
+mlx/
 
 # Virtual environments
 venv/
